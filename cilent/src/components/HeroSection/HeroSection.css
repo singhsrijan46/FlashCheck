@@ -1,0 +1,16 @@
+/* HeroSection.css */
+.herosection {
+  /* Make the wrapper span the full viewport width */
+  width: 100%;
+  overflow: hidden;          /* Cuts off anything that might spill out */
+  position: relative;        /* Allows for absolute‑positioned overlays later */
+  background-image: linear-gradient(180deg, rgba(0,0,0,0.7) 10%, transparent);
+}
+
+
+.herosection img {
+  width: 100%;               /* Always stretch to fill the wrapper’s width */
+  height: auto;              /* Preserve the photo’s aspect ratio */
+  display: block;            /* Removes the default inline‑element whitespace */
+  object-fit: cover;         /* Gently crops if you later give .herosection a fixed height */
+}

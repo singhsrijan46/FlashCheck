@@ -1,0 +1,44 @@
+.navbar{
+    width: 100%;
+    padding: 25px 4.5%;
+    display: flex;
+    justify-content: space-between;
+    position: fixed;
+    color: #e5e5e5;
+    background-image: linear-gradient(180deg, rgba(0,0,0,0.7) 10%, transparent);
+    z-index: 1;
+}
+.navbar-left{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 38px;
+    font-weight: bold;
+}
+.navbar-left img{
+    width: 95px;
+}
+.navbar-right{
+    height: 84px;
+}
+.navbar-right ul{
+    display: flex;
+    gap:56px;
+    height: 84px;
+    list-style: none;
+    align-items: center;
+}
+.navbar-right ul li{
+    font-size: 23px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.navbar-right ul button{
+    padding: 15px 37px;
+    border-radius: 18;
+    font-size: 23px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+}
