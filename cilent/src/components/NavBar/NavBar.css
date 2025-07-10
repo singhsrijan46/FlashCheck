@@ -15,8 +15,12 @@
     font-size: 38px;
     font-weight: bold;
 }
+.navbar-left p{
+    cursor: pointer;
+}
 .navbar-left img{
     width: 95px;
+    cursor: pointer;
 }
 .navbar-right{
     height: 84px;
