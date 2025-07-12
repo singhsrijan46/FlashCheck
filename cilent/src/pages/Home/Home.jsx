@@ -11,6 +11,7 @@ const Home = () => {
         <NavBar/>
         <HeroSection/>
         <FeaturedSection/>
+        <Footer/>
     </div>
   )
 }

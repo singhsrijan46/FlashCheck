@@ -1,5 +1,6 @@
 import React from 'react'
 import './Footer.css'
+import logo from '../../assets/logo.png'
 
 const Footer = () => {
   return (
@@ -7,11 +8,10 @@ const Footer = () => {
       <div className="footer__top">
         {/* ───── Brand / About ───── */}
         <div className="footer__brand">
-          <img
-            className="footer__logo"
-            src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/dummyLogo/dummyLogoWhite.svg"
-            alt="logo"
-          />
+          <div className="footer__logo">
+            <img src={logo} alt="" />
+            <p>FlashCheck</p>
+          </div>
 
           <p className="footer__text">
             Lorem Ipsum has been the industry's standard dummy text ever since the
