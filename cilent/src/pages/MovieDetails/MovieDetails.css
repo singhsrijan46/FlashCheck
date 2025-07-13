@@ -1,0 +1,382 @@
+.moviedetails-page-container {
+  min-height: 100vh;
+  background: #111;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Back Button */
+.back-button {
+  position: fixed;
+  top: 100px;
+  left: 30px;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.back-button:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: translateX(-2px);
+}
+
+/* Banner Section */
+.movie-banner {
+  position: relative;
+  width: 100%;
+  height: 70vh;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.banner-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.banner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.3) 100%);
+  z-index: 2;
+}
+
+.banner-content {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  padding: 0 6% 40px 6%;
+}
+
+.banner-left {
+  display: flex;
+  gap: 30px;
+  align-items: flex-end;
+  max-width: 1200px;
+}
+
+.movie-poster {
+  width: 200px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+.movie-info {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+}
+
+.movie-logo {
+  width: 200px;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));
+}
+
+.movie-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.movie-meta {
+  font-size: 1.2rem;
+  font-weight: 400;
+  display: flex;
+  gap: 12px;
+  color: #ccc;
+}
+
+.movie-rating-genres {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.movie-score {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #ffd700;
+}
+
+.movie-genres {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.genre-tag {
+  background-color: rgba(229, 9, 20, 0.8);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+}
+
+/* Details Sections */
+.movie-details-sections {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 4.5% 0 4.5%;
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+}
+
+.about-section h2,
+.cast-section h2,
+.crew-section h2,
+.trailer-section h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.about-section p {
+  font-size: 1.1rem;
+  color: #ccc;
+  line-height: 1.8;
+  max-width: 800px;
+}
+
+/* Cast Section */
+.cast-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px;
+}
+
+.cast-card {
+  background: #181818;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease;
+}
+
+.cast-card:hover {
+  transform: translateY(-4px);
+}
+
+.cast-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 12px;
+  background: #222;
+}
+
+.cast-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cast-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #fff;
+}
+
+.cast-actor {
+  font-size: 0.9rem;
+  color: #bbb;
+}
+
+.cast-role {
+  font-size: 0.8rem;
+  color: #999;
+  font-style: italic;
+}
+
+/* Crew Section */
+.crew-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.crew-card {
+  background: #181818;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease;
+}
+
+.crew-card:hover {
+  transform: translateY(-2px);
+}
+
+.crew-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #222;
+}
+
+.crew-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.crew-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #fff;
+}
+
+.crew-role {
+  font-size: 0.85rem;
+  color: #bbb;
+}
+
+/* Trailer Section */
+.trailer-embed-wrapper {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.movie-action-buttons {
+  display: flex;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.book-ticket-btn, .show-trailer-btn {
+  padding: 12px 28px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+  box-shadow: 0 2px 8px rgba(229,9,20,0.08);
+}
+
+.book-ticket-btn {
+  background: #e62429;
+  color: #fff;
+}
+
+.book-ticket-btn:hover {
+  background: #b71c1c;
+  transform: translateY(-2px) scale(1.04);
+}
+
+.show-trailer-btn {
+  background: #23232b;
+  color: #fff;
+  border: 1.5px solid #e62429;
+}
+
+.show-trailer-btn:hover {
+  background: #18181c;
+  color: #e62429;
+  transform: translateY(-2px) scale(1.04);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .back-button {
+    top: 80px;
+    left: 20px;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .banner-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  
+  .movie-poster {
+    width: 150px;
+    height: 225px;
+  }
+  
+  .movie-title {
+    font-size: 2rem;
+  }
+  
+  .movie-meta {
+    font-size: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .cast-list {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+  }
+  
+  .crew-list {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-content {
+    padding: 0 4% 30px 4%;
+  }
+  
+  .movie-details-sections {
+    padding: 30px 4% 0 4%;
+    gap: 40px;
+  }
+  
+  .cast-list {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  
+  .crew-list {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+  }
+} 

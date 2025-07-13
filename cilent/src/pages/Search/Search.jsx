@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import './Search.css';
 import MovieCard from '../../components/MovieCard/MovieCard';
 import NavBar from '../../components/NavBar/NavBar';
@@ -13,6 +14,8 @@ const Search = ({ onCityClick, onSignInClick }) => {
     format: [],
     rating: []
   });
+  const navigate = useNavigate();
+  const { city } = useParams();
 
   // Sample movie data for search results
   const searchResults = [
@@ -35,6 +38,10 @@ const Search = ({ onCityClick, onSignInClick }) => {
 
   const isSelected = (filterType, value) => {
     return selectedFilters[filterType].includes(value);
+  };
+
+  const handleMovieClick = (movieId) => {
+    navigate(`/${city || 'new-delhi'}/movies/${movieId}`);
   };
 
   return (
@@ -152,12 +159,6 @@ const Search = ({ onCityClick, onSignInClick }) => {
                   3D
                 </button>
                 <button 
-                  className={`filter-option ${isSelected('format', 'IMAX') ? 'selected' : ''}`}
-                  onClick={() => handleFilterChange('format', 'IMAX')}
-                >
-                  IMAX
-                </button>
-                <button 
                   className={`filter-option ${isSelected('format', '4DX') ? 'selected' : ''}`}
                   onClick={() => handleFilterChange('format', '4DX')}
                 >
@@ -170,33 +171,26 @@ const Search = ({ onCityClick, onSignInClick }) => {
               <label>Rating</label>
               <div className="filter-options">
                 <button 
-                  className={`filter-option ${isSelected('rating', 'Above 9') ? 'selected' : ''}`}
-                  onClick={() => handleFilterChange('rating', 'Above 9')}
+                  className={`filter-option ${isSelected('rating', '7+') ? 'selected' : ''}`}
+                  onClick={() => handleFilterChange('rating', '7+')}
                 >
-                  Above 9
+                  7+
                 </button>
                 <button 
-                  className={`filter-option ${isSelected('rating', 'Above 8') ? 'selected' : ''}`}
-                  onClick={() => handleFilterChange('rating', 'Above 8')}
+                  className={`filter-option ${isSelected('rating', '8+') ? 'selected' : ''}`}
+                  onClick={() => handleFilterChange('rating', '8+')}
                 >
-                  Above 8
+                  8+
                 </button>
                 <button 
-                  className={`filter-option ${isSelected('rating', 'Above 7') ? 'selected' : ''}`}
-                  onClick={() => handleFilterChange('rating', 'Above 7')}
+                  className={`filter-option ${isSelected('rating', '9+') ? 'selected' : ''}`}
+                  onClick={() => handleFilterChange('rating', '9+')}
                 >
-                  Above 7
-                </button>
-                <button 
-                  className={`filter-option ${isSelected('rating', 'Below 7') ? 'selected' : ''}`}
-                  onClick={() => handleFilterChange('rating', 'Below 7')}
-                >
-                  Below 7
+                  9+
                 </button>
               </div>
             </div>
           </div>
-
           {/* Right Content Panel */}
           <div className="content-panel">
             {/* Search Bar */}
@@ -204,12 +198,13 @@ const Search = ({ onCityClick, onSignInClick }) => {
               <input type="text" placeholder="Search movies..." />
               <button>Search</button>
             </div>
-
             {/* Movie Results */}
             <div className="results-panel">
               <div className="search-results-grid">
                 {searchResults.map((movie) => (
-                  <MovieCard key={movie.id} movie={movie} />
+                  <div key={movie.id} onClick={() => handleMovieClick(movie.id)}>
+                    <MovieCard movie={movie} />
+                  </div>
                 ))}
               </div>
             </div>

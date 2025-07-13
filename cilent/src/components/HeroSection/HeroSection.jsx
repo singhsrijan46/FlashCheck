@@ -4,6 +4,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, EffectFade } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-fade';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import banner1 from '../../assets/demon-slayer.jpg';
 import logo1 from '../../assets/demon-slayer_logo.png';
@@ -22,6 +23,7 @@ import logo1 from '../../assets/demon-slayer_logo.png';
 
 const slides = [
   {
+    id: 1,
     banner: banner1,
     logo: logo1,
     year: '2025',
@@ -32,6 +34,7 @@ const slides = [
     tags: 'Action | Anime | Fantasy',
   },
   {
+    id: 2,
     banner: banner1,
     logo: logo1,
     year: '2024',
@@ -42,6 +45,7 @@ const slides = [
     tags: 'Sci-Fi | Action | Drama',
   },
   {
+    id: 3,
     banner: banner1,
     logo: logo1,
     year: '2023',
@@ -52,6 +56,7 @@ const slides = [
     tags: 'Animation | Family | Adventure',
   },
   {
+    id: 4,
     banner: banner1,
     logo: logo1,
     year: '2022',
@@ -62,6 +67,7 @@ const slides = [
     tags: 'Horror | Mystery | Thriller',
   },
   {
+    id: 5,
     banner: banner1,
     logo: logo1,
     year: '2021',
@@ -76,9 +82,15 @@ const slides = [
 const HeroSection = () => {
   const swiperRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const navigate = useNavigate();
+  const { city } = useParams();
 
   const handleThumbClick = (index) => {
     swiperRef.current?.slideToLoop(index); // slideToLoop ensures loop works correctly
+  };
+
+  const handleSeeDetails = (movieId) => {
+    navigate(`/${city || 'new-delhi'}/movies/${movieId}`);
   };
 
   return (
@@ -104,7 +116,7 @@ const HeroSection = () => {
                 <p className="p1">{slide.year} | {slide.rating} | {slide.duration} | {slide.languages}</p>
                 <p className="p2">{slide.desc}</p>
                 <p className="p3">{slide.tags}</p>
-                <button>See Details</button>
+                <button onClick={() => handleSeeDetails(slide.id)}>See Details</button>
               </ul>
             </div>
           </SwiperSlide>

@@ -4,6 +4,7 @@ import NavBar from '../../components/NavBar/NavBar'
 import Footer from '../../components/Footer/Footer'
 import HeroSection from '../../components/HeroSection/HeroSection'
 import FeaturedSection from '../../components/FeaturedSection/FeaturedSection'
+import Trailer from '../../components/Trailer/Trailer';
 
 const Home = ({ onCityClick, onSignInClick }) => {
   return (
@@ -11,6 +12,7 @@ const Home = ({ onCityClick, onSignInClick }) => {
         <NavBar onCityClick={onCityClick} onSignInClick={onSignInClick}/>
         <HeroSection/>
         <FeaturedSection/>
+        <Trailer/>
         <Footer/>
     </div>
   )

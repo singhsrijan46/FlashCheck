@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import MovieCard from '../MovieCard/MovieCard';
 import poster from '../../assets/demon-slayer_poster.webp'
 
-const FeaturedSection = () => {
+const FeaturedSection = ({ heading = 'Now Showing', onMovieClick }) => {
   const navigate = useNavigate();
   const { city } = useParams();
   const currentCity = city || 'new-delhi';
@@ -20,10 +20,18 @@ const FeaturedSection = () => {
     { id: 6, poster, rating: 8.9, votes: 1890, genres: ['Animation', 'Fantasy'] }
   ];
 
+  const handleMovieClick = (movieId) => {
+    if (onMovieClick) {
+      onMovieClick(movieId);
+    } else {
+      navigate(`/${currentCity}/movies/${movieId}`);
+    }
+  };
+
   return (
     <div className='featuredsection'>
         <div className='heading'>
-            <p>Now Showing</p>
+            <p>{heading}</p>
             <button onClick={() => navigate(`/${currentCity}/movies`)}>
                 View All
                 <ArrowRight/>
@@ -31,7 +39,9 @@ const FeaturedSection = () => {
         </div>
         <div className='cards-row'>
           {movies.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} />
+            <div key={movie.id} onClick={() => handleMovieClick(movie.id)}>
+              <MovieCard movie={movie} />
+            </div>
           ))}
         </div>
     </div>

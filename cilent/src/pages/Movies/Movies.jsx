@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import NavBar from '../../components/NavBar/NavBar';
 import Footer from '../../components/Footer/Footer';
 import MovieCard from '../../components/MovieCard/MovieCard';
@@ -7,6 +8,8 @@ import poster from '../../assets/demon-slayer_poster.webp';
 
 const Movies = ({ onCityClick, onSignInClick }) => {
   const [selectedLanguages, setSelectedLanguages] = useState([]);
+  const navigate = useNavigate();
+  const { city } = useParams();
 
   // Sample movie data with different languages
   const movies = [
@@ -42,6 +45,10 @@ const Movies = ({ onCityClick, onSignInClick }) => {
     );
   };
 
+  const handleMovieClick = (movieId) => {
+    navigate(`/${city || 'new-delhi'}/movies/${movieId}`);
+  };
+
   const filteredMovies =
     selectedLanguages.length === 0
       ? movies
@@ -68,7 +75,9 @@ const Movies = ({ onCityClick, onSignInClick }) => {
       {/* Movies Grid */}
       <div className="movies-grid">
         {filteredMovies.map((movie) => (
-          <MovieCard key={movie.id} movie={movie} />
+          <div key={movie.id} onClick={() => handleMovieClick(movie.id)}>
+            <MovieCard movie={movie} />
+          </div>
         ))}
       </div>
       <Footer />

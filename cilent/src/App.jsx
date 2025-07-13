@@ -3,6 +3,7 @@ import Home from './pages/Home/Home'
 import SignIn from './pages/SignIn/SignIn'
 import SignUp from './pages/SignUp/SignUp'
 import Movies from './pages/Movies/Movies'
+import MovieDetails from './pages/MovieDetails/MovieDetails'
 import Search from './pages/Search/Search'
 import City from './pages/City/City'
 import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom'
@@ -29,6 +30,7 @@ const App = () => {
         <Route path='/' element={<Navigate to='/new-delhi' replace />} />
         <Route path='/:city' element={<Home onCityClick={handleOpenCityModal} onSignInClick={handleOpenSignInModal} onSignUpClick={handleOpenSignUpModal} />} />
         <Route path='/:city/movies' element={<Movies onCityClick={handleOpenCityModal} onSignInClick={handleOpenSignInModal} onSignUpClick={handleOpenSignUpModal} />} />
+        <Route path='/:city/movies/:movieId' element={<MovieDetails onCityClick={handleOpenCityModal} onSignInClick={handleOpenSignInModal} onSignUpClick={handleOpenSignUpModal} />} />
         <Route path='/:city/search' element={<Search onCityClick={handleOpenCityModal} onSignInClick={handleOpenSignInModal} onSignUpClick={handleOpenSignUpModal} />} />
       </Routes>
     </BrowserRouter>
