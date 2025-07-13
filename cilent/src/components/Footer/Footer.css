@@ -26,7 +26,7 @@
   flex-direction: column;
   justify-content: space-between;
   width: 100%;
-  gap: 5px;
+  gap: 40px;
   padding-bottom: 40px;
   border-bottom: 1px solid #6b7280;
 }

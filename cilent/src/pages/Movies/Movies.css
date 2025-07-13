@@ -1,0 +1,95 @@
+.movies-page-container {
+  min-height: 100vh;
+  background: #111;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Language Filter */
+.language-filter {
+  padding: 30px 4.5% 20px 4.5%;
+  background: #111;
+  border-bottom: 1px solid #333;
+}
+
+.language-filter h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 10px 20px;
+  background: transparent;
+  border: 2px solid #333;
+  border-radius: 25px;
+  color: #ccc;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.filter-btn:hover {
+  border-color: #e50914;
+  color: #e50914;
+}
+
+.filter-btn.active {
+  background: #e50914;
+  border-color: #e50914;
+  color: white;
+}
+
+/* Movies Grid */
+.movies-grid {
+  padding: 30px 4.5%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px;
+  min-height: 60vh;
+  overflow-y: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .language-filter {
+    padding: 20px 4% 15px 4%;
+  }
+  
+  .language-filter h2 {
+    font-size: 1.6rem;
+    margin-bottom: 15px;
+  }
+  
+  .filter-buttons {
+    gap: 8px;
+  }
+  
+  .filter-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+  
+  .movies-grid {
+    padding: 20px 4%;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .movies-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+}

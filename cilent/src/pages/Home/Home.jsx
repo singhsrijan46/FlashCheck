@@ -5,10 +5,10 @@ import Footer from '../../components/Footer/Footer'
 import HeroSection from '../../components/HeroSection/HeroSection'
 import FeaturedSection from '../../components/FeaturedSection/FeaturedSection'
 
-const Home = () => {
+const Home = ({ onCityClick, onSignInClick }) => {
   return (
     <div className='home'>
-        <NavBar/>
+        <NavBar onCityClick={onCityClick} onSignInClick={onSignInClick}/>
         <HeroSection/>
         <FeaturedSection/>
         <Footer/>

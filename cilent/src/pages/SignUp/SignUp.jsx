@@ -1,13 +1,14 @@
 import React from 'react'
 import './SignUp.css'
-import { useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
-const SignUp = () => {
-  const navigate = useNavigate();
+const SignUp = ({ onClose, onSwitchSignIn }) => {
+  const { city } = useParams();
+  const currentCity = city || 'new-delhi';
   
   return (
     <div className="signup-container">
-      <button className="close-button" onClick={() => navigate(-1)}>✖</button>
+      <button className="close-button" onClick={() => onClose ? onClose() : null}>✖</button>
 
       <h2 className="signup-heading">Sign Up</h2>
       
@@ -19,7 +20,7 @@ const SignUp = () => {
       </form>
       <p className="switch-text">
         Already have an account?{' '}
-        <button onClick={() => navigate('/signin')} className="switch-button">
+        <button onClick={onSwitchSignIn} className="switch-button">
           Sign In
         </button>
       </p>

@@ -1,13 +1,14 @@
 import React from 'react'
 import './SignIn.css'
-import { useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
-const SignIn = () => {
-  const navigate = useNavigate();
+const SignIn = ({ onClose, onSwitchSignUp }) => {
+  const { city } = useParams();
+  const currentCity = city || 'new-delhi';
 
   return (
     <div className="signin-container">
-      <button className="close-button" onClick={() => navigate(-1)}>✖</button>
+      <button className="close-button" onClick={() => onClose ? onClose() : null}>✖</button>
 
       <h2 className="signin-heading">Sign In</h2>
 
@@ -24,7 +25,7 @@ const SignIn = () => {
 
       <p className="switch-text">
         New user?{' '}
-        <button onClick={() => navigate('/signup')} className="switch-button">
+        <button onClick={onSwitchSignUp} className="switch-button">
           Sign Up
         </button>
       </p>

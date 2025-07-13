@@ -46,3 +46,21 @@
     border-radius: 12px;
     cursor: pointer;
 }
+.navbar-city-btn {
+  background: none;
+  border: none;
+  color: #e5e5e5;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.navbar-city-btn:hover {
+  background: rgba(229, 9, 20, 0.08);
+  color: #e50914;
+}
