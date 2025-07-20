@@ -6,7 +6,7 @@ const Footer = () => {
   return (
     <div className="footer">
       <div className="footer__top">
-        {/* ───── Brand / About ───── */}
+
         <div className="footer__brand">
           <div className="footer__logo">
             <img src={logo} alt="" />
@@ -33,7 +33,6 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* ───── Links & Contact ───── */}
         <div className="footer__links">
           <div>
             <h2 className="footer__title">Company</h2>

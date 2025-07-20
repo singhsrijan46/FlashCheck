@@ -47,13 +47,13 @@ const Search = ({ onCityClick, onSignInClick }) => {
   return (
     <div className="search-page-container">
       <NavBar onCityClick={onCityClick} onSignInClick={onSignInClick}/>
-      <div className="search-page">
-        <div className="search-body">
-          {/* Left Filter Panel */}
-          <div className="filters-panel">
-            <h3>Advanced Filters</h3>
+    <div className="search-page">
+      <div className="search-body">
+        {/* Left Filter Panel */}
+        <div className="filters-panel">
+          <h3>Advanced Filters</h3>
 
-            <div className="filter-group">
+          <div className="filter-group">
               <label>Theatre</label>
               <div className="filter-options">
                 <button 
@@ -74,11 +74,11 @@ const Search = ({ onCityClick, onSignInClick }) => {
                 >
                   Cinepolis
                 </button>
-              </div>
-            </div>
+          </div>
+          </div>
 
-            <div className="filter-group">
-              <label>Language</label>
+          <div className="filter-group">
+            <label>Language</label>
               <div className="filter-options">
                 <button 
                   className={`filter-option ${isSelected('language', 'Hindi') ? 'selected' : ''}`}
@@ -105,10 +105,10 @@ const Search = ({ onCityClick, onSignInClick }) => {
                   Telugu
                 </button>
               </div>
-            </div>
+          </div>
 
-            <div className="filter-group">
-              <label>Genre</label>
+          <div className="filter-group">
+            <label>Genre</label>
               <div className="filter-options">
                 <button 
                   className={`filter-option ${isSelected('genre', 'Action') ? 'selected' : ''}`}
@@ -141,10 +141,10 @@ const Search = ({ onCityClick, onSignInClick }) => {
                   Thriller
                 </button>
               </div>
-            </div>
+          </div>
 
-            <div className="filter-group">
-              <label>Format</label>
+          <div className="filter-group">
+            <label>Format</label>
               <div className="filter-options">
                 <button 
                   className={`filter-option ${isSelected('format', '2D') ? 'selected' : ''}`}
@@ -165,10 +165,10 @@ const Search = ({ onCityClick, onSignInClick }) => {
                   4DX
                 </button>
               </div>
-            </div>
+          </div>
 
-            <div className="filter-group">
-              <label>Rating</label>
+          <div className="filter-group">
+            <label>Rating</label>
               <div className="filter-options">
                 <button 
                   className={`filter-option ${isSelected('rating', '7+') ? 'selected' : ''}`}
@@ -197,9 +197,9 @@ const Search = ({ onCityClick, onSignInClick }) => {
             <div className="search-bar">
               <input type="text" placeholder="Search movies..." />
               <button>Search</button>
-            </div>
+        </div>
             {/* Movie Results */}
-            <div className="results-panel">
+        <div className="results-panel">
               <div className="search-results-grid">
                 {searchResults.map((movie) => (
                   <div key={movie.id} onClick={() => handleMovieClick(movie.id)}>

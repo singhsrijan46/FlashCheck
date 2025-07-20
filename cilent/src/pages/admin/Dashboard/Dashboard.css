@@ -1,0 +1,101 @@
+/* (No changes needed, just move the file) */ .admin-dashboard {
+  width: 100%;
+}
+.admin-dashboard-heading {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+  color: #fff;
+}
+.admin-dashboard-heading .highlight {
+  color: #ff4b5c;
+}
+.admin-stats-row {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 38px;
+}
+.admin-stat-card {
+  background: #2a161b;
+  border-radius: 14px;
+  padding: 24px 36px 18px 28px;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  color: #fff;
+  position: relative;
+}
+.admin-stat-label {
+  font-size: 1.1rem;
+  color: #e0e0e0;
+  margin-bottom: 10px;
+}
+.admin-stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.admin-stat-icon {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  font-size: 1.5rem;
+  color: #ff4b5c;
+}
+.admin-active-shows-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 36px 0 18px 0;
+  color: #fff;
+}
+.admin-shows-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 28px;
+}
+.admin-show-card {
+  background: #2a161b;
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  padding: 0 0 18px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: #fff;
+  min-width: 200px;
+  max-width: 260px;
+}
+.admin-show-poster {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 14px 14px 0 0;
+}
+.admin-show-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 12px 0 0 16px;
+}
+.admin-show-price {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 6px 0 0 16px;
+}
+.admin-show-rating {
+  font-size: 1rem;
+  color: #ff4b5c;
+  margin: 6px 0 0 16px;
+  display: flex;
+  align-items: center;
+}
+.admin-show-rating .star {
+  color: #ff4b5c;
+  margin-right: 4px;
+}
+.admin-show-time {
+  font-size: 0.95rem;
+  color: #e0e0e0;
+  margin: 8px 0 0 16px;
+} 

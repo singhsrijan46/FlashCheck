@@ -1,0 +1,39 @@
+/* (No changes needed, just move the file) */ .admin-list-bookings {
+  width: 100%;
+}
+.admin-list-bookings-heading {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+  color: #fff;
+}
+.admin-list-bookings-heading .highlight {
+  color: #ff4b5c;
+}
+.admin-bookings-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #2a161b;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+}
+.admin-bookings-table th, .admin-bookings-table td {
+  padding: 16px 18px;
+  text-align: left;
+}
+.admin-bookings-table th {
+  background: #3a1a22;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.admin-bookings-table td {
+  background: #2a161b;
+  color: #fff;
+  font-size: 1rem;
+  border-bottom: 1px solid #3a1a22;
+}
+.admin-bookings-table tr:last-child td {
+  border-bottom: none;
+} 

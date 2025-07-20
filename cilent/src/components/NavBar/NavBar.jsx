@@ -6,7 +6,6 @@ import { ChevronDown } from 'lucide-react';
 
 const cityDisplayName = (cityParam) => {
   if (!cityParam) return 'New Delhi';
-  // Convert kebab-case to display name (e.g., new-delhi -> New Delhi)
   return cityParam
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
