@@ -5,11 +5,14 @@ import Footer from '../../components/Footer/Footer';
 import MovieCard from '../../components/MovieCard/MovieCard';
 import './Movies.css';
 import poster from '../../assets/demon-slayer_poster.webp';
+import { useAppContext } from '../../context/AppContext';
 
 const Movies = ({ onCityClick, onSignInClick }) => {
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const navigate = useNavigate();
-  const { city } = useParams();
+  // Remove useParams
+  // const { city } = useParams();
+  const { city = 'new-delhi' } = useAppContext();
 
   // Sample movie data with different languages
   const movies = [
@@ -46,7 +49,7 @@ const Movies = ({ onCityClick, onSignInClick }) => {
   };
 
   const handleMovieClick = (movieId) => {
-    navigate(`/${city || 'new-delhi'}/movies/${movieId}`);
+    navigate(`/movies/${movieId}`);
   };
 
   const filteredMovies =

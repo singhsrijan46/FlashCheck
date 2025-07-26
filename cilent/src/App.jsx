@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Home from './pages/Home/Home'
 import SignIn from './pages/SignIn/SignIn'
 import SignUp from './pages/SignUp/SignUp'
@@ -11,7 +11,38 @@ import AddShows from './pages/admin/AddShows/AddShows';
 import ListShows from './pages/admin/ListShows/ListShows';
 import ListBookings from './pages/admin/ListBookings/ListBookings';
 import AdminHome from './pages/admin/Home/Home';
-import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom'
+import {Routes, Route, Navigate, useLocation} from 'react-router-dom'
+import { useAppContext } from './context/AppContext'
+import { ToastContainer, toast } from 'react-toastify';
+import axios from 'axios';
+
+// Wrapper to run fetchIsAdmin on /admin access
+const AdminAccessWrapper = ({ children, setShowSignInModal }) => {
+  const { fetchIsAdmin, isAdmin, user } = useAppContext();
+  const location = useLocation();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const check = async () => {
+      setLoading(true);
+      await fetchIsAdmin();
+      setLoading(false);
+    };
+    check();
+    // eslint-disable-next-line
+  }, [user]);
+
+  if (loading) return null;
+  if (!user) {
+    setShowSignInModal(true);
+    return null;
+  }
+  if (!isAdmin) {
+    toast.error('You are not authorized to access admin dashboardr');
+    return <Navigate to="/" state={{ from: location }} replace />;
+  }
+  return children;
+};
 
 const App = () => {
   const [showCityModal, setShowCityModal] = useState(false);
@@ -27,25 +58,30 @@ const App = () => {
   const handleCloseSignUpModal = () => setShowSignUpModal(false);
 
   return (
-    <BrowserRouter>
+    <>
       {showCityModal && <City onClose={handleCloseCityModal} />}
       {showSignInModal && <SignIn onClose={handleCloseSignInModal} onSwitchSignUp={() => { handleCloseSignInModal(); handleOpenSignUpModal(); }} />}
       {showSignUpModal && <SignUp onClose={handleCloseSignUpModal} onSwitchSignIn={() => { handleCloseSignUpModal(); handleOpenSignInModal(); }} />}
       <Routes>
-        <Route path='/' element={<Navigate to='/new-delhi' replace />} />
-        <Route path='/:city' element={<Home onCityClick={handleOpenCityModal} onSignInClick={handleOpenSignInModal} onSignUpClick={handleOpenSignUpModal} />} />
-        <Route path='/:city/movies' element={<Movies onCityClick={handleOpenCityModal} onSignInClick={handleOpenSignInModal} onSignUpClick={handleOpenSignUpModal} />} />
-        <Route path='/:city/movies/:movieId' element={<MovieDetails onCityClick={handleOpenCityModal} onSignInClick={handleOpenSignInModal} onSignUpClick={handleOpenSignUpModal} />} />
-        <Route path='/:city/search' element={<Search onCityClick={handleOpenCityModal} onSignInClick={handleOpenSignInModal} onSignUpClick={handleOpenSignUpModal} />} />
-        <Route path='/admin' element={<AdminHome />}>
-          <Route index element={<Navigate to='/admin/dashboard' replace />} />
-          <Route path='dashboard' element={<Dashboard />} />
-          <Route path='add-shows' element={<AddShows />} />
-          <Route path='list-shows' element={<ListShows />} />
-          <Route path='list-bookings' element={<ListBookings />} />
-        </Route>
+        <Route path='/' element={<Home onCityClick={handleOpenCityModal} onSignInClick={handleOpenSignInModal} onSignUpClick={handleOpenSignUpModal} />} />
+        <Route path='/movies' element={<Movies onCityClick={handleOpenCityModal} onSignInClick={handleOpenSignInModal} onSignUpClick={handleOpenSignUpModal} />} />
+        <Route path='/movies/:movieId' element={<MovieDetails onCityClick={handleOpenCityModal} onSignInClick={handleOpenSignInModal} onSignUpClick={handleOpenSignUpModal} />} />
+        <Route path='/search' element={<Search onCityClick={handleOpenCityModal} onSignInClick={handleOpenSignInModal} onSignUpClick={handleOpenSignUpModal} />} />
+        <Route path='/admin/*' element={
+          <AdminAccessWrapper setShowSignInModal={setShowSignInModal}>
+            <Routes>
+              <Route index element={<Navigate to='/admin/dashboard' replace />} />
+              <Route path='dashboard' element={<Dashboard />} />
+              <Route path='add-shows' element={<AddShows />} />
+              <Route path='list-shows' element={<ListShows />} />
+              <Route path='list-bookings' element={<ListBookings />} />
+              <Route path='' element={<AdminHome />} />
+            </Routes>
+          </AdminAccessWrapper>
+        } />
       </Routes>
-    </BrowserRouter>
+      <ToastContainer />
+    </>
   )
 }
 

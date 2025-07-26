@@ -1,6 +1,6 @@
-const Joi = require('joi');
+import Joi from 'joi';
 
-const signupValidation = (req,res,next) => {
+export const signupValidation = (req,res,next) => {
     const schema = Joi.object({
         name: Joi.string().min(3).max(100).required(),
         email: Joi.string().email().required(),
@@ -14,7 +14,7 @@ const signupValidation = (req,res,next) => {
     next();
 }
 
-const signinValidation = (req,res,next) => {
+export const signinValidation = (req,res,next) => {
     const schema = Joi.object({
         email: Joi.string().email().required(),
         password: Joi.string().min(4).max(100).required()
@@ -25,9 +25,4 @@ const signinValidation = (req,res,next) => {
             .json({ message: "Bad request", error})
     }
     next();
-}
-
-module.exports = {
-    signupValidation,
-    signinValidation
 }

@@ -5,6 +5,7 @@ import MovieCard from '../../components/MovieCard/MovieCard';
 import NavBar from '../../components/NavBar/NavBar';
 import Footer from '../../components/Footer/Footer';
 import poster from '../../assets/demon-slayer_poster.webp';
+import { useAppContext } from '../../context/AppContext';
 
 const Search = ({ onCityClick, onSignInClick }) => {
   const [selectedFilters, setSelectedFilters] = useState({
@@ -15,7 +16,9 @@ const Search = ({ onCityClick, onSignInClick }) => {
     rating: []
   });
   const navigate = useNavigate();
-  const { city } = useParams();
+  // Remove useParams
+  // const { city } = useParams();
+  const { city = 'new-delhi' } = useAppContext();
 
   // Sample movie data for search results
   const searchResults = [
@@ -41,7 +44,7 @@ const Search = ({ onCityClick, onSignInClick }) => {
   };
 
   const handleMovieClick = (movieId) => {
-    navigate(`/${city || 'new-delhi'}/movies/${movieId}`);
+    navigate(`/movies/${movieId}`);
   };
 
   return (

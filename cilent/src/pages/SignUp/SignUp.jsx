@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import './SignUp.css'
 import { useNavigate, useParams } from 'react-router-dom'
-import { handleError } from '../../utils';
-import { ToastContainer } from 'react-toastify'
+import { toast, ToastContainer } from 'react-toastify'
 
 const SignUp = ({ onClose, onSwitchSignIn }) => {
   const { city } = useParams();
@@ -28,7 +27,7 @@ const SignUp = ({ onClose, onSwitchSignIn }) => {
     e.preventDefault();
     const { name, email, password } = signupInfo;
     if(!name || !email || !password) {
-      return handleError('Name, email, password fields required')
+      return toast.error('Name, email, password fields required');
     }
     try{
         const url = "http://localhost:8080/auth/signup";
@@ -42,12 +41,12 @@ const SignUp = ({ onClose, onSwitchSignIn }) => {
         const result = await response.json();
         const { success, message } = result;
         if(success){
-          handleSuccess(message);
+          toast.success(message);
           setTimeout(onSwitchSignIn, 1000)
         }
         console.log(result);
     } catch(err) {
-        handleError(err);
+        toast.error(err.message);
         setTimeout(onSwitchSignIn, 1000)
     }
   }

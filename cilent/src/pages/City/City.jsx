@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './City.css';
 import { MapPin, Landmark, Building2, Hotel, Castle, Tent, Mountain, TreePalm, Home, X } from 'lucide-react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useAppContext } from '../../context/AppContext';
 
 const allCities = [
   { name: 'New Delhi', state: 'Delhi', icon: <Building2 /> },
@@ -39,7 +40,9 @@ const popularCities = allCities.slice(0, 10); // First 10 as popular
 const City = ({ onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { city: cityParam } = useParams();
+  // Remove useParams
+  // const { city: cityParam } = useParams();
+  const { setCity } = useAppContext();
 
   // Always empty on open
   const [selectedState, setSelectedState] = useState('');
@@ -53,7 +56,8 @@ const City = ({ onClose }) => {
     setSelectedState('');
     setStateInput('');
     setCityInput('');
-  }, [cityParam]);
+    // No need to reset on cityParam change
+  }, []);
 
   // Always show all states as suggestions when state input is focused
   const stateSuggestions = showStateSuggestions
@@ -73,14 +77,8 @@ const City = ({ onClose }) => {
 
   // Replace the city segment in the current path
   const updateCityInPath = (newCity) => {
-    const cityUrl = newCity.toLowerCase().replace(/\s+/g, '-');
-    const pathParts = location.pathname.split('/');
-    // pathParts[0] is '', pathParts[1] is city
-    if (pathParts.length > 1) {
-      pathParts[1] = cityUrl;
-    }
-    const newPath = pathParts.join('/') || `/${cityUrl}`;
-    navigate(newPath, { replace: true });
+    // Set city in context instead of URL
+    setCity(newCity.toLowerCase().replace(/\s+/g, '-'));
     if (onClose) onClose();
   };
 

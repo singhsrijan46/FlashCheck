@@ -1,18 +1,31 @@
-const express = require("express");
+import express from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+import 'dotenv/config';
+
+import authRouter from './Routes/authRouter.js';
+import './Models/db.js'
+import showRouter from "./Routes/showRouter.js";
+import bookingRouter from "./Routes/bookingRouter.js";
+import adminRouter from "./Routes/adminRouter.js";
+import userRouter from "./Routes/userRouter.js";
+
 const app = express();
-const bodyParser = require("body-parser");
-app.use(bodyParser.json());
-const cors = require("cors");
-app.use(cors());
-require("dotenv").config();
 const PORT = process.env.PORT || 8080;
 
-const AuthRouter = require("./Routes/AuthRouter");
-const connectdb = require("./Models/db.js");
-await connectdb();
+
+
+//Middlewares
+app.use(bodyParser.json());
+app.use(cors());
+
 
 //API Routes
-app.use("/auth", AuthRouter);
+app.use("/auth", authRouter);
+app.use("/api/show", showRouter);
+app.use("/api/booking", bookingRouter)
+app.use("/api/admin", adminRouter)
+app.use("/api/user", userRouter)
 
 app.listen(PORT, ()=>{
     console.log(`Server is running on port ${PORT}`);

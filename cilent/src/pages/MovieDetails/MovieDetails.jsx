@@ -6,9 +6,12 @@ import poster from '../../assets/demon-slayer_poster.webp';
 import logo from '../../assets/demon-slayer_logo.png';
 import { ArrowLeft } from 'lucide-react';
 import FeaturedSection from '../../components/FeaturedSection/FeaturedSection';
+import { useAppContext } from '../../context/AppContext';
 
 const MovieDetails = ({ onCityClick, onSignInClick }) => {
-  const { city, movieId } = useParams();
+  // Remove city from useParams
+  const { movieId } = useParams();
+  const { city = 'new-delhi' } = useAppContext();
   const navigate = useNavigate();
   const trailerRef = useRef(null);
 
@@ -157,7 +160,7 @@ const MovieDetails = ({ onCityClick, onSignInClick }) => {
       </div>
 
       <div className="recommended-section-wrapper">
-        <FeaturedSection heading="Recommended Movies" onMovieClick={(movieId) => navigate(`/${city || 'new-delhi'}/movies/${movieId}`)} />
+        <FeaturedSection heading="Recommended Movies" onMovieClick={(movieId) => navigate(`/movies/${movieId}`)} />
       </div>
       <Footer />
     </div>

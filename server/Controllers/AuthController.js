@@ -1,8 +1,8 @@
-const bcrypt = require('bcrypt');
-const userModel = require("../Models/User.js");
-const jwt = require('jsonwebtoken');
+import bcrypt from 'bcrypt';
+import userModel from "../Models/User.js";
+import jwt from 'jsonwebtoken';
 
-const signup = async(req, res) => {
+export const signup = async(req, res) => {
     try{
         const { name, email, password } = req.body;
         const found = await userModel.findOne({ email });
@@ -12,7 +12,6 @@ const signup = async(req, res) => {
         }
         const user = new userModel({ name, email, password });
         user.password = await bcrypt.hash(password, 10);
-        console.log("Hashing password...")
         await user.save();
         res.status(201)
             .json({
@@ -28,7 +27,7 @@ const signup = async(req, res) => {
     }
 }
 
-const signin = async(req, res) => {
+export const signin = async(req, res) => {
     try{
         const { email, password } = req.body;
         const user = await userModel.findOne({ email });
@@ -51,14 +50,13 @@ const signin = async(req, res) => {
                 message: "Signin success",
                 success: true,
                 jwtToken,
-                email,
-                name: user.name
+                user
             })
     } catch(err){
         res.status(500)
             .json({
                 
-                message: "Internal server  error",
+                message: "Internal server error",
                 success: false
             })
     }
@@ -67,8 +65,3 @@ const signin = async(req, res) => {
 
 
 
-
-module.exports = {
-    signup,
-    signin
-}

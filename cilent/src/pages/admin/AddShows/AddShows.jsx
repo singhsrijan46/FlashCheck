@@ -1,125 +1,157 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import './AddShows.css';
-
-const OMDB_API_KEY = 'demo'; // Replace with your OMDb API key
-
-const cities = [
-  'New Delhi', 'Mumbai', 'Bengaluru', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad', 'Surat', 'Jaipur'
-];
+import { useNavigate } from 'react-router-dom';
+import { CheckIcon, Currency, DeleteIcon, StarIcon } from 'lucide-react';
+import Title from '../../../components/admin/Title/Title';
+import Loading from '../../../components/Loading/Loading';
 
 const AddShows = () => {
-  const [movieName, setMovieName] = useState('');
-  const [movieData, setMovieData] = useState(null);
-  const [showDetails, setShowDetails] = useState(false);
-  const [showDate, setShowDate] = useState('');
-  const [showTime, setShowTime] = useState('');
-  const [shows, setShows] = useState([]);
-  const [selectedCity, setSelectedCity] = useState('New Delhi');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [nowPlayingMovies, setNowPlayingMovies] = useState([]);
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [dateTimeSelection, setDateTimeSelection] = useState({});
+  const [dateTimeInput, setDateTimeInput] = useState("");
+  const [showPrice, setShowPrice] = useState("");
 
-  const handleMovieSearch = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setShowDetails(false);
-    setMovieData(null);
-    try {
-      const res = await fetch(`https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(movieName)}`);
-      const data = await res.json();
-      if (data && data.Response !== 'False') {
-        setMovieData(data);
-        setShowDetails(true);
-      } else {
-        setError('Movie not found.');
+  // Dummy data for nowPlayingMovies to prevent blank screen
+  const fetchNowPlayingMovies = async () => {
+    // Replace this with your actual API call
+    setNowPlayingMovies([
+      {
+        id: 1,
+        poster: 'https://via.placeholder.com/100x140?text=Movie+1',
+        vote_average: 8.2,
+        vote_count: 1200,
+        title: 'Sample Movie 1',
+        release_date: '2025-07-01',
+      },
+      {
+        id: 2,
+        poster: 'https://via.placeholder.com/100x140?text=Movie+2',
+        vote_average: 7.5,
+        vote_count: 900,
+        title: 'Sample Movie 2',
+        release_date: '2025-06-15',
+      },
+    ]);
+  };
+
+  const handleDateTimeAdd = () => {
+    if (!dateTimeInput) return;
+    const [date, time] = dateTimeInput.split('T');
+    if (!date || !time) return;
+
+    setDateTimeSelection((prev) => {
+      const times = prev[date] || [];
+      if (times.includes(time)) {
+        return { ...prev, [date]: [...times, time] };
       }
-    } catch (err) {
-      setError('Error fetching movie data.');
-    }
-    setLoading(false);
+      return prev;
+    });
   };
 
-  const handleAddShow = () => {
-    if (!showDate || !showTime) return;
-    setShows([...shows, { date: showDate, time: showTime }]);
-    setShowDate('');
-    setShowTime('');
+  const handleRemoveTime = (date, time) => {
+    setDateTimeSelection((prev) => {
+      const filterTimes = prev[date].filter((t) => t !== time);
+      if (!filterTimes.length === 0) {
+        const { [date]: _, ...rest } = prev;
+        return rest; 
+      }
+      return { ...prev, [date]: filterTimes };
+    });
   };
 
-  return (
+  useEffect(() => {
+    fetchNowPlayingMovies();
+  }, []);
+
+  return nowPlayingMovies.length > 0 ? (
     <div className="addshows-container">
-      <h2 className="addshows-heading">Add Shows</h2>
-      <form className="addshows-form" onSubmit={handleMovieSearch}>
-        <input
-          type="text"
-          placeholder="Enter Movie Name"
-          value={movieName}
-          onChange={e => setMovieName(e.target.value)}
-          className="addshows-input"
-          required
-        />
-        <button type="submit" className="addshows-search-btn" disabled={loading}>
-          {loading ? 'Searching...' : 'Fetch Movie'}
-        </button>
-      </form>
-      {error && <div className="addshows-error">{error}</div>}
-      {showDetails && movieData && (
-        <div className="addshows-movie-details slide-down">
-          <img src={movieData.Poster} alt={movieData.Title} className="addshows-movie-poster" />
-          <div className="addshows-movie-info">
-            <h3>{movieData.Title} ({movieData.Year})</h3>
-            <p><b>Genre:</b> {movieData.Genre}</p>
-            <p><b>Director:</b> {movieData.Director}</p>
-            <p><b>Actors:</b> {movieData.Actors}</p>
-            <p><b>Plot:</b> {movieData.Plot}</p>
-            <p><b>IMDB Rating:</b> {movieData.imdbRating}</p>
-          </div>
-        </div>
-      )}
-      {showDetails && movieData && (
-        <div className="addshows-showtime-section">
-          <h4>Add Show Time</h4>
-          <div className="addshows-showtime-row">
-            <input
-              type="date"
-              value={showDate}
-              onChange={e => setShowDate(e.target.value)}
-              className="addshows-date-input"
-            />
-            <input
-              type="time"
-              value={showTime}
-              onChange={e => setShowTime(e.target.value)}
-              className="addshows-time-input"
-            />
-            <button type="button" className="addshows-add-btn" onClick={handleAddShow}>
-              Add
-            </button>
-          </div>
-          <div className="addshows-shows-list">
-            {shows.map((show, idx) => (
-              <div key={idx} className="addshows-show-item">
-                {show.date} at {show.time}
+      <Title text1="Add" text2="Shows" />
+      <p className="addshows-nowplaying-label">Now Playing Movies</p>
+      <div className="addshows-movie-list">
+        {nowPlayingMovies.map((movie) => (
+          <div
+            key={movie.id}
+            className={`addshows-movie-card${selectedMovie === movie.id ? ' selected' : ''}`}
+            onClick={() => setSelectedMovie(movie.id)}
+          >
+            <img src={movie.poster} alt="" className="addshows-movie-poster" />
+            <div>
+              <p className="addshows-movie-rating">
+                <StarIcon className="addshows-movie-rating-icon" />
+                {movie.vote_average.toFixed(1)}
+              </p>
+              <p className="addshows-movie-votes">
+                {movie.vote_count} Votes
+              </p>
+            </div>
+            {selectedMovie === movie.id && (
+              <div className="addshows-checkicon">
+                <CheckIcon />
               </div>
+            )}
+            <p className="addshows-movie-title">{movie.title}</p>
+            <p className="addshows-movie-release">{movie.release_date}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Show Price Input */}
+      <div className="addshows-price-section">
+        <label className="addshows-price-label">Show Price:</label>
+        <div className="addshows-price-input-wrap">
+          <span className="addshows-price-currency">₹</span>
+          <input
+            min={0}
+            type="number"
+            value={showPrice}
+            onChange={(e) => setShowPrice(e.target.value)}
+            placeholder="Enter show price"
+            className="addshows-price-input"
+          />
+        </div>
+      </div>
+
+      {/* Date and Time Input */}
+      <div className="addshows-datetime-section">
+        <label className="addshows-datetime-label">Select Date and Time:</label>
+        <input
+          type="datetime-local"
+          value={dateTimeInput}
+          onChange={(e) => setDateTimeInput(e.target.value)}
+          className="addshows-datetime-input"
+        />
+        <button onClick={handleDateTimeAdd} className="addshows-datetime-addbtn">
+          Add Time
+        </button>
+      </div>
+
+      {/* Display Selected Date and Times */}
+      {Object.keys(dateTimeSelection).length > 0 && (
+        <div className="addshows-datetimes-list">
+          <h2 className="addshows-datetimes-title">Selected Date-Times</h2>
+          <ul className="addshows-datetimes-ul">
+            {Object.entries(dateTimeSelection).map(([date, times]) => (
+              <li key={date} className="addshows-datetimes-li">
+                <div className="addshows-datetimes-date">{date}</div>
+                <div className="addshows-datetimes-times">
+                  {times.map((time) => (
+                    <div key={time} className="addshows-datetimes-time">
+                      <span>{time}</span>
+                      <DeleteIcon onClick={() => handleRemoveTime(date, time)} width={15} className="addshows-datetimes-deleteicon" />
+                    </div>
+                  ))}
+                </div>
+              </li>
             ))}
-          </div>
-          <div className="addshows-city-section">
-            <label htmlFor="city-select">Select City:</label>
-            <select
-              id="city-select"
-              value={selectedCity}
-              onChange={e => setSelectedCity(e.target.value)}
-              className="addshows-city-select"
-            >
-              {cities.map(city => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
-          </div>
+          </ul>
         </div>
       )}
+      <button className="addshows-submit-btn">
+        Add Show
+      </button>
     </div>
-  );
-};
+  ) : <Loading />
+}
 
 export default AddShows; 
