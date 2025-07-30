@@ -1,0 +1,55 @@
+.admin-sidebar {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 0.75rem;
+  width: 4rem;
+  border-right: 1px solid rgba(209, 213, 219, 0.2);
+  background-color: #ffffff;
+  flex-shrink: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .admin-sidebar {
+    width: 16rem;
+    padding: 2rem 1rem;
+  }
+}
+
+.admin-sidebar-profile {
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .admin-sidebar-profile {
+    height: 4rem;
+    width: 4rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.admin-sidebar-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  text-align: center;
+  display: none;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  padding: 0 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .admin-sidebar-name {
+    display: block;
+    font-size: 1rem;
+  }
+} 

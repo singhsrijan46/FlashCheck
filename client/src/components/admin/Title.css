@@ -1,0 +1,10 @@
+.admin-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 2rem;
+}
+
+.admin-title .admin-title-highlight {
+  color: #1E90FF;
+} 

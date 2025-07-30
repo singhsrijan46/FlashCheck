@@ -1,0 +1,159 @@
+.footer {
+  padding: 0 1.5rem;
+  margin-top: 10rem;
+  width: 100%;
+  color: #d1d5db;
+}
+
+@media (min-width: 768px) {
+  .footer {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .footer {
+    padding-left: 9rem;
+    padding-right: 9rem;
+  }
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  gap: 2.5rem;
+  border-bottom: 1px solid #6b7280;
+  padding-bottom: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .footer-content {
+    flex-direction: row;
+  }
+}
+
+.footer-brand {
+  max-width: 24rem;
+}
+
+@media (min-width: 768px) {
+  .footer-brand {
+    max-width: 24rem;
+  }
+}
+
+.footer-logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.footer-logo {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: contain;
+}
+
+@media (max-width: 767px) {
+  .footer-logo {
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
+.footer-logo-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 767px) {
+  .footer-logo-text {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-logo-text {
+    font-size: 1rem;
+  }
+}
+
+.footer-description {
+  margin-top: 0.8rem;
+  font-size: 0.875rem;
+}
+
+.footer-apps {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.footer-app-icon {
+  height: 2.25rem;
+  width: auto;
+}
+
+.footer-links {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 5rem;
+}
+
+@media (min-width: 768px) {
+  .footer-links {
+    gap: 10rem;
+  }
+}
+
+.footer-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-section-title {
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+
+.footer-section-list {
+  font-size: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.footer-section-list a {
+  color: #9ca3af;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-section-list a:hover {
+  color: white;
+}
+
+.footer-section-text {
+  font-size: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.01rem;
+}
+
+.footer-copyright {
+  text-align: center;
+  padding: 0.3rem 0;
+  font-size: 0.875rem;
+  color: #9ca3af;
+} 

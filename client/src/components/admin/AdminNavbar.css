@@ -1,0 +1,347 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  width: 100%;
+  max-width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.navbar.scrolled {
+  background-color: rgba(9, 9, 11, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (min-width: 768px) {
+  .navbar {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .navbar {
+    padding-left: 9rem;
+    padding-right: 9rem;
+  }
+}
+
+/* Left side - Profile */
+.navbar-profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.navbar-profile:hover {
+  transform: scale(1.05);
+}
+
+.navbar-profile-container {
+  position: relative;
+}
+
+.navbar-profile-btn {
+  display: flex;
+  align-items: center;
+    gap: 0.5rem;
+  padding: 0.7rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-size: 1.15rem;
+}
+
+.navbar-profile-btn:hover {
+  transform: scale(1.1);
+}
+
+.navbar-profile-avatar {
+  width: 2.7rem;
+  height: 2.7rem;
+  background: linear-gradient(135deg, #1E90FF, #4682B4);
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.navbar-profile-btn:hover .navbar-profile-avatar {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(30, 144, 255, 0.3);
+}
+
+.navbar-dropdown-icon {
+  color: #9ca3af;
+  transition: all 0.2s ease;
+}
+
+.navbar-profile-container:hover .navbar-dropdown-icon {
+  transform: rotate(180deg);
+  color: white;
+}
+
+.navbar-profile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
+  width: 12rem;
+  max-width: calc(100vw - 2rem);
+  background-color: #1f2937;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.375rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  padding: 0.25rem 0;
+  z-index: 1000;
+  overflow: hidden;
+  animation: slideDown 0.2s ease;
+  min-width: 160px;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.navbar-profile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1.1rem 1.3rem;
+  font-size: 1.15rem;
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.navbar-profile-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  /* No scale effect */
+}
+
+.navbar-profile-greeting {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1E90FF;
+  padding: 1.1rem 1.3rem 0.7rem 1.3rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 0.25rem;
+}
+
+/* Center - Navigation */
+.navbar-center {
+  display: none;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.navbar-center:hover {
+  transform: scale(1.02);
+}
+
+@media (min-width: 768px) {
+  .navbar-center {
+    display: flex;
+  }
+}
+
+.navbar-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+}
+
+.navbar-nav-indicator {
+  position: absolute;
+  bottom: -0.5rem;
+  height: 0.25rem;
+  background-color: #1E90FF;
+  border-radius: 0.125rem;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.navbar-nav-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.35rem;
+  padding: 0.7rem 1.2rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  position: relative;
+  z-index: 2;
+}
+
+.navbar-nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.navbar-nav-link.active {
+  color: #1E90FF;
+  transform: scale(1.05);
+}
+
+/* Active indicator positioning */
+.navbar-nav-links .navbar-nav-link:nth-child(2).active ~ .navbar-nav-indicator {
+  left: 0;
+  width: 3.5rem;
+}
+
+.navbar-nav-links .navbar-nav-link:nth-child(3).active ~ .navbar-nav-indicator {
+  left: 4.5rem;
+  width: 3.5rem;
+}
+
+.navbar-nav-links .navbar-nav-link:nth-child(4).active ~ .navbar-nav-indicator {
+  left: 9rem;
+  width: 4rem;
+}
+
+/* Right side - Logo */
+.navbar-logo {
+  max-width: 100%;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.navbar-logo:hover {
+  transform: scale(1.05);
+}
+
+@media (min-width: 768px) {
+  .navbar-logo {
+    max-width: none;
+    flex: none;
+  }
+}
+
+.navbar-logo img {
+  width: 3.5rem;
+  height: 3.5rem;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+@media (max-width: 767px) {
+  .navbar-logo img {
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
+/* Mobile menu */
+.navbar-mobile-menu {
+  display: block;
+  margin-left: 1rem;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  color: white;
+  transition: transform 0.2s ease;
+}
+
+.navbar-mobile-menu:hover {
+  transform: scale(1.1);
+}
+
+@media (min-width: 768px) {
+  .navbar-mobile-menu {
+    display: none;
+  }
+}
+
+.navbar-mobile-menu-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s;
+}
+
+.navbar-mobile-menu-container.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.navbar-close {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  color: white;
+  transition: transform 0.2s ease;
+}
+
+.navbar-close:hover {
+  transform: scale(1.1);
+}
+
+.navbar-mobile-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.navbar-mobile-nav a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.navbar-mobile-nav a:hover {
+  color: #1E90FF;
+  transform: scale(1.05);
+} 

@@ -1,0 +1,353 @@
+.movie-details-page {
+  padding: 0 1.5rem;
+  padding-top: 7.5rem;
+}
+
+@media (min-width: 768px) {
+  .movie-details-page {
+    padding-left: 4rem;
+    padding-right: 4rem;
+    padding-top: 12.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .movie-details-page {
+    padding-left: 6rem;
+    padding-right: 6rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .movie-details-page {
+    padding-left: 8rem;
+    padding-right: 8rem;
+  }
+}
+
+.movie-details-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  max-width: 90rem;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .movie-details-container {
+    flex-direction: row;
+    gap: 5rem;
+  }
+}
+
+.movie-details-poster {
+  margin: 0 auto;
+  border-radius: 0.75rem;
+  height: 30rem;
+  max-width: 24rem;
+  object-fit: cover;
+}
+
+@media (max-width: 767px) {
+  .movie-details-poster {
+    margin: 0 auto;
+  }
+}
+
+.movie-details-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+.movie-details-language {
+  color: #1E90FF;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.movie-details-title {
+  font-size: 2.25rem;
+  font-weight: 600;
+  max-width: 40rem;
+  text-wrap: balance;
+  line-height: 1.1;
+}
+
+@media (min-width: 768px) {
+  .movie-details-title {
+    font-size: 2.75rem;
+    line-height: 1.2;
+  }
+}
+
+.movie-details-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #d1d5db;
+  font-size: 0.875rem;
+}
+
+.movie-details-rating-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #1E90FF;
+  fill: #1E90FF;
+}
+
+.movie-details-overview {
+  color: #d1d5db;
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  max-width: 50rem;
+}
+
+.movie-details-meta {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+
+.movie-details-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.movie-details-trailer-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  background-color: #1f2937;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.movie-details-trailer-btn:hover {
+  background-color: #111827;
+}
+
+.movie-details-trailer-btn:active {
+  transform: scale(0.95);
+}
+
+.movie-details-trailer-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.movie-details-tickets-btn {
+  padding: 0.75rem 2rem;
+  font-size: 0.875rem;
+  background-color: #1E90FF;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-decoration: none;
+}
+
+.movie-details-tickets-btn:hover {
+  background-color: #4682B4;
+}
+
+.movie-details-tickets-btn:active {
+  transform: scale(0.95);
+}
+
+.movie-details-favorite-btn {
+  background-color: #374151;
+  padding: 0.625rem;
+  border: none;
+  border-radius: 50%;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.movie-details-favorite-btn:active {
+  transform: scale(0.95);
+}
+
+.movie-details-favorite-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.movie-details-favorite-icon.filled {
+  fill: #1E90FF;
+  color: #1E90FF;
+}
+
+.movie-details-cast-title {
+  font-size: 1.875rem;
+  font-weight: 600;
+  margin-top: 5rem;
+}
+
+.movie-details-cast-container {
+  overflow-x: auto;
+  margin-top: 2rem;
+  padding-bottom: 1rem;
+}
+
+.movie-details-cast-grid {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  width: max-content;
+  padding: 0 1rem;
+}
+
+.movie-details-cast-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.movie-details-cast-image {
+  border-radius: 50%;
+  height: 5.5rem;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+@media (min-width: 768px) {
+  .movie-details-cast-image {
+    height: 5.5rem;
+  }
+}
+
+.movie-details-cast-name {
+  font-weight: 500;
+  font-size: 0.8rem;
+  margin-top: 0.75rem;
+}
+
+.movie-details-recommendations-title {
+  font-size: 1.875rem;
+  font-weight: 600;
+  margin-top: 5rem;
+  margin-bottom: 0.4rem;
+}
+
+.movie-details-recommendations-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 0 2rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 639px) {
+  .movie-details-recommendations-grid {
+    justify-content: flex-start;
+    gap: 0 2rem;
+  }
+}
+
+.movie-details-show-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.movie-details-show-more-btn {
+  font-size: 0.95rem;
+  padding: 0.6rem 1.7rem;
+  background-color: #1E90FF;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.movie-details-show-more-btn:hover {
+  background-color: #4682B4;
+}
+
+/* Trailer Section */
+.movie-details-trailer-section {
+  margin-top: 5rem;
+  margin-bottom: 5rem;
+}
+
+.movie-details-trailer-title {
+  font-size: 1.875rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: white;
+}
+
+.movie-details-trailer-container {
+  position: relative;
+  width: 100%;
+  max-width: 60rem;
+  margin: 0 auto;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.movie-details-trailer-video {
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  border: none;
+  border-radius: 0.75rem;
+}
+
+.movie-details-trailer-message {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 1rem;
+  margin-top: 1rem;
+  padding: 2rem;
+  background: rgba(31, 41, 55, 0.5);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.movie-details-trailer-loading {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 1rem;
+  margin-top: 1rem;
+  padding: 2rem;
+  background: rgba(31, 41, 55, 0.5);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.movie-details-trailer-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .movie-details-trailer-container {
+    max-width: 100%;
+  }
+  
+  .movie-details-trailer-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+} 

@@ -1,0 +1,22 @@
+.admin-layout {
+  min-height: 100vh;
+  margin-top: 5rem;
+  background-color: #09090b;
+  color: white;
+}
+
+.admin-layout-content {
+  padding: 2rem 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .admin-layout-content {
+    padding: 2rem 4rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .admin-layout-content {
+    padding: 2rem 9rem;
+  }
+} 

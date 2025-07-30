@@ -1,0 +1,128 @@
+.my-bookings-page {
+  padding: 0 1.5rem;
+  padding-top: 7.5rem;
+  padding-bottom: 7.5rem;
+}
+
+@media (min-width: 768px) {
+  .my-bookings-page {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .my-bookings-page {
+    padding-left: 10rem;
+    padding-right: 10rem;
+  }
+}
+
+.my-bookings-title {
+  font-size: 2.25rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+.my-bookings-item {
+  background-color: #1a1a1a;
+  border: 1px solid #8b4513;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.my-bookings-content {
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.my-bookings-image {
+  width: 6rem;
+  height: 9rem;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+}
+
+.my-bookings-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+  justify-content: space-between;
+  min-height: 9rem;
+}
+
+.my-bookings-movie-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.my-bookings-movie-runtime {
+  color: #d1d5db;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.my-bookings-movie-date {
+  color: #d1d5db;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.my-bookings-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: auto;
+}
+
+.my-bookings-seats {
+  color: #d1d5db;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.my-bookings-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1E90FF;
+}
+
+.my-bookings-price {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.my-bookings-pay-btn {
+  background-color: #1E90FF;
+  padding: 0.25rem 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  border: none;
+  border-radius: 9999px;
+  font-weight: 500;
+  cursor: pointer;
+  color: white;
+  text-decoration: none;
+}
+
+.my-bookings-pay-btn:hover {
+  background-color: #4682B4;
+}
+
+.my-bookings-ticket-info {
+  font-size: 0.875rem;
+}
+
+.my-bookings-ticket-info span {
+  color: #9ca3af;
+} 
