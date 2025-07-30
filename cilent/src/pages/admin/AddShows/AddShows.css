@@ -1,236 +1,236 @@
-/* AddShows Page Styles */
-
+/* General Layout */
 .addshows-container {
-  max-width: 1200px;
-  margin: 32px auto;
-  padding: 32px 24px;
-  background: #141414;
-  border-radius: 8px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.2);
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  color: #ffffff;
-}
-
-.addshows-title {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #ffffff;
-  margin-bottom: 24px;
+  padding: 2rem;
+  background-color: #0d0d0d;
+  color: #fff;
+  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
 }
 
 .addshows-nowplaying-label {
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: #ffffff;
-  margin-bottom: 16px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
 
+/* Movie Card Grid */
 .addshows-movie-list {
   display: flex;
-  gap: 24px;
   overflow-x: auto;
-  padding-bottom: 16px;
-  margin-bottom: 24px;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.addshows-movie-list::-webkit-scrollbar {
-  display: none;
+  gap: 0.7rem; /* slightly reduced gap */
+  margin-bottom: 2rem;
+  padding-bottom: 0.5rem;
 }
 
 .addshows-movie-card {
-  min-width: 200px;
-  background: rgba(32, 32, 32, 0.8);
-  border-radius: 8px;
-  padding: 12px;
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  padding: 0.5rem; /* reduced padding */
+  min-width: 110px; /* reduced min-width */
+  max-width: 120px;
+  position: relative;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: 0.2s ease;
   border: 2px solid transparent;
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
 }
+
+.addshows-movie-card:hover {
+  border-color: #f43f5e;
+}
+
 .addshows-movie-card.selected {
-  border: 2px solid #5f6fff;
-  box-shadow: 0 4px 16px rgba(95,111,255,0.10);
-  background: #eef0ff;
+  border-color: #f43f5e;
 }
+
 .addshows-movie-poster {
-  width: 160px;
-  height: 240px;
+  width: 90px; /* reduced width */
+  height: 120px; /* fixed height for uniformity */
   object-fit: cover;
   border-radius: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 0.4rem;
 }
-.addshows-movie-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #22223b;
-  margin: 4px 0 2px 0;
-  text-align: center;
-}
-.addshows-movie-release {
-  font-size: 0.9rem;
-  color: #888;
-  text-align: center;
-}
-.addshows-movie-rating {
+
+.addshows-movie-rating,
+.addshows-movie-votes {
+  font-size: 0.75rem; /* slightly smaller */
+  color: #d1d5db;
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #ffd700;
-  font-weight: 600;
-  font-size: 1rem;
-}
-.addshows-movie-votes {
-  font-size: 0.85rem;
-  color: #aaa;
-  margin-bottom: 2px;
-}
-.addshows-checkicon {
-  color: #5f6fff;
-  background: #fff;
-  border-radius: 50%;
-  padding: 2px;
-  margin-top: 4px;
+  margin: 2px 0;
+  justify-content: center;
 }
 
-/* Show Price Input */
+.addshows-movie-rating-icon {
+  width: 13px;
+  height: 13px;
+  color: #fbbf24;
+}
+
+.addshows-checkicon {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  background-color: #22c55e;
+  border-radius: 50%;
+  padding: 4px;
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.addshows-movie-title {
+  font-size: 0.8rem; /* smaller */
+  font-weight: 600;
+  margin-top: 4px;
+  text-align: center;
+}
+
+.addshows-movie-release {
+  font-size: 0.7rem; /* smaller */
+  color: #9ca3af;
+  text-align: center;
+}
+
+/* Price Section */
 .addshows-price-section {
-  margin-top: 32px;
-  padding: 24px;
-  background: rgba(32, 32, 32, 0.8);
-  border-radius: 8px;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
 }
+
 .addshows-price-label {
-  font-weight: 500;
-  color: #22223b;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.5rem;
 }
+
 .addshows-price-input-wrap {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: #f4f4f8;
+  background-color: #1f1f1f;
   border-radius: 6px;
-  padding: 4px 10px;
+  padding: 0.5rem;
+  max-width: 200px;
 }
+
 .addshows-price-currency {
-  color: #5f6fff;
-  font-weight: 700;
-  font-size: 1.1rem;
+  margin-right: 8px;
+  color: #f43f5e;
 }
+
 .addshows-price-input {
-  border: none;
   background: transparent;
-  font-size: 1rem;
-  width: 80px;
+  border: none;
   outline: none;
-  color: #22223b;
-}
-
-/* Date and Time Input */
-.addshows-datetime-section {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.addshows-datetime-label {
-  font-weight: 500;
-  color: #22223b;
-}
-.addshows-datetime-input {
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 1rem;
-  color: #22223b;
-  background: #f8f8fa;
-}
-.addshows-datetime-addbtn {
-  background: #5f6fff;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.addshows-datetime-addbtn:hover {
-  background: #3d4fd6;
-}
-
-/* Selected Date-Times */
-.addshows-datetimes-list {
-  margin-top: 10px;
-  background: #f8f8fa;
-  border-radius: 8px;
-  padding: 12px 16px;
-}
-.addshows-datetimes-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #22223b;
-  margin-bottom: 8px;
-}
-.addshows-datetimes-ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.addshows-datetimes-li {
-  margin-bottom: 8px;
-}
-.addshows-datetimes-date {
-  font-weight: 500;
-  color: #4a4e69;
-  margin-bottom: 2px;
-}
-.addshows-datetimes-times {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.addshows-datetimes-time {
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  padding: 4px 10px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.98rem;
-  color: #22223b;
-}
-.addshows-datetimes-deleteicon {
-  color: #e63946;
-  cursor: pointer;
-  margin-left: 4px;
-  transition: color 0.2s;
-}
-.addshows-datetimes-deleteicon:hover {
-  color: #b71c1c;
-}
-
-/* Add Show Button */
-.addshows-submit-btn {
-  margin-top: 18px;
-  background: #5f6fff;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 0;
-  font-size: 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.2s;
+  color: white;
   width: 100%;
 }
+
+/* Date-Time Input */
+.addshows-datetime-section {
+  margin-top: 1.5rem;
+}
+
+.addshows-datetime-label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.addshows-datetime-input {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  background-color: #1f1f1f;
+  color: white;
+  margin-right: 10px;
+}
+
+.addshows-datetime-addbtn {
+  background-color: #ef4444;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.addshows-datetime-addbtn:hover {
+  background-color: #dc2626;
+}
+
+/* Date-Time List Display */
+.addshows-datetimes-list {
+  margin-top: 2rem;
+}
+
+.addshows-datetimes-title {
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.addshows-datetimes-ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.addshows-datetimes-li {
+  margin-bottom: 1rem;
+}
+
+.addshows-datetimes-date {
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  color: #f43f5e;
+}
+
+.addshows-datetimes-times {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.addshows-datetimes-time {
+  background-color: #1f1f1f;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+}
+
+.addshows-datetimes-deleteicon {
+  cursor: pointer;
+  color: #f87171;
+  transition: 0.2s;
+}
+
+.addshows-datetimes-deleteicon:hover {
+  color: #ef4444;
+}
+
+/* Submit Button */
+.addshows-submit-btn {
+  margin-top: 2rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #f43f5e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
 .addshows-submit-btn:hover {
-  background: #3d4fd6;
+  background-color: #e11d48;
 }

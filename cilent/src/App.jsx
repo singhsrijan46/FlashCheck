@@ -68,16 +68,9 @@ const App = () => {
         <Route path='/movies/:movieId' element={<MovieDetails onCityClick={handleOpenCityModal} onSignInClick={handleOpenSignInModal} onSignUpClick={handleOpenSignUpModal} />} />
         <Route path='/search' element={<Search onCityClick={handleOpenCityModal} onSignInClick={handleOpenSignInModal} onSignUpClick={handleOpenSignUpModal} />} />
         <Route path='/admin/*' element={
-          <AdminAccessWrapper setShowSignInModal={setShowSignInModal}>
-            <Routes>
-              <Route index element={<Navigate to='/admin/dashboard' replace />} />
-              <Route path='dashboard' element={<Dashboard />} />
-              <Route path='add-shows' element={<AddShows />} />
-              <Route path='list-shows' element={<ListShows />} />
-              <Route path='list-bookings' element={<ListBookings />} />
-              <Route path='' element={<AdminHome />} />
-            </Routes>
-          </AdminAccessWrapper>
+          //<AdminAccessWrapper setShowSignInModal={setShowSignInModal}>
+            <AdminHome />
+          //</AdminAccessWrapper>
         } />
       </Routes>
       <ToastContainer />

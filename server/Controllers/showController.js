@@ -1,6 +1,8 @@
 import axios from 'axios';
 import movieModel from '../Models/Movie.js';
 import showModel from '../Models/User.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 //API to get now playing movies from TMDB API
 export const getNowPlayingMovies = async (req, res) => {
@@ -10,6 +12,34 @@ export const getNowPlayingMovies = async (req, res) => {
         })
         const movies = data.results;
         res.json({success: true, movies: movies})
+    } catch(error) {
+        console.error(error);
+        res.json({success: false, message: error.message})
+    }
+}
+
+//API to get movie details from omdb api
+export const getMovieDetails = async (req, res) => {
+    try{
+        const { movieName } = req.body;
+        const { data } = await axios.get(`https://www.omdbapi.com/?apikey=${process.env.OMDB_API_KEY}&t=${movieName}`);
+
+        
+        const movieDetails = {
+            _id: data.imdbID,
+            title: data.title,
+            overview: data.overview,
+            poster_path: data.poster_path,
+            backdrop_path: data.backdrop_path,
+            genres: data.genres,
+            casts: data.cast,
+            release_data: data.release_data,
+            original_language: data.original_language,
+            tagline: data.tagline || "",
+            runtime: data.runtime
+        }
+
+        res.json({success: true, movie: movieDetails})
     } catch(error) {
         console.error(error);
         res.json({success: false, message: error.message})

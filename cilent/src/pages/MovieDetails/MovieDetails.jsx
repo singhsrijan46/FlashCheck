@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import NavBar from '../../components/NavBar/NavBar';
 import Footer from '../../components/Footer/Footer';
 import './MovieDetails.css';
 import poster from '../../assets/demon-slayer_poster.webp';
@@ -61,7 +62,7 @@ const MovieDetails = ({ onCityClick, onSignInClick }) => {
 
   return (
     <div className="moviedetails-page-container">
-      
+      <NavBar onCityClick={onCityClick} onSignInClick={onSignInClick} />
       {/* Back Button */}
       <button className="back-button" onClick={handleBackClick}>
         <ArrowLeft size={20} />

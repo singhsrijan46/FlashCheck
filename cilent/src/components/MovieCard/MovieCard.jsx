@@ -3,7 +3,7 @@ import './MovieCard.css';
 import { Star } from 'lucide-react';
 
 const MovieCard = ({ movie }) => {
-  const { poster, rating, votes, genres } = movie;
+  const { poster, rating, genres } = movie;
 
   return (
     <div className='moviecard'>
@@ -14,7 +14,6 @@ const MovieCard = ({ movie }) => {
             <Star className='star-icon' />
             <span className='rating-value'>{rating}</span>
           </div>
-          <div className='votes'>{votes} votes</div>
         </div>
         <div className='genres'>
           {genres.map((genre, index) => (
