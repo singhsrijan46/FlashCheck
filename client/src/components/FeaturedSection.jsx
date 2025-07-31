@@ -27,10 +27,6 @@ const FeaturedSection = () => {
         ))}
       </div>
 
-      <div className='featured-show-more'>
-        <button onClick={()=> {navigate('/movies'); scrollTo(0,0)}}
-         className='featured-show-more-btn'>Show more</button>
-      </div>
     </div>
   )
 }

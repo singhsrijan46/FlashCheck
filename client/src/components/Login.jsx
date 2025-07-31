@@ -32,6 +32,8 @@ const Login = ({ state }) => {
         try {
             console.log('Form submitted with data:', formData);
             console.log('Current location:', location.pathname);
+            console.log('Location state:', location.state);
+            console.log('Component state:', state);
             console.log('From path:', from);
             
             let result;

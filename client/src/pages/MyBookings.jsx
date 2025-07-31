@@ -42,19 +42,14 @@ const MyBookings = () => {
     <div className='my-bookings-page'>
       <h1 className='my-bookings-title'>My Bookings</h1>
 
-      {bookings.map((item,index)=>(
-        <div key={index} className='my-bookings-item'>
-          <div className='my-bookings-content'>
-            <img src={image_base_url + item.show.movie.poster_path} alt="" className='my-bookings-image'/>
-            <div className='my-bookings-details'>
-              <p className='my-bookings-movie-title'>{item.show.movie.title}</p>
-              <p className='my-bookings-movie-runtime'>{timeFormat(item.show.movie.runtime)}</p>
-              <p className='my-bookings-movie-date'>{dateFormat(item.show.showDateTime)}</p>
-            </div>
-          </div>
-          <div className='my-bookings-actions'>
-            <p className='my-bookings-seats'>Seats: {Object.keys(item.bookedSeats).map(seat => item.bookedSeats[seat]).join(", ")}</p>
-            <p className='my-bookings-amount'>{currency} {item.amount}</p>
+      {bookings.map((booking) => (
+        <div key={booking._id} className="my-bookings-booking">
+          <div className="my-bookings-booking-info">
+            <h3>{booking.show?.movie?.title || 'Unknown Movie'}</h3>
+            <p>Date: {new Date(booking.show?.showDateTime).toLocaleDateString()}</p>
+            <p>Time: {new Date(booking.show?.showDateTime).toLocaleTimeString()}</p>
+            <p>Seats: {booking.bookedSeats.join(', ')}</p>
+            <p>Amount: ${booking.amount}</p>
           </div>
         </div>
       ))}

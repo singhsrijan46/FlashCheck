@@ -15,10 +15,10 @@ const movieSchema = new mongoose.Schema(
         vote_average: {type: Number, required: true},
         runtime: {type: Number, required: true},
         trailer: {
-            key: String,
-            name: String,
-            site: String,
-            type: String
+            key: {type: String, default: null},
+            name: {type: String, default: null},
+            site: {type: String, default: null},
+            type: {type: String, default: null}
         }
     }, {timestamps: true}
 )

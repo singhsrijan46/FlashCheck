@@ -60,6 +60,10 @@ const Navbar = () => {
    }
  };
 
+ const handleSearchClick = () => {
+   navigate('/search');
+ };
+
   return (
     <div className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
       {/* Left side - Logo */}
@@ -70,7 +74,7 @@ const Navbar = () => {
 
       {/* Center - Search and Navigation */}
       <div className='navbar-center'>
-        <div className='navbar-search-container'>
+        <div className='navbar-search-container' onClick={handleSearchClick}>
           <SearchIcon className='navbar-search-icon'/>
         </div>
         
@@ -90,20 +94,15 @@ const Navbar = () => {
           >
             Movies
           </Link>
-          <Link 
-            to='/search' 
-            className={`navbar-nav-link ${isActive('/search') ? 'active' : ''}`}
-            onClick={e => handleNavLinkClick(e, '/search')}
-          >
-            Search
-          </Link>
-          <Link 
-            to='/favorite' 
-            className={`navbar-nav-link ${isActive('/favorite') ? 'active' : ''}`}
-            onClick={e => handleNavLinkClick(e, '/favorite')}
-          >
-            Favorites
-          </Link>
+          {user && (
+            <Link 
+              to='/favorite' 
+              className={`navbar-nav-link ${isActive('/favorite') ? 'active' : ''}`}
+              onClick={e => handleNavLinkClick(e, '/favorite')}
+            >
+              Favorites
+            </Link>
+          )}
         </div>
       </div>
 
@@ -111,7 +110,7 @@ const Navbar = () => {
       <div className='navbar-profile'>
         {
             !user ? (
-                <button onClick={() => navigate('/login')} className='navbar-login-btn'>Login</button>
+                <button onClick={() => navigate('/login', { state: { from: location } })} className='navbar-login-btn'>Login</button>
             ) : (
                 <div className="navbar-profile-container">
                     <button 
@@ -175,12 +174,14 @@ const Navbar = () => {
           >
             Movies
           </Link>
-          <Link 
-            onClick={e => { handleNavLinkClick(e, '/favorite'); setIsOpen(false); }} 
-            to='/favorite'
-          >
-            Favorites
-          </Link>
+          {user && (
+            <Link 
+              onClick={e => { handleNavLinkClick(e, '/favorite'); setIsOpen(false); }} 
+              to='/favorite'
+            >
+              Favorites
+            </Link>
+          )}
         </div>
       </div>
     </div>

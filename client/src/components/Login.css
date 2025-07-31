@@ -149,7 +149,6 @@
   padding: 0.75rem 1rem;
   border: 1px solid rgba(75, 85, 99, 0.6);
   border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   background-color: rgba(55, 65, 81, 0.9);
   color: white;
   outline: none;
@@ -160,41 +159,30 @@
 
 .login-input:focus {
   border-color: #1E90FF;
-  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.2);
   background-color: rgba(75, 85, 99, 0.95);
   transform: translateY(-1px);
 }
 
 .login-button {
-  position: relative;
   width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   padding: 0.75rem 2.5rem;
+  background-color: #1E90FF;
+  color: white;
   border: none;
+  border-radius: 0.375rem;
   font-size: 0.875rem;
   font-weight: 500;
-  border-radius: 0.5rem;
-  color: white;
-  background-color: #1E90FF;
   cursor: pointer;
-  outline: none;
-  box-sizing: border-box;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(30, 144, 255, 0.3);
 }
 
 .login-button:hover {
   background-color: #4682B4;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(30, 144, 255, 0.4);
 }
 
 .login-button:active {
-  transform: translateY(0) scale(0.98);
-  box-shadow: 0 2px 8px rgba(30, 144, 255, 0.3);
+  transform: scale(0.95);
 }
 
 .login-button:focus {
@@ -203,10 +191,9 @@
 }
 
 .login-button:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
   transform: none;
-  box-shadow: none;
 }
 
 .login-switch {

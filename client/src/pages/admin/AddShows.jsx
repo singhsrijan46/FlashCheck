@@ -18,17 +18,31 @@ const AddShows = () => {
     const [dateTimeInput, setDateTimeInput] = useState("");
     const [showPrice, setShowPrice] = useState("");
     const [addingShow, setAddingShow] = useState(false)
+    const [loadingMovies, setLoadingMovies] = useState(true)
 
 
      const fetchNowPlayingMovies = async () => {
         try {
+            setLoadingMovies(true);
             const { data } = await axios.get('/api/show/now-playing', {
                 headers: { Authorization: `Bearer ${await getToken()}` }})
                 if(data.success){
+                    console.log('Fetched movies:', data.movies);
+                    console.log('First movie structure:', data.movies[0]);
+                    
+                    // Check for duplicate IDs
+                    const movieIds = data.movies.map(movie => movie._id || movie.id);
+                    console.log('All movie IDs:', movieIds);
+                    const uniqueIds = new Set(movieIds);
+                    console.log('Unique movie IDs:', Array.from(uniqueIds));
+                    console.log('Duplicate IDs found:', movieIds.length !== uniqueIds.size);
+                    
                     setNowPlayingMovies(data.movies)
                 }
         } catch (error) {
             console.error('Error fetching movies:', error)
+        } finally {
+            setLoadingMovies(false);
         }
     };
 
@@ -125,72 +139,144 @@ const AddShows = () => {
     useEffect(() => {
         if(user){
             fetchNowPlayingMovies();
-        }
+        }   
     }, [user]);
 
-  return nowPlayingMovies.length > 0 ? (
+    // Debug selectedMovie changes
+    useEffect(() => {
+        console.log('selectedMovie changed to:', selectedMovie);
+    }, [selectedMovie]);
+
+  return (
     <>
-      <p className="add-shows-title">Now Playing Movies</p>
-      <div className="add-shows-movies-container">
-        <div className="add-shows-movies-grid">
-            {nowPlayingMovies.map((movie) =>(
-                <div key={movie.id} className="add-shows-movie-card" onClick={()=> setSelectedMovie(movie.id)}>
-                    <div className="add-shows-movie-image-container">
-                        <img src={image_base_url + movie.poster_path} alt="" className="add-shows-movie-image" />
-                        {selectedMovie === movie.id && (
-                            <div className="add-shows-movie-selected">
-                                <CheckIcon className="add-shows-movie-selected-icon" />
+      <div className="add-shows-container">
+        {/* Main Content */}
+        <div className="add-shows-main">
+          {/* Latest Movies Section */}
+          <div className="add-shows-latest-section">
+            <h2 className="add-shows-section-title">Latest Movies</h2>
+            
+            {loadingMovies ? (
+              <Loading />
+            ) : nowPlayingMovies.length > 0 ? (
+              <div className="add-shows-movies-container">
+                <div className="add-shows-movies-grid">
+                    {nowPlayingMovies.map((movie) =>{
+                        const movieId = movie._id || movie.id;
+                        const isSelected = selectedMovie === movieId;
+                        
+                        return (
+                            <div key={movieId} className="add-shows-movie-card" onClick={()=> {
+                                console.log('Movie clicked:', movie.title, 'ID:', movieId);
+                                console.log('Current selectedMovie:', selectedMovie);
+                                console.log('Is currently selected:', isSelected);
+                                setSelectedMovie(movieId);
+                                console.log('Setting selectedMovie to:', movieId);
+                            }}>
+                                <div className="add-shows-movie-image-container">
+                                    <img src={image_base_url + movie.poster_path} alt="" className="add-shows-movie-image" />
+                                    {isSelected && (
+                                        <div className="add-shows-movie-selected">
+                                            <CheckIcon className="add-shows-movie-selected-icon" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="add-shows-movie-info">
+                                    <p className="add-shows-movie-title">{movie.title}</p>
+                                    <p className="add-shows-movie-date">{movie.release_date}</p>
+                                    <p className="add-shows-movie-id">ID: {movieId}</p>
+                                    <p className={`add-shows-movie-status ${isSelected ? 'selected' : ''}`}>
+                                        {isSelected ? 'SELECTED' : 'Click to select'}
+                                    </p>
+                                </div>
                             </div>
-                        )}
-                    </div>
-                    <div className="add-shows-movie-info">
-                        <p className="add-shows-movie-title">{movie.title}</p>
-                        <p className="add-shows-movie-date">{movie.release_date}</p>
-                    </div>
+                        );
+                    })}
                 </div>
-            ))}
+                {nowPlayingMovies.length > 0 && nowPlayingMovies[0]._id === "550" && (
+                  <div className="add-shows-offline-notice">
+                    <p>⚠️ Using sample data - TMDB API may be unavailable</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="add-shows-no-movies">
+                <p>No movies found from TMDB API.</p>
+              </div>
+            )}
+          </div>
+
+          {/* OR Divider */}
+          <div className="add-shows-or-divider">
+            <div className="add-shows-or-line"></div>
+            <span className="add-shows-or-text">OR</span>
+            <div className="add-shows-or-line"></div>
+          </div>
+
+          {/* Manual Movie Input */}
+          <div className="add-shows-manual-section">
+            <h3 className="add-shows-subsection-title">Add Other Movies</h3>
+            <div className="add-shows-manual-input">
+              <label>Movie ID (TMDB):</label>
+              <input 
+                type="text" 
+                placeholder="Enter TMDB Movie ID (e.g., 550)" 
+                className="add-shows-manual-field"
+                onChange={(e) => setSelectedMovie(e.target.value)}
+              />
+              <p className="add-shows-manual-help">
+                You can find TMDB Movie IDs by searching on <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer">themoviedb.org</a>
+              </p>
+            </div>
+          </div>
+
+          {/* Configuration Section */}
+          <div className="add-shows-config-section">
+            <h2 className="add-shows-section-title">Show Configuration</h2>
+            
+            {/* Show Price Input */}
+            <div className="add-shows-price-section">
+                <h3 className="add-shows-subsection-title">Show Price</h3>
+                <div className="add-shows-price-input">
+                    <p className="add-shows-price-currency">{currency}</p>
+                    <input min={0} type="number" value={showPrice} onChange={(e) => setShowPrice(e.target.value)} placeholder="Enter show price" className="add-shows-price-field" />
+                </div>
+            </div>
+
+            {/* Date & Time Selection */}
+            <div className="add-shows-datetime-section">
+                <h3 className="add-shows-subsection-title">Select Date and Time</h3>
+                <div className="add-shows-datetime-input">
+                    <input type="datetime-local" value={dateTimeInput} onChange={(e) => setDateTimeInput(e.target.value)} className="add-shows-datetime-field" />
+                    <button onClick={handleDateTimeAdd} className="add-shows-datetime-button" >
+                        Add Time
+                    </button>
+                </div>
+            </div>
+
+            {/* Display Selected Times */}
+            {dateTimeSelection.length > 0 && (
+            <div className="add-shows-selected-times">
+                <h3 className="add-shows-subsection-title">Selected Date-Time</h3>
+                <div className="add-shows-selected-times-grid">
+                    {dateTimeSelection.map((dateTime) => (
+                        <div key={dateTime} className="add-shows-time-item" >
+                            <span>{new Date(dateTime).toLocaleString()}</span>
+                            <DeleteIcon onClick={() => handleRemoveTime(dateTime)} width={15} className="add-shows-time-delete" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+            )}
+            
+            <button onClick={handleSubmit} disabled={addingShow} className="add-shows-submit-button" >
+                Add Show
+            </button>
+          </div>
         </div>
       </div>
-
-       {/* Show Price Input */}
-       <div className="add-shows-price-section">
-            <label className="add-shows-price-label">Show Price</label>
-            <div className="add-shows-price-input">
-                <p className="add-shows-price-currency">{currency}</p>
-                <input min={0} type="number" value={showPrice} onChange={(e) => setShowPrice(e.target.value)} placeholder="Enter show price" className="add-shows-price-field" />
-            </div>
-        </div>
-
-        {/* Date & Time Selection */}
-        <div className="add-shows-datetime-section">
-            <label className="add-shows-datetime-label">Select Date and Time</label>
-            <div className="add-shows-datetime-input">
-                <input type="datetime-local" value={dateTimeInput} onChange={(e) => setDateTimeInput(e.target.value)} className="add-shows-datetime-field" />
-                <button onClick={handleDateTimeAdd} className="add-shows-datetime-button" >
-                    Add Time
-                </button>
-            </div>
-        </div>
-
-       {/* Display Selected Times */}
-        {dateTimeSelection.length > 0 && (
-        <div className="add-shows-selected-times">
-            <h2>Selected Date-Time</h2>
-            <div className="add-shows-selected-times-grid">
-                {dateTimeSelection.map((dateTime) => (
-                    <div key={dateTime} className="add-shows-time-item" >
-                        <span>{new Date(dateTime).toLocaleString()}</span>
-                        <DeleteIcon onClick={() => handleRemoveTime(dateTime)} width={15} className="add-shows-time-delete" />
-                    </div>
-                ))}
-            </div>
-        </div>
-       )}
-       <button onClick={handleSubmit} disabled={addingShow} className="add-shows-submit-button" >
-            Add Show
-        </button>
     </>
-  ) : <Loading />
+  )
 }
 
 export default AddShows

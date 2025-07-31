@@ -240,23 +240,99 @@
 }
 
 .showtime-book-btn {
-  width: 100%;
-  max-width: 16rem;
-  margin: 0 auto;
-  padding: 0.6rem 1.7rem;
+  padding: 0.75rem 2.5rem;
   background-color: #1E90FF;
   color: white;
   border: none;
   border-radius: 0.375rem;
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
-  display: block;
+  white-space: nowrap;
 }
 
 .showtime-book-btn:hover {
   background-color: #4682B4;
+}
+
+.showtime-book-btn:active {
+  transform: scale(0.95);
+}
+
+.showtime-book-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.3);
+}
+
+.showtime-book-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.seat-selection-continue-btn {
+  padding: 0.75rem 2.5rem;
+  background-color: #1E90FF;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.seat-selection-continue-btn:hover {
+  background-color: #4682B4;
+}
+
+.seat-selection-continue-btn:active {
+  transform: scale(0.95);
+}
+
+.seat-selection-continue-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.3);
+}
+
+.seat-selection-continue-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.payment-confirm-btn {
+  padding: 0.75rem 2.5rem;
+  background-color: #1E90FF;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.payment-confirm-btn:hover {
+  background-color: #4682B4;
+}
+
+.payment-confirm-btn:active {
+  transform: scale(0.95);
+}
+
+.payment-confirm-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.3);
+}
+
+.payment-confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Responsive Design */

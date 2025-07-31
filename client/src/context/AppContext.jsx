@@ -14,6 +14,7 @@ export const AppProvider = ({ children })=>{
     const [favoriteMovies, setFavoriteMovies] = useState([])
     const [user, setUser] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [fetchingShows, setFetchingShows] = useState(false)
 
     const image_base_url = import.meta.env.VITE_TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p/w500';
 
@@ -114,15 +115,26 @@ export const AppProvider = ({ children })=>{
     }
 
     const fetchShows = async ()=>{
+        // Prevent multiple simultaneous calls
+        if (fetchingShows) {
+            console.log('fetchShows already in progress, skipping...');
+            return;
+        }
+        
         try {
+            setFetchingShows(true);
+            console.log('Fetching shows from server...');
             const { data } = await axios.get('/api/show/all')
             if(data.success){
                 setShows(data.shows || [])
+                console.log('Shows fetched successfully:', data.shows?.length || 0);
             }else{
                 toast.error(data.message)
             }
         } catch (error) {
-            // console.error(error)
+            console.error('Error fetching shows:', error);
+        } finally {
+            setFetchingShows(false);
         }
     }
 

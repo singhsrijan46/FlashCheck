@@ -29,6 +29,14 @@ const MovieCard = ({movie}) => {
               ))}
             </div>
           </div>
+          <div className='movie-card-hover-overlay'>
+            <button 
+              onClick={()=> {navigate(`/movies/${movie._id}`); scrollTo(0, 0)}}
+              className='movie-card-book-ticket-btn'
+            >
+              Book Ticket
+            </button>
+          </div>
         </div>
         <div className='movie-card-details'>
           <p className='movie-card-title'>{movie.title}</p>

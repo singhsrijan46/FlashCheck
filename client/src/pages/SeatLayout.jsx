@@ -40,6 +40,17 @@ const SeatLayout = () => {
     }
   }
 
+  const getOccupiedSeats = async () => {
+    try {
+      const { data } = await axios.get(`/api/booking/occupied-seats/${id}/${date}`)
+      if (data.success) {
+        setOccupiedSeats(data.occupiedSeats)
+      }
+    } catch (error) {
+      console.log('Error getting occupied seats:', error)
+    }
+  }
+
   const handleSeatClick = (seatId) =>{
       if(!selectedSeats.includes(seatId) && selectedSeats.length > 4){
         return toast("You can only select 5 seats")
@@ -56,9 +67,9 @@ const SeatLayout = () => {
     }
     try {
       const { data } = await axios.post('/api/booking/create', {
-        showId: id,
+        movieId: id,
         date: date,
-        selectedSeats, // <-- use correct key
+        selectedSeats,
         amount: selectedSeats.length * show.showPrice
       }, {
         headers: { Authorization: `Bearer ${await getToken()}` }
@@ -77,7 +88,8 @@ const SeatLayout = () => {
 
   useEffect(() => {
     getShow()
-  }, [id])
+    getOccupiedSeats()
+  }, [id, date])
 
   const renderSeatBlock = (rowLetter, blockNumber) => {
     const blockSeats = []

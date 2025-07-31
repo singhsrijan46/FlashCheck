@@ -1,32 +1,223 @@
 import axios from "axios"
 import Movie from "../models/Movie.js";
 import Show from "../models/Show.js";
-import { inngest } from "../inngest/index.js";
+import User from "../models/User.js";
+import sendEmail from "../configs/nodeMailer.js";
+
+// Simple movie cache to reduce API calls
+const movieCache = new Map();
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+
+// Sample movie data as fallback when TMDB API is unavailable
+const sampleMovies = [
+    {
+        _id: "550",
+        title: "Fight Club",
+        overview: "A depressed man meets a strange soapmaker whose outlook on life changes his own.",
+        poster_path: "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
+        backdrop_path: "/52AfXWuXCHn3UjD17rBruA9f5qb.jpg",
+        release_date: "1999-10-15",
+        vote_average: 8.8,
+        original_language: "en",
+        genre_ids: [18]
+    },
+    {
+        _id: "13",
+        title: "Forrest Gump",
+        overview: "A man with a low IQ has accomplished great things in his life.",
+        poster_path: "/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg",
+        backdrop_path: "/yE5d3BUhDU8BGxSyfRmJPU9i8SV.jpg",
+        release_date: "1994-07-06",
+        vote_average: 8.8,
+        original_language: "en",
+        genre_ids: [35, 18]
+    },
+    {
+        _id: "238",
+        title: "The Godfather",
+        overview: "Spanning the years 1945 to 1955, a chronicle of the fictional Italian-American Corleone crime family.",
+        poster_path: "/3bhkrj58Vtu7enYsRolD1fZdja1.jpg",
+        backdrop_path: "/tmU7GeKVybMWFButWEGl2M4GeiP.jpg",
+        release_date: "1972-03-14",
+        vote_average: 9.2,
+        original_language: "en",
+        genre_ids: [18, 80]
+    },
+    {
+        _id: "680",
+        title: "Pulp Fiction",
+        overview: "A burger-loving hit man, his philosophical partner, a drug-addled gangster's moll and a washed-up boxer.",
+        poster_path: "/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
+        backdrop_path: "/suaEOtk1N1sgg2QM528GluxMcOr.jpg",
+        release_date: "1994-10-14",
+        vote_average: 8.9,
+        original_language: "en",
+        genre_ids: [53, 80]
+    },
+    {
+        _id: "155",
+        title: "The Dark Knight",
+        overview: "Batman raises the stakes in his war on crime.",
+        poster_path: "/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+        backdrop_path: "/hkBaDkMWbLaf8B1lsWsKX7Ew3Xq.jpg",
+        release_date: "2008-07-18",
+        vote_average: 9.0,
+        original_language: "en",
+        genre_ids: [18, 28, 80]
+    }
+];
+
+const getCachedMovieData = (movieId) => {
+    const cached = movieCache.get(movieId);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+        return cached.data;
+    }
+    return null;
+};
+
+const setCachedMovieData = (movieId, data) => {
+    movieCache.set(movieId, {
+        data,
+        timestamp: Date.now()
+    });
+};
+
+// Add global axios interceptor for better error handling
+axios.interceptors.response.use(
+    response => response,
+    error => {
+        if (error.code === 'ECONNRESET' || error.code === 'ENOTFOUND' || error.code === 'ETIMEDOUT') {
+            console.log('Network error occurred:', error.code);
+            // Return a custom error response instead of throwing
+            return Promise.reject({
+                message: `Network error: ${error.code}`,
+                isNetworkError: true
+            });
+        }
+        return Promise.reject(error);
+    }
+);
+
+// Simple rate limiting for TMDB API calls
+const apiCallTracker = new Map();
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const MAX_CALLS_PER_WINDOW = 30; // Increased from 10 to 30
+
+const checkRateLimit = (endpoint) => {
+    const now = Date.now();
+    const windowStart = now - RATE_LIMIT_WINDOW;
+    
+    if (!apiCallTracker.has(endpoint)) {
+        apiCallTracker.set(endpoint, []);
+    }
+    
+    const calls = apiCallTracker.get(endpoint);
+    // Remove old calls outside the window
+    const recentCalls = calls.filter(timestamp => timestamp > windowStart);
+    apiCallTracker.set(endpoint, recentCalls);
+    
+    if (recentCalls.length >= MAX_CALLS_PER_WINDOW) {
+        // Instead of throwing error, wait a bit and retry
+        console.log('Rate limit approaching, waiting...');
+        return false;
+    }
+    
+    recentCalls.push(now);
+    return true;
+};
 
 // API to get now playing movies from TMDB API
 export const getNowPlayingMovies = async (req, res)=>{
     try {
-        // Get all shows from database and populate movie details
-        const shows = await Show.find({ showDateTime: { $gte: new Date() } })
-            .populate('movie')
-            .sort({ showDateTime: 1 });
-
-        // Get unique movies from shows
-        const uniqueMovies = [];
-        const seenMovieIds = new Set();
+        console.log('=== GET NOW PLAYING MOVIES ===');
+        console.log('TMDB API Key available:', !!process.env.TMDB_API_KEY);
         
-        shows.forEach(show => {
-            if (show.movie && !seenMovieIds.has(show.movie._id.toString())) {
-                seenMovieIds.add(show.movie._id.toString());
-                uniqueMovies.push(show.movie);
+        if (!process.env.TMDB_API_KEY) {
+            console.error('TMDB API Key is missing');
+            return res.json({success: false, message: 'TMDB API Key is not configured'});
+        }
+
+        // Fetch currently showing movies from TMDB API
+        const fetchWithRetry = async (url, retries = 3) => {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    // Check rate limit before making API call
+                    if (!checkRateLimit('tmdb-api')) {
+                        console.log('Rate limit hit, waiting 2 seconds...');
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        continue;
+                    }
+                    
+                    return await axios.get(url, {
+                        headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
+                        timeout: 15000 // Increased timeout
+                    });
+                } catch (error) {
+                    console.log(`TMDB API call failed (${retries - i} retries left):`, error.message);
+                    if (i === retries - 1) throw error;
+                    // Wait longer between retries
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                }
+            }
+        };
+
+        // Get currently showing movies from TMDB
+        const nowPlayingResponse = await fetchWithRetry('https://api.themoviedb.org/3/movie/now_playing');
+        const nowPlayingMovies = nowPlayingResponse.data.results;
+
+        console.log('Fetched now playing movies from TMDB:', nowPlayingMovies.length);
+
+        // Also get upcoming movies for more options
+        const upcomingResponse = await fetchWithRetry('https://api.themoviedb.org/3/movie/upcoming');
+        const upcomingMovies = upcomingResponse.data.results;
+
+        console.log('Fetched upcoming movies from TMDB:', upcomingMovies.length);
+
+        // Combine and deduplicate movies
+        const allMovies = [...nowPlayingMovies, ...upcomingMovies];
+        const uniqueMovies = [];
+        const seenIds = new Set();
+
+        allMovies.forEach(movie => {
+            if (!seenIds.has(movie.id.toString())) {
+                seenIds.add(movie.id.toString());
+                const movieData = {
+                    _id: movie.id.toString(),
+                    title: movie.title,
+                    overview: movie.overview,
+                    poster_path: movie.poster_path,
+                    backdrop_path: movie.backdrop_path,
+                    release_date: movie.release_date,
+                    vote_average: movie.vote_average,
+                    original_language: movie.original_language,
+                    genre_ids: movie.genre_ids
+                };
+                uniqueMovies.push(movieData);
+                // Cache the movie data
+                setCachedMovieData(movie.id.toString(), movieData);
             }
         });
 
-        console.log('Found movies with shows:', uniqueMovies.length);
-        res.json({success: true, movies: uniqueMovies})
+        console.log('Total unique movies found:', uniqueMovies.length);
+        res.json({success: true, movies: uniqueMovies});
+        
     } catch (error) {
         console.error('Error fetching now playing movies:', error);
-        res.json({success: false, message: error.message})
+        // Try to return cached data as fallback
+        const cachedMovies = [];
+        for (const [movieId, cached] of movieCache.entries()) {
+            if (Date.now() - cached.timestamp < CACHE_DURATION) {
+                cachedMovies.push(cached.data);
+            }
+        }
+        
+        if (cachedMovies.length > 0) {
+            console.log('Returning cached movie data as fallback:', cachedMovies.length);
+            res.json({success: true, movies: cachedMovies});
+        } else {
+            console.log('No cached data available, using sample movies as fallback');
+            res.json({success: true, movies: sampleMovies});
+        }
     }
 }
 
@@ -57,22 +248,37 @@ export const addShow = async (req, res) =>{
             
             try {
                 console.log('Making TMDB API calls...');
-                // Fetch movie details, credits, and videos from TMDB API
+                // Fetch movie details, credits, and videos from TMDB API with retry logic
+                const fetchWithRetry = async (url, retries = 3) => {
+                    for (let i = 0; i < retries; i++) {
+                        try {
+                            // Check rate limit before making API call
+                            if (!checkRateLimit('tmdb-api')) {
+                                console.log('Rate limit hit, waiting 2 seconds...');
+                                await new Promise(resolve => setTimeout(resolve, 2000));
+                                continue;
+                            }
+                            
+                            console.log(`Making API call to: ${url}`);
+                            const response = await axios.get(url, {
+                                headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
+                                timeout: 15000 // Increased timeout
+                            });
+                            console.log(`API call successful for: ${url}`);
+                            return response;
+                        } catch (error) {
+                            console.log(`TMDB API call failed (${retries - i} retries left):`, error.message);
+                            if (i === retries - 1) throw error;
+                            // Wait longer between retries
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                        }
+                    }
+                };
+
                 const [movieDetailsResponse, movieCreditsResponse, movieVideosResponse] = await Promise.all([
-                    axios.get(`https://api.themoviedb.org/3/movie/${movieId}`, {
-                        headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
-                        timeout: 10000
-                    }),
-
-                    axios.get(`https://api.themoviedb.org/3/movie/${movieId}/credits`, {
-                        headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
-                        timeout: 10000
-                    }),
-
-                    axios.get(`https://api.themoviedb.org/3/movie/${movieId}/videos`, {
-                        headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
-                        timeout: 10000
-                    })
+                    fetchWithRetry(`https://api.themoviedb.org/3/movie/${movieId}`),
+                    fetchWithRetry(`https://api.themoviedb.org/3/movie/${movieId}/credits`),
+                    fetchWithRetry(`https://api.themoviedb.org/3/movie/${movieId}/videos`)
                 ]);
 
                 console.log('TMDB API calls successful');
@@ -81,6 +287,11 @@ export const addShow = async (req, res) =>{
                 const movieVideosData = movieVideosResponse.data;
                 
                 console.log('TMDB API responses received');
+                console.log('Movie API data:', {
+                    title: movieApiData.title,
+                    id: movieApiData.id,
+                    overview: movieApiData.overview?.substring(0, 100) + '...'
+                });
 
                 // Get the first official trailer or teaser
                 const trailer = movieVideosData.results.find(video => 
@@ -92,6 +303,10 @@ export const addShow = async (req, res) =>{
                     video.site === 'YouTube'
                 );
 
+                console.log('Found trailer:', trailer);
+                console.log('Trailer type:', typeof trailer);
+                console.log('Trailer structure:', JSON.stringify(trailer, null, 2));
+                
                  const movieDetails = {
                     _id: movieId.toString(),
                     title: movieApiData.title,
@@ -106,21 +321,54 @@ export const addShow = async (req, res) =>{
                     vote_average: movieApiData.vote_average,
                     runtime: movieApiData.runtime,
                     trailer: trailer ? {
-                        key: trailer.key,
-                        name: trailer.name,
-                        site: trailer.site,
-                        type: trailer.type
+                        key: trailer.key || null,
+                        name: trailer.name || null,
+                        site: trailer.site || null,
+                        type: trailer.type || null
                     } : null
                  }
 
                  console.log('Creating movie in database...');
-                 // Add movie to the database
-                 movie = await Movie.create(movieDetails);
-                 console.log('Movie created successfully:', movie._id);
+                 console.log('Movie details to create:', JSON.stringify(movieDetails, null, 2));
+                 
+                 // Test with minimal movie data first
+                 try {
+                     const testMovie = await Movie.create({
+                         _id: movieId.toString(),
+                         title: movieApiData.title,
+                         overview: movieApiData.overview || "No overview available",
+                         poster_path: movieApiData.poster_path,
+                         release_date: movieApiData.release_date || "Unknown",
+                         vote_average: movieApiData.vote_average || 0
+                     });
+                     console.log('Test movie created successfully:', testMovie._id);
+                     movie = testMovie;
+                 } catch (testError) {
+                     console.error('Error creating test movie:', testError);
+                     console.error('Test error details:', testError.message);
+                     return res.json({success: false, message: 'Failed to create movie in database: ' + testError.message});
+                 }
             } catch (error) {
                 console.error('Error fetching from TMDB API:', error);
                 console.error('Error details:', error.response?.data || error.message);
-                return res.json({success: false, message: 'Failed to fetch movie data from TMDB API: ' + error.message});
+                console.error('Error status:', error.response?.status);
+                
+                // Try to create a basic movie with just the ID and title
+                try {
+                    console.log('TMDB API failed, creating basic movie...');
+                    movie = await Movie.create({
+                        _id: movieId.toString(),
+                        title: `Movie ${movieId}`,
+                        overview: "Movie details not available",
+                        poster_path: null,
+                        release_date: "Unknown",
+                        vote_average: 0
+                    });
+                    console.log('Basic movie created successfully:', movie._id);
+                } catch (basicError) {
+                    console.error('Error creating basic movie:', basicError);
+                    return res.json({success: false, message: 'Failed to create movie: ' + basicError.message});
+                }
             }
         }
 
@@ -139,12 +387,15 @@ export const addShow = async (req, res) =>{
                     return res.json({success: false, message: 'Invalid date format'});
                 }
                 
-                showsToCreate.push({
+                const showData = {
                     movie: movieId.toString(),
                     showDateTime: parsedDate,
                     showPrice,
                     occupiedSeats: {}
-                })
+                };
+                
+                console.log('Show data to create:', showData);
+                showsToCreate.push(showData);
             })
         });
 
@@ -165,6 +416,7 @@ export const addShow = async (req, res) =>{
             } catch (error) {
                 console.error('Error creating shows:', error);
                 console.error('Error details:', error.message);
+                console.error('Error stack:', error.stack);
                 return res.json({success: false, message: 'Failed to create shows in database: ' + error.message});
             }
         } else {
@@ -172,13 +424,31 @@ export const addShow = async (req, res) =>{
             return res.json({success: false, message: 'No valid shows to create'});
         }
 
-         //  Trigger Inngest event
-         await inngest.send({
-            name: "app/show.added",
-             data: {movieTitle: movie.title}
-         })
-
         console.log('=== ADD SHOW COMPLETED SUCCESSFULLY ===');
+        
+        // Send simple notification email (optional)
+        try {
+            const users = await User.find({}).limit(10); // Limit to first 10 users
+            for (const user of users) {
+                await sendEmail({
+                    to: user.email,
+                    subject: `🎬 New Show Added: ${movie.title}`,
+                    body: `<div style="font-family: Arial, sans-serif; padding: 20px;">
+                        <h2>Hi ${user.name},</h2>
+                        <p>We've just added a new show to our library:</p>
+                        <h3 style="color: #1E90FF;">"${movie.title}"</h3>
+                        <p>Visit our website to book your tickets!</p>
+                        <br/>
+                        <p>Thanks,<br/>FlashCheck Team</p>
+                    </div>`
+                });
+            }
+            console.log(`Sent notifications to ${users.length} users`);
+        } catch (error) {
+            console.log('Email notification failed:', error.message);
+            // Don't fail the request if email fails
+        }
+        
         res.json({success: true, message: 'Show Added successfully.'})
     } catch (error) {
         console.error('=== ADD SHOW ERROR ===');
@@ -191,8 +461,28 @@ export const addShow = async (req, res) =>{
 // API to get all shows from the database
 export const getShows = async (req, res) =>{
     try {
+        console.log('=== GET SHOWS REQUEST ===');
+        console.log('Request URL:', req.url);
+        console.log('Request method:', req.method);
+        console.log('Request headers:', req.headers);
         console.log('Fetching all shows...');
-        const shows = await Show.find({showDateTime: {$gte: new Date()}}).populate('movie').sort({ showDateTime: 1 });
+        
+        // Get shows from 30 days ago to 30 days in the future
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const thirtyDaysFromNow = new Date();
+        thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+        
+        console.log('Date range:', { from: thirtyDaysAgo, to: thirtyDaysFromNow });
+        
+        const shows = await Show.find({
+            showDateTime: { 
+                $gte: thirtyDaysAgo,
+                $lte: thirtyDaysFromNow
+            }
+        }).populate('movie').sort({ showDateTime: 1 });
+        
         console.log('Total shows found:', shows.length);
 
         // filter unique movies by _id
@@ -207,6 +497,7 @@ export const getShows = async (req, res) =>{
         });
 
         console.log('Unique movies with shows:', uniqueMovies.length);
+        console.log('=== GET SHOWS RESPONSE ===');
         res.json({success: true, shows: uniqueMovies})
     } catch (error) {
         console.error('Error fetching shows:', error);
@@ -229,7 +520,7 @@ export const getShow = async (req, res) =>{
             if(!dateTime[date]){
                 dateTime[date] = []
             }
-            dateTime[date].push({ time: show.showDateTime, showId: show._id })
+            dateTime[date].push({ time: show.showDateTime, showId: show._id.toString() })
         })
 
         res.json({success: true, movie, dateTime})
@@ -246,34 +537,70 @@ export const getMovieTrailer = async (req, res) => {
         console.log('Fetching trailer for movie ID:', movieId);
         console.log('TMDB API Key available:', !!process.env.TMDB_API_KEY);
         
-        // Fetch movie videos from TMDB API
-        const { data } = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}/videos`, {
-            headers: { Authorization: `Bearer ${process.env.TMDB_API_KEY}` }
-        });
+        if (!process.env.TMDB_API_KEY) {
+            return res.json({ success: false, message: 'TMDB API Key not configured' });
+        }
 
-        console.log('TMDB API response:', data);
-        console.log('Available videos:', data.results?.length || 0);
+        // Add retry logic for network issues
+        let retries = 3;
+        let lastError;
 
-        // Get the first official trailer or teaser
-        const trailer = data.results.find(video => 
-            (video.type === 'Trailer' || video.type === 'Teaser') && 
-            video.site === 'YouTube' &&
-            video.official === true
-        ) || data.results.find(video => 
-            (video.type === 'Trailer' || video.type === 'Teaser') && 
-            video.site === 'YouTube'
-        );
+        while (retries > 0) {
+            try {
+                // Check rate limit before making API call
+                if (!checkRateLimit('tmdb-api')) {
+                    console.log('Rate limit hit, waiting 2 seconds...');
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    continue;
+                }
+                
+                // Fetch movie videos from TMDB API with timeout
+                const { data } = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}/videos`, {
+                    headers: { Authorization: `Bearer ${process.env.TMDB_API_KEY}` },
+                    timeout: 15000 // Increased timeout
+                });
 
-        console.log('Found trailer:', trailer);
+                console.log('TMDB API response:', data);
+                console.log('Available videos:', data.results?.length || 0);
 
-        res.json({ 
-            success: true, 
-            trailer: trailer ? {
-                key: trailer.key,
-                name: trailer.name,
-                site: trailer.site,
-                type: trailer.type
-            } : null
+                // Get the first official trailer or teaser
+                const trailer = data.results.find(video => 
+                    (video.type === 'Trailer' || video.type === 'Teaser') && 
+                    video.site === 'YouTube' &&
+                    video.official === true
+                ) || data.results.find(video => 
+                    (video.type === 'Trailer' || video.type === 'Teaser') && 
+                    video.site === 'YouTube'
+                );
+
+                console.log('Found trailer:', trailer);
+
+                return res.json({ 
+                    success: true, 
+                    trailer: trailer ? {
+                        key: trailer.key,
+                        name: trailer.name,
+                        site: trailer.site,
+                        type: trailer.type
+                    } : null
+                });
+            } catch (error) {
+                lastError = error;
+                console.log(`TMDB API call failed (${retries} retries left):`, error.message);
+                retries--;
+                
+                if (retries > 0) {
+                    // Wait before retrying
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+        }
+
+        // If all retries failed
+        console.error('All TMDB API retries failed:', lastError);
+        return res.json({ 
+            success: false, 
+            message: 'Failed to fetch trailer after multiple attempts' 
         });
     } catch (error) {
         console.error('Error in getMovieTrailer:', error);

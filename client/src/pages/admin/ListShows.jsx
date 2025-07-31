@@ -69,45 +69,6 @@ const ListShows = () => {
       <div className="list-shows-container">
         <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2>Shows ({adminShows.length})</h2>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button 
-              onClick={getAllShows}
-              style={{ 
-                padding: '0.5rem 1rem', 
-                backgroundColor: '#1E90FF', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '0.375rem',
-                cursor: 'pointer'
-              }}
-            >
-              Refresh Shows
-            </button>
-            <button 
-              onClick={async () => {
-                try {
-                  console.log('=== CHECKING ALL SHOWS (NO DATE FILTER) ===');
-                  const token = await getToken();
-                  const { data } = await axios.get("/api/admin/all-shows", {
-                    headers: { Authorization: `Bearer ${token}` }
-                  });
-                  console.log('All shows (no date filter):', data);
-                } catch (error) {
-                  console.error('Error checking all shows:', error);
-                }
-              }}
-              style={{ 
-                padding: '0.5rem 1rem', 
-                backgroundColor: '#10B981', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '0.375rem',
-                cursor: 'pointer'
-              }}
-            >
-              Debug Shows
-            </button>
-          </div>
         </div>
          <table className="list-shows-table">
              <thead className="list-shows-thead">
