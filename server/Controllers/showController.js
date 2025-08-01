@@ -498,32 +498,69 @@ export const getShows = async (req, res) =>{
         
         console.log('Date range:', { from: thirtyDaysAgo, to: thirtyDaysFromNow });
         
-        const shows = await Show.find({
-            showDateTime: { 
-                $gte: thirtyDaysAgo,
-                $lte: thirtyDaysFromNow
-            }
-        }).populate('movie').sort({ showDateTime: 1 });
+        // Add error handling for the database query
+        let shows;
+        try {
+            shows = await Show.find({
+                showDateTime: { 
+                    $gte: thirtyDaysAgo,
+                    $lte: thirtyDaysFromNow
+                }
+            }).populate('movie').sort({ showDateTime: 1 });
+        } catch (dbError) {
+            console.error('Database query error:', dbError);
+            return res.json({ success: false, message: 'Failed to fetch shows from database' });
+        }
         
         console.log('Total shows found:', shows.length);
 
-        // filter unique movies by _id
+        // filter unique movies by _id with proper validation
         const uniqueMovies = [];
         const seenMovieIds = new Set();
         
         shows.forEach(show => {
-            if (show.movie && !seenMovieIds.has(show.movie._id.toString())) {
-                seenMovieIds.add(show.movie._id.toString());
-                uniqueMovies.push(show.movie);
+            try {
+                // Validate that show and movie exist and have required fields
+                if (show && 
+                    show.movie && 
+                    show.movie._id && 
+                    typeof show.movie._id.toString === 'function' &&
+                    !seenMovieIds.has(show.movie._id.toString())) {
+                    
+                    seenMovieIds.add(show.movie._id.toString());
+                    
+                    // Validate movie has required fields before adding
+                    if (show.movie.title && show.movie.overview) {
+                        uniqueMovies.push(show.movie);
+                    } else {
+                        console.log('Skipping movie with missing required fields:', show.movie._id);
+                    }
+                } else {
+                    console.log('Skipping invalid show or movie:', show?._id, show?.movie?._id);
+                }
+            } catch (validationError) {
+                console.error('Error validating show/movie:', validationError);
+                // Continue processing other shows
             }
         });
 
         console.log('Unique movies with shows:', uniqueMovies.length);
         console.log('=== GET SHOWS RESPONSE ===');
-        res.json({success: true, shows: uniqueMovies})
+        
+        // Return empty array if no valid movies found
+        res.json({
+            success: true, 
+            shows: uniqueMovies,
+            totalShows: shows.length,
+            validMovies: uniqueMovies.length
+        });
     } catch (error) {
         console.error('Error fetching shows:', error);
-        res.json({ success: false, message: error.message });
+        res.json({ 
+            success: false, 
+            message: error.message,
+            error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 }
 
@@ -531,24 +568,74 @@ export const getShows = async (req, res) =>{
 export const getShow = async (req, res) =>{
     try {
         const {movieId} = req.params;
-        // get all upcoming shows for the movie
-        const shows = await Show.find({movie: movieId, showDateTime: { $gte: new Date() }})
+        
+        if (!movieId) {
+            return res.json({ success: false, message: 'Movie ID is required' });
+        }
+        
+        console.log('Fetching shows for movie ID:', movieId);
+        
+        // get all upcoming shows for the movie with error handling
+        let shows;
+        try {
+            shows = await Show.find({
+                movie: movieId, 
+                showDateTime: { $gte: new Date() }
+            });
+        } catch (dbError) {
+            console.error('Database query error:', dbError);
+            return res.json({ success: false, message: 'Failed to fetch shows from database' });
+        }
 
-        const movie = await Movie.findById(movieId);
+        console.log('Found shows:', shows.length);
+
+        // Get movie with error handling
+        let movie;
+        try {
+            movie = await Movie.findById(movieId);
+            if (!movie) {
+                return res.json({ success: false, message: 'Movie not found' });
+            }
+        } catch (movieError) {
+            console.error('Error fetching movie:', movieError);
+            return res.json({ success: false, message: 'Failed to fetch movie details' });
+        }
+
         const dateTime = {};
 
         shows.forEach((show) => {
-            const date = show.showDateTime.toISOString().split("T")[0];
-            if(!dateTime[date]){
-                dateTime[date] = []
+            try {
+                if (show && show.showDateTime) {
+                    const date = show.showDateTime.toISOString().split("T")[0];
+                    if (!dateTime[date]) {
+                        dateTime[date] = [];
+                    }
+                    dateTime[date].push({ 
+                        time: show.showDateTime, 
+                        showId: show._id.toString() 
+                    });
+                }
+            } catch (showError) {
+                console.error('Error processing show:', showError);
+                // Continue processing other shows
             }
-            dateTime[date].push({ time: show.showDateTime, showId: show._id.toString() })
-        })
+        });
 
-        res.json({success: true, movie, dateTime})
+        console.log('Processed dateTime object:', Object.keys(dateTime).length, 'dates');
+        
+        res.json({
+            success: true, 
+            movie, 
+            dateTime,
+            totalShows: shows.length
+        });
     } catch (error) {
-        console.error(error);
-        res.json({ success: false, message: error.message });
+        console.error('Error in getShow:', error);
+        res.json({ 
+            success: false, 
+            message: error.message,
+            error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 }
 
