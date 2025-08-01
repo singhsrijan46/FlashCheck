@@ -1,3 +1,4 @@
+// VERSION: 4.0 - STRIPE COMPLETELY REMOVED - FORCE CACHE REFRESH
 import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
@@ -7,6 +8,10 @@ import bookingRouter from './routes/bookingRoutes.js';
 import adminRouter from './routes/adminRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import authRouter from './routes/authRoutes.js';
+
+// NO STRIPE IMPORTS - COMPLETELY REMOVED
+// NO STRIPE WEBHOOKS - COMPLETELY REMOVED
+// NO PAYMENT GATEWAY - COMPLETELY REMOVED
 
 const app = express();
 const port = process.env.PORT || 8080;
