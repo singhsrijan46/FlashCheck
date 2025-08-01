@@ -34,7 +34,7 @@ app.use(cors(corsOptions));
 app.use(express.json())
 
 // Stripe Webhooks Route (must come before other middleware)
-app.use('/api/stripe', express.raw({type: 'application/json'}), stripeWebhooks)
+app.post('/api/stripe/webhooks', express.raw({type: 'application/json'}), stripeWebhooks)
 
 // API Routes
 app.get('/', (req, res)=> res.send('Server is Live!'))
