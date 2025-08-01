@@ -7,6 +7,7 @@ import bookingRouter from './routes/bookingRoutes.js';
 import adminRouter from './routes/adminRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import authRouter from './routes/authRoutes.js';
+import { stripeWebhooks } from './controllers/stripeWebhooks.js';
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -31,6 +32,9 @@ app.use(cors(corsOptions));
 
 // Middleware
 app.use(express.json())
+
+// Stripe Webhooks Route
+app.post('/api/stripe/webhooks', express.raw({type: 'application/json'}), stripeWebhooks)
 
 // API Routes
 app.get('/', (req, res)=> res.send('Server is Live!'))
