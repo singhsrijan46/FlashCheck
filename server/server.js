@@ -29,12 +29,20 @@ try {
     // Don't exit, let the app continue but log the error
 }
 
+// CORS configuration
+const corsOptions = {
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+
 // Stripe Webhooks Route
 app.use('/api/stripe', express.raw({type: 'application/json'}), stripeWebhooks)
 
 // Middleware
 app.use(express.json())
-app.use(cors())
 
 // API Routes
 app.get('/', (req, res)=> res.send('Server is Live!'))
@@ -47,7 +55,8 @@ app.get('/health', (req, res) => {
         env: {
             hasMongoUri: !!process.env.MONGODB_URI,
             hasJwtSecret: !!process.env.JWT_SECRET,
-            hasTmdbKey: !!process.env.TMDB_API_KEY
+            hasTmdbKey: !!process.env.TMDB_API_KEY,
+            frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000'
         }
     });
 });
