@@ -5,8 +5,7 @@ const bookingSchema = new mongoose.Schema({
     show: {type: String, required: true, ref: 'Show'},
     amount: {type: Number, required: true},
     bookedSeats: {type: Array, required: true},
-    isPaid: {type: Boolean,  default:false},
-    paymentLink: {type: String},
+    isPaid: {type: Boolean, default: true}, // Always true since no payment gateway
 },{timestamps: true })
 
 const Booking = mongoose.model("Booking", bookingSchema);

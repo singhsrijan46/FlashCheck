@@ -32,10 +32,6 @@ JWT_SECRET=your_jwt_secret_key_here
 # TMDB API Configuration
 TMDB_API_KEY=your_tmdb_api_key_here
 
-# Stripe Configuration (Optional)
-STRIPE_SECRET_KEY=your_stripe_secret_key_here
-STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret_here
-
 # Email Configuration (Optional)
 SMTP_USER=your_smtp_username
 SMTP_PASS=your_smtp_password
@@ -95,8 +91,6 @@ After deploying both frontend and backend:
 - `MONGODB_URI`: MongoDB connection string
 - `JWT_SECRET`: Secret key for JWT tokens
 - `TMDB_API_KEY`: TMDB API key for movie data
-- `STRIPE_SECRET_KEY`: Stripe payment integration
-- `STRIPE_WEBHOOK_SECRET`: Stripe webhook verification
 - `SMTP_USER/PASS`: Email service credentials
 - `SENDER_EMAIL`: Email address for notifications
 - `FRONTEND_URL`: Frontend URL for CORS

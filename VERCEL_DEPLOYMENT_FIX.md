@@ -18,8 +18,6 @@ TMDB_API_KEY=eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwYTM4M2VmMmNhYzEzOGExM2EyZTM2NTZiYj
 **Optional Variables:**
 ```
 FRONTEND_URL=http://localhost:3000
-STRIPE_SECRET_KEY=your_stripe_key
-STRIPE_WEBHOOK_SECRET=your_webhook_secret
 SMTP_USER=your_smtp_user
 SMTP_PASS=your_smtp_pass
 SENDER_EMAIL=your_email@domain.com
@@ -46,6 +44,7 @@ Visit these URLs to test:
    - Serverless-friendly database connection
    - Proper middleware order
 3. **Environment Variable Validation**: Added checks for required variables
+4. **Removed all Stripe/payment gateway code**: Simplified the application
 
 ### **Common Issues & Solutions:**
 
