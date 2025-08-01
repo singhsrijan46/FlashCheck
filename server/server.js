@@ -21,14 +21,6 @@ if (missingEnvVars.length > 0) {
     console.error('Please set these environment variables in your Vercel dashboard');
 }
 
-// Connect to database with error handling
-try {
-    await connectDB();
-} catch (error) {
-    console.error('Database connection failed:', error.message);
-    // Don't exit, let the app continue but log the error
-}
-
 // CORS configuration
 const corsOptions = {
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
@@ -38,11 +30,11 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Stripe Webhooks Route
-app.use('/api/stripe', express.raw({type: 'application/json'}), stripeWebhooks)
-
 // Middleware
 app.use(express.json())
+
+// Stripe Webhooks Route (must come before other middleware)
+app.use('/api/stripe', express.raw({type: 'application/json'}), stripeWebhooks)
 
 // API Routes
 app.get('/', (req, res)=> res.send('Server is Live!'))
@@ -60,6 +52,20 @@ app.get('/health', (req, res) => {
         }
     });
 });
+
+// Connect to database with error handling
+const initializeServer = async () => {
+    try {
+        await connectDB();
+        console.log('Database connected successfully');
+    } catch (error) {
+        console.error('Database connection failed:', error.message);
+        // Don't exit, let the app continue but log the error
+    }
+};
+
+// Initialize database connection
+initializeServer();
 
 app.use('/api/auth', authRouter)
 app.use('/api/show', showRouter)
@@ -82,5 +88,10 @@ app.use('*', (req, res) => {
     res.status(404).json({ success: false, message: 'Route not found' });
 });
 
-app.listen(port, ()=> console.log(`Server listening at http://localhost:${port}`));
+// Only start server if not in serverless environment
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+    app.listen(port, ()=> console.log(`Server listening at http://localhost:${port}`));
+}
+
+export default app;
 
