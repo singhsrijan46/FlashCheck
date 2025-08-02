@@ -5,7 +5,12 @@
       "src": "server.js",
       "use": "@vercel/node",
       "config": {
-        "maxDuration": 30 
+        "includeFiles": [
+          "controllers/**",
+          "middleware/**",
+          "routes/**"
+        ],
+        "maxDuration": 30
       }
     }
   ],
