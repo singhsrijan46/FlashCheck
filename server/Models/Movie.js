@@ -1,9 +1,9 @@
-// VERSION: 3.0 - Aggressive Movie Validation Fix
 import mongoose from "mongoose";
 
 const movieSchema = new mongoose.Schema(
     {
         _id: {type: String, required: true},
+        tmdbId: {type: String, default: null}, // Add this field to match the database index
         title: {type: String, required: true},
         overview: {type: String, required: true},
         poster_path: {type: String, default: "/default-poster.jpg"},
@@ -26,28 +26,24 @@ const movieSchema = new mongoose.Schema(
 
 // Pre-save hook to ensure required fields are always set
 movieSchema.pre('save', function(next) {
-    // Ensure required fields have default values
-    if (!this.poster_path) this.poster_path = "/default-poster.jpg";
-    if (!this.backdrop_path) this.backdrop_path = "/default-backdrop.jpg";
-    if (!this.runtime) this.runtime = 120;
-    if (!this.genres) this.genres = [];
-    if (!this.casts) this.casts = [];
-    if (!this.vote_average) this.vote_average = 0;
-    
-    next();
-});
-
-// Pre-validate hook to ensure fields exist
-movieSchema.pre('validate', function(next) {
-    // Set default values before validation
-    if (!this.poster_path) this.poster_path = "/default-poster.jpg";
-    if (!this.backdrop_path) this.backdrop_path = "/default-backdrop.jpg";
-    if (!this.runtime) this.runtime = 120;
-    if (!this.genres) this.genres = [];
-    if (!this.casts) this.casts = [];
-    if (!this.vote_average) this.vote_average = 0;
-    
-    next();
+    try {
+        // Set default values for required fields
+        if (!this.poster_path) this.poster_path = "/default-poster.jpg";
+        if (!this.backdrop_path) this.backdrop_path = "/default-backdrop.jpg";
+        if (!this.runtime) this.runtime = 120;
+        if (!this.genres) this.genres = [];
+        if (!this.casts) this.casts = [];
+        if (!this.vote_average) this.vote_average = 0;
+        
+        // Ensure tmdbId is set to prevent duplicate key errors
+        if (!this.tmdbId) {
+            this.tmdbId = this._id;
+        }
+        
+        next();
+    } catch (error) {
+        next(error);
+    }
 });
 
 const Movie = mongoose.model('Movie', movieSchema);

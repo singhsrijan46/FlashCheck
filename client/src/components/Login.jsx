@@ -30,24 +30,15 @@ const Login = ({ state }) => {
         setLoading(true);
 
         try {
-            console.log('Form submitted with data:', formData);
-            console.log('Current location:', location.pathname);
-            console.log('Location state:', location.state);
-            console.log('Component state:', state);
-            console.log('From path:', from);
-            
             let result;
             if (isLogin) {
                 result = await login(formData.email, formData.password, () => {
-                    console.log('Login successful, navigating to:', from);
                     toast.success('Login successful!');
                     navigate(from, { replace: true });
                 });
             } else {
                 result = await register(formData.name, formData.email, formData.password);
             }
-
-            console.log('Auth result:', result);
             if (result.success) {
                 if (!isLogin) {
                     // After successful registration, switch to login mode

@@ -20,8 +20,44 @@ const ShowtimeSelection = () => {
         setLoading(true);
         const { data } = await axios.get(`/api/show/${id}`);
         if (data.success) {
-          setCurrentMovie(data.movie);
-          setShowData(data.dateTime);
+          setCurrentMovie(data.show.movie);
+          // Get all shows for this movie to display showtimes
+          const showsResponse = await axios.get(`/api/show/all`);
+          if (showsResponse.data.success) {
+            console.log('All shows:', showsResponse.data.shows);
+            console.log('Looking for movie ID:', id);
+            
+            // Try different ways to match the movie ID
+            const movieShows = showsResponse.data.shows.filter(show => {
+              const showMovieId = show.movie;
+              const requestedId = id;
+              
+              console.log('Comparing:', { 
+                showMovieId, 
+                requestedId, 
+                showMovieIdType: typeof showMovieId,
+                requestedIdType: typeof requestedId,
+                isObject: typeof showMovieId === 'object'
+              });
+              
+              // If show.movie is an object (populated), check its _id
+              if (typeof showMovieId === 'object' && showMovieId._id) {
+                return showMovieId._id === requestedId || 
+                       showMovieId._id === requestedId.toString() ||
+                       showMovieId._id.toString() === requestedId ||
+                       showMovieId._id.toString() === requestedId.toString();
+              }
+              
+              // If show.movie is a string (movie ID), compare directly
+              return showMovieId === requestedId || 
+                     showMovieId === requestedId.toString() ||
+                     showMovieId.toString() === requestedId ||
+                     showMovieId.toString() === requestedId.toString();
+            });
+            
+            console.log('Filtered shows for movie:', movieShows);
+            setShowData(movieShows);
+          }
         }
       } catch (error) {
         console.error('Error fetching show data:', error);
@@ -84,6 +120,26 @@ const ShowtimeSelection = () => {
     }
   };
 
+  // Helper function to check if a date has shows
+  const hasShowsForDate = (date) => {
+    if (!showData || !Array.isArray(showData)) return false;
+    const dateStr = date.toISOString().split('T')[0];
+    return showData.some(show => {
+      const showDate = new Date(show.showDateTime).toISOString().split('T')[0];
+      return showDate === dateStr;
+    });
+  };
+
+  // Helper function to get shows for a specific date
+  const getShowsForDate = (date) => {
+    if (!showData || !Array.isArray(showData)) return [];
+    const dateStr = date.toISOString().split('T')[0];
+    return showData.filter(show => {
+      const showDate = new Date(show.showDateTime).toISOString().split('T')[0];
+      return showDate === dateStr;
+    });
+  };
+
   if (loading) {
     return <div className="showtime-loading">Loading...</div>;
   }
@@ -117,7 +173,7 @@ const ShowtimeSelection = () => {
           {dates.map((date, index) => {
             const formatted = formatDate(date);
             const dateStr = date.toISOString().split('T')[0];
-            const hasShows = showData[dateStr] && showData[dateStr].length > 0;
+            const hasShows = hasShowsForDate(date);
             const isSelected = selectedDate && 
               selectedDate.getDate() === date.getDate() && 
               selectedDate.getMonth() === date.getMonth();
@@ -146,17 +202,17 @@ const ShowtimeSelection = () => {
             <div className="showtime-time-grid">
               {(() => {
                 const dateStr = selectedDate.toISOString().split('T')[0];
-                const timeSlots = showData[dateStr] || [];
+                const timeSlots = getShowsForDate(selectedDate);
                 
                 return timeSlots.map((slot, index) => {
-                  const isSelected = selectedTime && selectedTime.showId === slot.showId;
+                  const isSelected = selectedTime && selectedTime._id === slot._id;
                   return (
                     <button
                       key={index}
                       className={`showtime-time-btn ${isSelected ? 'selected' : ''} available`}
                       onClick={() => handleTimeSelect(slot)}
                     >
-                      <span className="showtime-time">{formatTime(slot.time)}</span>
+                      <span className="showtime-time">{formatTime(slot.showDateTime)}</span>
                       <span className="showtime-format">2D</span>
                     </button>
                   );

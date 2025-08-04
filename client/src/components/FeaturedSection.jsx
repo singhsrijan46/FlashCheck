@@ -22,9 +22,16 @@ const FeaturedSection = () => {
       </div>
 
       <div className='featured-movies'>
-        {shows.slice(0, 4).map((show)=>(
-            <MovieCard key={show._id} movie={show}/>
-        ))}
+        {shows.length > 0 ? (
+          shows.slice(0, 4).map((show)=>(
+            <MovieCard key={show._id} movie={show.movie || show}/>
+          ))
+        ) : (
+          <div className='featured-no-movies'>
+            <p>No movies available at the moment.</p>
+            <p>Please check back later or contact an administrator to add shows.</p>
+          </div>
+        )}
       </div>
 
     </div>

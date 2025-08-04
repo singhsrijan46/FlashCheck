@@ -9,6 +9,14 @@
   padding-top: 5rem;
 }
 
+.seat-layout-container {
+  display: flex;
+  gap: 2rem;
+  max-width: 1400px;
+  width: 100%;
+  padding: 0 2rem;
+}
+
 .seat-layout-main,
 .seat-layout-main-large {
   background: none;
@@ -16,7 +24,7 @@
   border-radius: 0;
   box-shadow: none;
   padding: 0;
-  margin: 0 auto;
+  margin: 0;
   width: auto;
   max-width: none;
   min-width: 0;
@@ -25,6 +33,163 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  flex: 1;
+}
+
+/* Summary Section */
+.seat-layout-summary {
+  width: 320px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 12px;
+  padding: 1.5rem;
+  height: fit-content;
+  position: sticky;
+  top: 2rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.seat-layout-summary-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.seat-layout-summary-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 0.75rem;
+}
+
+.seat-layout-movie-info {
+  text-align: center;
+}
+
+.seat-layout-movie-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 0.5rem 0;
+}
+
+.seat-layout-movie-date {
+  font-size: 0.9rem;
+  color: #a855f7;
+  margin: 0;
+}
+
+.seat-layout-seats-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.seat-layout-seats-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+.seat-layout-no-seats {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  text-align: center;
+  margin: 0;
+}
+
+.seat-layout-seats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.seat-layout-seat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.seat-layout-seat-id {
+  font-weight: 600;
+  color: #f59e0b;
+}
+
+.seat-layout-seat-price {
+  color: #10b981;
+  font-weight: 500;
+}
+
+.seat-layout-price-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.seat-layout-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.seat-layout-price-row:first-child {
+  color: #9ca3af;
+}
+
+.seat-layout-total-price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.seat-layout-checkout-btn {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.seat-layout-checkout-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+}
+
+.seat-layout-checkout-btn:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.seat-layout-checkout-icon {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .seat-layout-title {
@@ -94,6 +259,13 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   opacity: 0.7;
+}
+
+.seat-layout-section-price {
+  color: #1E90FF;
+  font-weight: 600;
+  opacity: 1;
+  margin-left: 0.5rem;
 }
 
 .seat-layout-rows {
@@ -217,43 +389,21 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Checkout Button */
-.seat-layout-checkout-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 2rem;
-  padding: 0.875rem 2rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: white;
-  background: linear-gradient(135deg, #8b5cf6, #a855f7);
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-  margin: 2rem auto 0 auto;
-}
-
-.seat-layout-checkout-btn:hover {
-  background: linear-gradient(135deg, #a855f7, #c084fc);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
-}
-
-.seat-layout-checkout-btn:active {
-  transform: translateY(0) scale(0.98);
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
-}
-
-.seat-layout-checkout-icon {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
 /* Responsive Design */
 @media (max-width: 1200px) {
+  .seat-layout-container {
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 0 1rem;
+  }
+  
+  .seat-layout-summary {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    position: static;
+  }
+  
   .seat-layout-main,
   .seat-layout-main-large,
   .seat-layout-theater,
@@ -266,6 +416,10 @@
 }
 
 @media (max-width: 900px) {
+  .seat-layout-container {
+    padding: 0 0.5rem;
+  }
+  
   .seat-layout-main,
   .seat-layout-main-large,
   .seat-layout-theater,
@@ -278,53 +432,67 @@
 }
 
 @media (max-width: 768px) {
+  .seat-layout-container {
+    padding: 0 0.25rem;
+  }
+  
   .seat-layout-main,
   .seat-layout-main-large {
     padding: 0;
-    margin: 0 auto;
+    margin: 0;
+    width: 100%;
     max-width: none;
     min-width: 0;
-    width: auto;
   }
+
   .seat-layout-title {
     font-size: 1.5rem;
     margin-bottom: 1.5rem;
-    margin-top: 1rem;
   }
+
   .seat-layout-screen {
     width: 90vw;
+    max-width: 30rem;
   }
+
   .seat-layout-theater,
-  .seat-layout-rows,
+  .seat-layout-rows {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    overflow-x: auto;
+  }
+
   .seat-layout-row {
     min-width: 0;
     max-width: none;
     width: auto;
   }
-  .seat-layout-row {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
+
   .seat-layout-row-number {
-    margin-right: 0;
-    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
   }
+
   .seat-layout-block {
-    justify-content: center;
+    min-width: 0;
+    max-width: none;
+    width: auto;
   }
+
   .seat-layout-aisle {
     width: 1.5rem;
     height: 1.5rem;
-    margin: 0.25rem;
   }
+
   .seat-layout-seat {
     width: 2rem;
     height: 2rem;
     font-size: 0.625rem;
   }
+
   .seat-layout-checkout-btn {
-    padding: 0.75rem 1.5rem;
-    font-size: 0.875rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
   }
 } 
 

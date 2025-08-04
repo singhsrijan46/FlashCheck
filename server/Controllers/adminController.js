@@ -1,28 +1,51 @@
-import Booking from "../models/Booking.js"
 import Show from "../models/Show.js";
-import User from "../models/User.js";
+import Booking from "../models/Booking.js";
 import Movie from "../models/Movie.js";
+import User from "../models/User.js";
+import axios from 'axios'; // Added axios import
 
-// API to check if user is admin
 export const isAdmin = async (req, res) =>{
-    res.json({success: true, isAdmin: true})
+    try {
+        res.json({success: true, message: "Admin verified"})
+    } catch (error) {
+        console.error(error);
+        res.json({success: false, message: error.message})
+    }
 }
 
-// API to get dashboard data
 export const getDashboardData = async (req, res) =>{
     try {
-        const bookings = await Booking.find({isPaid: true});
-        const activeShows = await Show.find({showDateTime: {$gte: new Date()}}).populate('movie');
-
+        const totalShows = await Show.countDocuments();
+        const totalBookings = await Booking.countDocuments();
+        const totalMovies = await Movie.countDocuments();
+        
+        // Get active shows (shows in the next 30 days)
+        const thirtyDaysFromNow = new Date();
+        thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+        
+        const activeShows = await Show.find({
+            showDateTime: { 
+                $gte: new Date(),
+                $lte: thirtyDaysFromNow
+            }
+        }).populate('movie').sort({ showDateTime: 1 }).limit(6);
+        
+        // Calculate total revenue from bookings
+        const bookings = await Booking.find({});
+        const totalRevenue = bookings.reduce((total, booking) => total + (booking.amount || 0), 0);
+        
+        // Get total users (you might need to add User model import if not already present)
         const totalUser = await User.countDocuments();
-
+        
         const dashboardData = {
-            totalBookings: bookings.length,
-            totalRevenue: bookings.reduce((acc, booking)=> acc + booking.amount, 0),
-            activeShows,
-            totalUser
-        }
-
+            totalShows,
+            totalBookings,
+            totalMovies,
+            totalRevenue,
+            totalUser,
+            activeShows
+        };
+        
         res.json({success: true, dashboardData})
     } catch (error) {
         console.error(error);
@@ -33,36 +56,13 @@ export const getDashboardData = async (req, res) =>{
 // API to get all shows
 export const getAllShows = async (req, res) =>{
     try {
-        console.log('=== GET ALL SHOWS START ===');
-        console.log('Fetching all shows for admin...');
-        
         const currentDate = new Date();
-        console.log('Current date:', currentDate);
         
-        // Get shows from 30 days ago to 30 days in the future
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         
         const thirtyDaysFromNow = new Date();
         thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-        
-        console.log('Date range:', { from: thirtyDaysAgo, to: thirtyDaysFromNow });
-        
-        // First, let's check ALL shows without date filter
-        const allShows = await Show.find({}).populate('movie').sort({ showDateTime: 1 });
-        console.log('Total shows in database (no date filter):', allShows.length);
-        
-        // Log all show dates for debugging
-        console.log('=== ALL SHOW DATES ===');
-        allShows.forEach((show, index) => {
-            console.log(`Show ${index + 1}:`, {
-                id: show._id,
-                movieTitle: show.movie?.title,
-                showDateTime: show.showDateTime,
-                isFuture: show.showDateTime > currentDate,
-                daysFromNow: Math.ceil((show.showDateTime - currentDate) / (1000 * 60 * 60 * 24))
-            });
-        });
         
         const shows = await Show.find({
             showDateTime: { 
@@ -71,104 +71,96 @@ export const getAllShows = async (req, res) =>{
             }
         }).populate('movie').sort({ showDateTime: 1 });
         
-        console.log('Found shows (with date filter):', shows.length);
-        console.log('Shows with movies:', shows.filter(s => s.movie).length);
-        
-        // Log each show for debugging
-        shows.forEach((show, index) => {
-            console.log(`Show ${index + 1}:`, {
-                id: show._id,
-                movieId: show.movie?._id,
-                movieTitle: show.movie?.title,
-                showDateTime: show.showDateTime,
-                showPrice: show.showPrice
-            });
-        });
-        
-        console.log('=== GET ALL SHOWS COMPLETED ===');
         res.json({success: true, shows})
     } catch (error) {
-        console.error('=== GET ALL SHOWS ERROR ===');
         console.error('Error fetching admin shows:', error);
         res.json({success: false, message: error.message})
     }
 }
 
-// DEBUG: Get all shows regardless of date
-export const getAllShowsDebug = async (req, res) => {
-  try {
-    const shows = await Show.find({}).populate('movie').sort({ showDateTime: 1 });
-    res.json({ success: true, shows });
-  } catch (error) {
-    res.json({ success: false, message: error.message });
-  }
-};
-
-// DEBUG: Create test shows with future dates
-export const createTestShows = async (req, res) => {
-  try {
-    console.log('=== CREATING TEST SHOWS ===');
-    
-    // Get existing movies
-    const movies = await Movie.find({}).limit(3);
-    console.log('Found movies:', movies.length);
-    
-    if (movies.length === 0) {
-      return res.json({ success: false, message: 'No movies found in database' });
-    }
-    
-    const testShows = [];
-    const now = new Date();
-    
-    // Create shows for the next 7 days
-    for (let i = 1; i <= 7; i++) {
-      const showDate = new Date(now.getTime() + (i * 24 * 60 * 60 * 1000)); // i days from now
-      
-      movies.forEach((movie, movieIndex) => {
-        // Create multiple shows per day
-        for (let j = 0; j < 3; j++) {
-          const showTime = new Date(showDate);
-          showTime.setHours(10 + (j * 4), 0, 0, 0); // 10 AM, 2 PM, 6 PM
-          
-          testShows.push({
-            movie: movie._id,
-            showDateTime: showTime,
-            showPrice: 12.99,
-            occupiedSeats: {}
-          });
-        }
-      });
-    }
-    
-    console.log('Creating', testShows.length, 'test shows...');
-    
-    // Clear existing shows first (optional)
-    // await Show.deleteMany({});
-    
-    const createdShows = await Show.insertMany(testShows);
-    console.log('Created', createdShows.length, 'test shows');
-    
-    res.json({ 
-      success: true, 
-      message: `Created ${createdShows.length} test shows`,
-      showsCreated: createdShows.length
-    });
-  } catch (error) {
-    console.error('Error creating test shows:', error);
-    res.json({ success: false, message: error.message });
-  }
-};
-
-// API to get all bookings
 export const getAllBookings = async (req, res) =>{
     try {
-        const bookings = await Booking.find({}).populate('user').populate({
-            path: "show",
-            populate: {path: "movie"}
-        }).sort({ createdAt: -1 })
-        res.json({success: true, bookings })
+        const bookings = await Booking.find({}).populate('user').populate('show').sort({ createdAt: -1 });
+        res.json({success: true, bookings})
     } catch (error) {
         console.error(error);
         res.json({success: false, message: error.message})
     }
 }
+
+// Function to update all existing movies with complete data
+export const updateAllMoviesWithCompleteData = async (req, res) => {
+    try {
+        if (!process.env.TMDB_API_KEY) {
+            return res.json({ success: false, message: 'TMDB API Key is not configured' });
+        }
+
+        const movies = await Movie.find({});
+        let updatedCount = 0;
+        let errorCount = 0;
+
+        for (const movie of movies) {
+            try {
+                const movieId = movie._id;
+                
+                const fetchWithRetry = async (url, retries = 3) => {
+                    for (let i = 0; i < retries; i++) {
+                        try {
+                            const response = await axios.get(url, {
+                                headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
+                                timeout: 15000
+                            });
+                            return response;
+                        } catch (error) {
+                            if (i === retries - 1) throw error;
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                        }
+                    }
+                };
+
+                const response = await fetchWithRetry(`https://api.themoviedb.org/3/movie/${movieId}`);
+                const apiData = response.data;
+                
+                const updatedMovieData = {
+                    title: apiData.title,
+                    overview: apiData.overview,
+                    poster_path: apiData.poster_path,
+                    backdrop_path: apiData.backdrop_path,
+                    release_date: apiData.release_date,
+                    vote_average: apiData.vote_average,
+                    original_language: apiData.original_language,
+                    genre_ids: apiData.genre_ids,
+                    runtime: apiData.runtime,
+                    status: apiData.status,
+                    tagline: apiData.tagline,
+                    vote_count: apiData.vote_count,
+                    popularity: apiData.popularity,
+                    adult: apiData.adult,
+                    video: apiData.video,
+                    original_title: apiData.original_title
+                };
+                
+                await Movie.findByIdAndUpdate(movieId, updatedMovieData, { new: true });
+                updatedCount++;
+                
+                // Add delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+            } catch (error) {
+                console.error(`Error updating movie ${movie._id}:`, error.message);
+                errorCount++;
+            }
+        }
+        
+        res.json({ 
+            success: true, 
+            message: `Updated ${updatedCount} movies successfully. ${errorCount} errors occurred.`,
+            updatedCount,
+            errorCount
+        });
+        
+    } catch (error) {
+        console.error('Error updating movies:', error);
+        res.json({ success: false, message: error.message });
+    }
+};

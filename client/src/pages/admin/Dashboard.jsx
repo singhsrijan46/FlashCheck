@@ -1,44 +1,48 @@
-import { ChartLineIcon, CircleDollarSignIcon, PlayCircleIcon, StarIcon, UsersIcon } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
-import { dummyDashboardData } from '../../assets/assets';
 import Loading from '../../components/Loading';
 import { dateFormat } from '../../lib/dateFormat';
 import { useAppContext } from '../../context/AppContext';
+import { UsersIcon, TicketIcon, DollarSignIcon, FilmIcon } from 'lucide-react';
+import { StarIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import './Dashboard.css';
 
 const Dashboard = () => {
-
-    const {axios, getToken, user, image_base_url} = useAppContext()
-
     const currency = import.meta.env.VITE_CURRENCY || '$'
+    const { axios, getToken, user, image_base_url } = useAppContext()
 
-    const [dashboardData, setDashboardData] = useState({
-        totalBookings: 0,
-        totalRevenue: 0,
-        activeShows: [],
-        totalUser: 0
-    });
+    const [dashboardData, setDashboardData] = useState(null);
     const [loading, setLoading] = useState(true);
 
     const dashboardCards = [
-        { title: "Total Bookings", value: dashboardData.totalBookings || "0", icon: ChartLineIcon },
-        { title: "Total Revenue", value: currency + dashboardData.totalRevenue || "0", icon: CircleDollarSignIcon },
-        { title: "Active Shows", value: dashboardData.activeShows.length || "0", icon: PlayCircleIcon },
-        { title: "Total Users", value: dashboardData.totalUser || "0", icon: UsersIcon }
+        { title: "Total Shows", value: dashboardData?.totalShows || "0", icon: FilmIcon },
+        { title: "Total Bookings", value: dashboardData?.totalBookings || "0", icon: TicketIcon },
+        { title: "Total Revenue", value: `${currency} ${dashboardData?.totalRevenue || "0"}`, icon: DollarSignIcon },
+        { title: "Total Users", value: dashboardData?.totalUser || "0", icon: UsersIcon }
     ]
 
     const fetchDashboardData = async () => {
         try {
            const { data } = await axios.get("/api/admin/dashboard", {headers: { Authorization: `Bearer ${await getToken()}`}}) 
            if (data.success) {
-            setDashboardData(data.dashboardData)
+            setDashboardData(data.dashboardData || {
+                totalBookings: 0,
+                totalRevenue: 0,
+                activeShows: [],
+                totalUser: 0,
+                totalShows: 0,
+                totalMovies: 0
+            })
             setLoading(false)
-           }else{
+           } else {
+            console.error('Dashboard API error:', data.message);
             toast.error(data.message)
+            setLoading(false)
            }
         } catch (error) {
-            toast.error("Error fetching dashboard data:", error)
+            console.error("Error fetching dashboard data:", error);
+            toast.error("Error fetching dashboard data");
+            setLoading(false);
         }
     };
 
@@ -48,9 +52,18 @@ const Dashboard = () => {
         }   
     }, [user]);
 
-  return !loading ? (
-    <>
-      <div className="dashboard-cards">
+    // Show loading while fetching data
+    if (loading) {
+        return (
+            <div className="dashboard-container">
+                <Loading />
+            </div>
+        )
+    }
+
+    return (
+        <div className="dashboard-container">
+            <div className="dashboard-cards">
                 <div className="dashboard-cards-container">
                     {dashboardCards.map((card, index) => (
                         <div key={index} className="dashboard-card">
@@ -66,32 +79,39 @@ const Dashboard = () => {
 
             <p className="dashboard-shows-title">Active Shows</p>
             <div className="dashboard-shows-grid">
-                {dashboardData.activeShows.map((show) => (
-                    <div key={show._id} className="dashboard-show-card">
-                        <div className="dashboard-show-image-container">
-                            <img src={image_base_url + show.movie.backdrop_path} alt='' className="dashboard-show-image" />
-                            <div className="dashboard-show-overlay-bottom">
-                                <div className="dashboard-show-rating-block">
-                                    <StarIcon className="dashboard-show-rating-icon"/>
-                                    <span className="dashboard-show-rating-value">{show.movie.vote_average.toFixed(1)}</span>
+                {dashboardData?.activeShows && dashboardData.activeShows.length > 0 ? (
+                    dashboardData.activeShows.map((show) => (
+                        <div key={show._id} className="dashboard-show-card">
+                            <div className="dashboard-show-image-container">
+                                <img src={image_base_url + (show.movie?.backdrop_path || '/default-backdrop.jpg')} alt='' className="dashboard-show-image" />
+                                <div className="dashboard-show-overlay-bottom">
+                                    <div className="dashboard-show-rating-block">
+                                        <StarIcon className="dashboard-show-rating-icon"/>
+                                        <span className="dashboard-show-rating-value">
+                                            {show.movie?.vote_average?.toFixed(1) || '0.0'}
+                                        </span>
+                                    </div>
+                                    <div className="dashboard-show-price-badge">
+                                        {currency} {show.silverPrice || show.goldPrice || show.diamondPrice || '0'}
+                                    </div>
                                 </div>
-                                <div className="dashboard-show-price-badge">
-                                    {currency} {show.showPrice}
+                            </div>
+                            <div className="dashboard-show-details">
+                                <p className="dashboard-show-title">{show.movie?.title || 'Unknown Movie'}</p>
+                                <div className="dashboard-show-meta-row">
+                                    <span className="dashboard-show-date">{dateFormat(show.showDateTime)}</span>
                                 </div>
                             </div>
                         </div>
-                        <div className="dashboard-show-details">
-                            <p className="dashboard-show-title">{show.movie.title}</p>
-                            <div className="dashboard-show-meta-row">
-                                <span className="dashboard-show-date">{dateFormat(show.showDateTime)}</span>
-                            </div>
-                        </div>
+                    ))
+                ) : (
+                    <div className="dashboard-no-shows">
+                        <p>No active shows found</p>
                     </div>
-                ))}
+                )}
             </div>
-
-    </>
-  ) : <Loading />
+        </div>
+    )
 }
 
 export default Dashboard

@@ -8,43 +8,41 @@ import toast from 'react-hot-toast';
 import './AddShows.css';
 
 const AddShows = () => {
-
-    const {axios, getToken, user, image_base_url, refreshAdminData} = useAppContext()
+    const { axios, getToken, user, image_base_url, refreshAdminData, refreshShows } = useAppContext()
 
     const currency = import.meta.env.VITE_CURRENCY || '$'
     const [nowPlayingMovies, setNowPlayingMovies] = useState([]);
     const [selectedMovie, setSelectedMovie] = useState(null);
     const [dateTimeSelection, setDateTimeSelection] = useState([]);
+    const [silverPrice, setSilverPrice] = useState("");
+    const [goldPrice, setGoldPrice] = useState("");
+    const [diamondPrice, setDiamondPrice] = useState("");
     const [dateTimeInput, setDateTimeInput] = useState("");
-    const [showPrice, setShowPrice] = useState("");
-    const [addingShow, setAddingShow] = useState(false)
-    const [loadingMovies, setLoadingMovies] = useState(true)
+    const [addingShow, setAddingShow] = useState(false);
+    const [loadingMovies, setLoadingMovies] = useState(true);
 
-
-     const fetchNowPlayingMovies = async () => {
+    const fetchNowPlayingMovies = async () => {
         try {
             setLoadingMovies(true);
-            const { data } = await axios.get('/api/show/now-playing', {
-                headers: { Authorization: `Bearer ${await getToken()}` }})
-                if(data.success){
-                    console.log('Fetched movies:', data.movies);
-                    console.log('First movie structure:', data.movies[0]);
-                    
-                    // Check for duplicate IDs
-                    const movieIds = data.movies.map(movie => movie._id || movie.id);
-                    console.log('All movie IDs:', movieIds);
-                    const uniqueIds = new Set(movieIds);
-                    console.log('Unique movie IDs:', Array.from(uniqueIds));
-                    console.log('Duplicate IDs found:', movieIds.length !== uniqueIds.size);
-                    
-                    setNowPlayingMovies(data.movies)
-                }
+            const { data } = await axios.get('/api/show/now-playing-public');
+            
+            if (data.success) {
+                setNowPlayingMovies(data.movies || []);
+            } else {
+                console.error('Failed to fetch movies:', data.message);
+                toast.error('Failed to fetch movies');
+            }
         } catch (error) {
-            console.error('Error fetching movies:', error)
+            console.error('Error fetching movies:', error);
+            toast.error('Error fetching movies');
         } finally {
             setLoadingMovies(false);
         }
     };
+
+    useEffect(() => {
+        fetchNowPlayingMovies();
+    }, [user]);
 
     const handleDateTimeAdd = () => {
         if (!dateTimeInput) return;
@@ -63,18 +61,44 @@ const AddShows = () => {
         });
     };
 
-    const handleSubmit = async ()=>{
+    const handleSubmit = async () => {
         try {
             setAddingShow(true)
-            console.log("=== ADD SHOW DEBUG ===");
-            console.log("Submit clicked");
-            console.log("selectedMovie:", selectedMovie);
-            console.log("dateTimeSelection:", dateTimeSelection);
-            console.log("showPrice:", showPrice);
 
-            if(!selectedMovie || dateTimeSelection.length === 0 || !showPrice){
-                console.log("Missing fields detected");
-                toast.error('Missing required fields');
+            // Better validation with specific error messages
+            if (!selectedMovie) {
+                toast.error('Please select a movie');
+                setAddingShow(false);
+                return;
+            }
+            
+            if (dateTimeSelection.length === 0) {
+                toast.error('Please add at least one show time');
+                setAddingShow(false);
+                return;
+            }
+            
+            if (!silverPrice || silverPrice.trim() === '') {
+                toast.error('Please enter silver price');
+                setAddingShow(false);
+                return;
+            }
+            
+            if (!goldPrice || goldPrice.trim() === '') {
+                toast.error('Please enter gold price');
+                setAddingShow(false);
+                return;
+            }
+            
+            if (!diamondPrice || diamondPrice.trim() === '') {
+                toast.error('Please enter diamond price');
+                setAddingShow(false);
+                return;
+            }
+
+            // Validate that prices are numbers
+            if (isNaN(Number(silverPrice)) || isNaN(Number(goldPrice)) || isNaN(Number(diamondPrice))) {
+                toast.error('Please enter valid prices (numbers only)');
                 setAddingShow(false);
                 return;
             }
@@ -83,37 +107,32 @@ const AddShows = () => {
             const payload = {
                 movieId: selectedMovie,
                 showsInput,
-                showPrice: Number(showPrice)
+                silverPrice: Number(silverPrice),
+                goldPrice: Number(goldPrice),
+                diamondPrice: Number(diamondPrice)
             }
-            console.log("Payload being sent:", payload);
 
             const token = await getToken();
-            console.log("Token available:", !!token);
-            console.log("Token length:", token?.length);
 
-            console.log("Making API call to /api/show/add...");
             const { data } = await axios.post('/api/show/add', payload, {
                 headers: { 
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             })
-            console.log("API response received:", data);
 
             if(data.success){
-                console.log("API call successful");
                 toast.success(data.message)
                 setSelectedMovie(null)
                 setDateTimeSelection([])
-                setShowPrice("")
+                setSilverPrice("")
+                setGoldPrice("")
+                setDiamondPrice("")
                 setDateTimeInput("")
                 // Refresh shows data after adding a new show
-                console.log('Show added successfully, refreshing data...');
                 await refreshAdminData()
-                console.log('Data refresh completed');
-                console.log("=== ADD SHOW COMPLETED ===");
+                await refreshShows()
             }else{
-                console.log("API call failed:", data.message);
                 toast.error(data.message)
             }
         } catch (error) {
@@ -136,15 +155,9 @@ const AddShows = () => {
         setAddingShow(false)
     }
 
-    useEffect(() => {
-        if(user){
-            fetchNowPlayingMovies();
-        }   
-    }, [user]);
-
     // Debug selectedMovie changes
     useEffect(() => {
-        console.log('selectedMovie changed to:', selectedMovie);
+
     }, [selectedMovie]);
 
   return (
@@ -167,11 +180,7 @@ const AddShows = () => {
                         
                         return (
                             <div key={movieId} className="add-shows-movie-card" onClick={()=> {
-                                console.log('Movie clicked:', movie.title, 'ID:', movieId);
-                                console.log('Current selectedMovie:', selectedMovie);
-                                console.log('Is currently selected:', isSelected);
                                 setSelectedMovie(movieId);
-                                console.log('Setting selectedMovie to:', movieId);
                             }}>
                                 <div className="add-shows-movie-image-container">
                                     <img src={image_base_url + movie.poster_path} alt="" className="add-shows-movie-image" />
@@ -206,40 +215,60 @@ const AddShows = () => {
             )}
           </div>
 
-          {/* OR Divider */}
-          <div className="add-shows-or-divider">
-            <div className="add-shows-or-line"></div>
-            <span className="add-shows-or-text">OR</span>
-            <div className="add-shows-or-line"></div>
-          </div>
-
-          {/* Manual Movie Input */}
-          <div className="add-shows-manual-section">
-            <h3 className="add-shows-subsection-title">Add Other Movies</h3>
-            <div className="add-shows-manual-input">
-              <label>Movie ID (TMDB):</label>
-              <input 
-                type="text" 
-                placeholder="Enter TMDB Movie ID (e.g., 550)" 
-                className="add-shows-manual-field"
-                onChange={(e) => setSelectedMovie(e.target.value)}
-              />
-              <p className="add-shows-manual-help">
-                You can find TMDB Movie IDs by searching on <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer">themoviedb.org</a>
-              </p>
-            </div>
-          </div>
-
           {/* Configuration Section */}
           <div className="add-shows-config-section">
             <h2 className="add-shows-section-title">Show Configuration</h2>
             
-            {/* Show Price Input */}
+            {/* Seat Prices Input */}
             <div className="add-shows-price-section">
-                <h3 className="add-shows-subsection-title">Show Price</h3>
+                <h3 className="add-shows-subsection-title">Seat Prices</h3>
+                
+                {/* Silver Price */}
                 <div className="add-shows-price-input">
-                    <p className="add-shows-price-currency">{currency}</p>
-                    <input min={0} type="number" value={showPrice} onChange={(e) => setShowPrice(e.target.value)} placeholder="Enter show price" className="add-shows-price-field" />
+                    <label>Silver Price:</label>
+                    <div className="add-shows-price-field-container">
+                        <p className="add-shows-price-currency">{currency}</p>
+                        <input 
+                            min={0} 
+                            type="number" 
+                            value={silverPrice} 
+                            onChange={(e) => setSilverPrice(e.target.value)} 
+                            placeholder="Enter silver seat price" 
+                            className="add-shows-price-field" 
+                        />
+                    </div>
+                </div>
+
+                {/* Gold Price */}
+                <div className="add-shows-price-input">
+                    <label>Gold Price:</label>
+                    <div className="add-shows-price-field-container">
+                        <p className="add-shows-price-currency">{currency}</p>
+                        <input 
+                            min={0} 
+                            type="number" 
+                            value={goldPrice} 
+                            onChange={(e) => setGoldPrice(e.target.value)} 
+                            placeholder="Enter gold seat price" 
+                            className="add-shows-price-field" 
+                        />
+                    </div>
+                </div>
+
+                {/* Diamond Price */}
+                <div className="add-shows-price-input">
+                    <label>Diamond Price:</label>
+                    <div className="add-shows-price-field-container">
+                        <p className="add-shows-price-currency">{currency}</p>
+                        <input 
+                            min={0} 
+                            type="number" 
+                            value={diamondPrice} 
+                            onChange={(e) => setDiamondPrice(e.target.value)} 
+                            placeholder="Enter diamond seat price" 
+                            className="add-shows-price-field" 
+                        />
+                    </div>
                 </div>
             </div>
 

@@ -1,4 +1,3 @@
-// VERSION: 2.0 - Enhanced Movie Creation with Fallbacks
 import axios from "axios"
 import Movie from "../models/Movie.js";
 import Show from "../models/Show.js";
@@ -88,8 +87,6 @@ axios.interceptors.response.use(
     response => response,
     error => {
         if (error.code === 'ECONNRESET' || error.code === 'ENOTFOUND' || error.code === 'ETIMEDOUT') {
-            console.log('Network error occurred:', error.code);
-            // Return a custom error response instead of throwing
             return Promise.reject({
                 message: `Network error: ${error.code}`,
                 isNetworkError: true
@@ -100,26 +97,19 @@ axios.interceptors.response.use(
 );
 
 // Simple rate limiting for TMDB API calls
-const apiCallTracker = new Map();
-const RATE_LIMIT_WINDOW = 60000; // 1 minute
-const MAX_CALLS_PER_WINDOW = 30; // Increased from 10 to 30
+const recentCalls = [];
+const MAX_CALLS_PER_MINUTE = 40;
 
 const checkRateLimit = (endpoint) => {
     const now = Date.now();
-    const windowStart = now - RATE_LIMIT_WINDOW;
+    const oneMinuteAgo = now - 60000;
     
-    if (!apiCallTracker.has(endpoint)) {
-        apiCallTracker.set(endpoint, []);
+    // Remove calls older than 1 minute
+    while (recentCalls.length > 0 && recentCalls[0] < oneMinuteAgo) {
+        recentCalls.shift();
     }
     
-    const calls = apiCallTracker.get(endpoint);
-    // Remove old calls outside the window
-    const recentCalls = calls.filter(timestamp => timestamp > windowStart);
-    apiCallTracker.set(endpoint, recentCalls);
-    
-    if (recentCalls.length >= MAX_CALLS_PER_WINDOW) {
-        // Instead of throwing error, wait a bit and retry
-        console.log('Rate limit approaching, waiting...');
+    if (recentCalls.length >= MAX_CALLS_PER_MINUTE) {
         return false;
     }
     
@@ -128,53 +118,40 @@ const checkRateLimit = (endpoint) => {
 };
 
 // API to get now playing movies from TMDB API
-export const getNowPlayingMovies = async (req, res)=>{
+export const getNowPlayingMovies = async (req, res) => {
     try {
-        console.log('=== GET NOW PLAYING MOVIES ===');
-        console.log('TMDB API Key available:', !!process.env.TMDB_API_KEY);
-        
         if (!process.env.TMDB_API_KEY) {
-            console.error('TMDB API Key is missing');
-            return res.json({success: false, message: 'TMDB API Key is not configured'});
+            console.log('TMDB API Key not configured, using sample movies');
+            return res.json({success: true, movies: sampleMovies});
         }
 
-        // Fetch currently showing movies from TMDB API
         const fetchWithRetry = async (url, retries = 3) => {
             for (let i = 0; i < retries; i++) {
                 try {
-                    // Check rate limit before making API call
                     if (!checkRateLimit('tmdb-api')) {
-                        console.log('Rate limit hit, waiting 2 seconds...');
                         await new Promise(resolve => setTimeout(resolve, 2000));
                         continue;
                     }
                     
-                    return await axios.get(url, {
+                    const response = await axios.get(url, {
                         headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
-                        timeout: 15000 // Increased timeout
+                        timeout: 15000
                     });
+                    return response;
                 } catch (error) {
-                    console.log(`TMDB API call failed (${retries - i} retries left):`, error.message);
+                    console.error(`API call failed for ${url} (attempt ${i + 1}/${retries}):`, error.message);
                     if (i === retries - 1) throw error;
-                    // Wait longer between retries
                     await new Promise(resolve => setTimeout(resolve, 2000));
                 }
             }
         };
 
-        // Get currently showing movies from TMDB
         const nowPlayingResponse = await fetchWithRetry('https://api.themoviedb.org/3/movie/now_playing');
         const nowPlayingMovies = nowPlayingResponse.data.results;
 
-        console.log('Fetched now playing movies from TMDB:', nowPlayingMovies.length);
-
-        // Also get upcoming movies for more options
         const upcomingResponse = await fetchWithRetry('https://api.themoviedb.org/3/movie/upcoming');
         const upcomingMovies = upcomingResponse.data.results;
 
-        console.log('Fetched upcoming movies from TMDB:', upcomingMovies.length);
-
-        // Combine and deduplicate movies
         const allMovies = [...nowPlayingMovies, ...upcomingMovies];
         const uniqueMovies = [];
         const seenIds = new Set();
@@ -184,6 +161,7 @@ export const getNowPlayingMovies = async (req, res)=>{
                 seenIds.add(movie.id.toString());
                 const movieData = {
                     _id: movie.id.toString(),
+                    tmdbId: movie.id.toString(), // Add tmdbId field
                     title: movie.title,
                     overview: movie.overview,
                     poster_path: movie.poster_path,
@@ -194,17 +172,16 @@ export const getNowPlayingMovies = async (req, res)=>{
                     genre_ids: movie.genre_ids
                 };
                 uniqueMovies.push(movieData);
-                // Cache the movie data
                 setCachedMovieData(movie.id.toString(), movieData);
             }
         });
 
-        console.log('Total unique movies found:', uniqueMovies.length);
         res.json({success: true, movies: uniqueMovies});
         
     } catch (error) {
         console.error('Error fetching now playing movies:', error);
-        // Try to return cached data as fallback
+        
+        // Try to return cached movies if available
         const cachedMovies = [];
         for (const [movieId, cached] of movieCache.entries()) {
             if (Date.now() - cached.timestamp < CACHE_DURATION) {
@@ -213,566 +190,647 @@ export const getNowPlayingMovies = async (req, res)=>{
         }
         
         if (cachedMovies.length > 0) {
-            console.log('Returning cached movie data as fallback:', cachedMovies.length);
+            console.log(`Returning ${cachedMovies.length} cached movies due to API error`);
             res.json({success: true, movies: cachedMovies});
         } else {
-            console.log('No cached data available, using sample movies as fallback');
+            console.log('No cached movies available, using sample movies');
             res.json({success: true, movies: sampleMovies});
         }
     }
-}
+};
 
 // API to add a new show to the database
-export const addShow = async (req, res) =>{
+export const addShow = async (req, res) => {
     try {
-        console.log('=== ADD SHOW START ===');
-        console.log('Add show request body:', req.body);
-        const {movieId, showsInput, showPrice} = req.body
+        const { movieId, showsInput, silverPrice, goldPrice, diamondPrice } = req.body;
 
-        if (!movieId || !showsInput || !showPrice) {
-            console.log('Missing required fields:', { movieId, showsInput, showPrice });
-            return res.json({success: false, message: 'Missing required fields'});
+        // Validate required fields
+        if (!movieId) {
+            return res.status(400).json({ success: false, message: 'Movie ID is required' });
+        }
+        
+        if (!showsInput || !Array.isArray(showsInput) || showsInput.length === 0) {
+            return res.status(400).json({ success: false, message: 'Show times are required' });
+        }
+        
+        if (!silverPrice || !goldPrice || !diamondPrice) {
+            return res.status(400).json({ success: false, message: 'All price fields are required' });
         }
 
-        console.log('Validating movieId:', movieId);
-        console.log('MovieId type:', typeof movieId);
-        let movie = await Movie.findById(movieId.toString())
+        // Validate that prices are numbers
+        if (isNaN(Number(silverPrice)) || isNaN(Number(goldPrice)) || isNaN(Number(diamondPrice))) {
+            return res.status(400).json({ success: false, message: 'Prices must be valid numbers' });
+        }
 
-        if(!movie) {
-            console.log('Movie not found in database, fetching from TMDB API...');
-            console.log('TMDB API Key available:', !!process.env.TMDB_API_KEY);
+        // Process each show time
+        for (const showInput of showsInput) {
+            const { date, time } = showInput;
             
-            if (!process.env.TMDB_API_KEY) {
-                console.error('TMDB API Key is missing');
-                return res.json({success: false, message: 'TMDB API Key is not configured'});
+            if (!time || !Array.isArray(time) || time.length === 0) {
+                return res.status(400).json({ success: false, message: 'Show times are required' });
             }
-            
-            try {
-                console.log('Making TMDB API calls...');
-                // Fetch movie details, credits, and videos from TMDB API with retry logic
+
+            // Create shows for each time slot
+            for (const timeSlot of time) {
+                const showDateTime = new Date(timeSlot);
+                
+                if (isNaN(showDateTime.getTime())) {
+                    return res.status(400).json({ success: false, message: 'Invalid date/time format' });
+                }
+
+                // Fetch movie data from TMDB API
                 const fetchWithRetry = async (url, retries = 3) => {
                     for (let i = 0; i < retries; i++) {
                         try {
-                            // Check rate limit before making API call
                             if (!checkRateLimit('tmdb-api')) {
-                                console.log('Rate limit hit, waiting 2 seconds...');
                                 await new Promise(resolve => setTimeout(resolve, 2000));
                                 continue;
                             }
                             
-                            console.log(`Making API call to: ${url}`);
                             const response = await axios.get(url, {
                                 headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
-                                timeout: 15000 // Increased timeout
+                                timeout: 15000
                             });
-                            console.log(`API call successful for: ${url}`);
                             return response;
                         } catch (error) {
-                            console.log(`TMDB API call failed (${retries - i} retries left):`, error.message);
                             if (i === retries - 1) throw error;
-                            // Wait longer between retries
                             await new Promise(resolve => setTimeout(resolve, 2000));
                         }
                     }
                 };
 
-                const [movieDetailsResponse, movieCreditsResponse, movieVideosResponse] = await Promise.all([
-                    fetchWithRetry(`https://api.themoviedb.org/3/movie/${movieId}`),
-                    fetchWithRetry(`https://api.themoviedb.org/3/movie/${movieId}/credits`),
-                    fetchWithRetry(`https://api.themoviedb.org/3/movie/${movieId}/videos`)
-                ]);
-
-                console.log('TMDB API calls successful');
-                const movieApiData = movieDetailsResponse.data;
-                const movieCreditsData = movieCreditsResponse.data;
-                const movieVideosData = movieVideosResponse.data;
+                let movieData = null;
                 
-                console.log('TMDB API responses received');
-                console.log('Movie API data:', {
-                    title: movieApiData.title,
-                    id: movieApiData.id,
-                    overview: movieApiData.overview?.substring(0, 100) + '...'
-                });
+                // Check cache first
+                const cachedData = getCachedMovieData(movieId);
+                if (cachedData) {
+                    movieData = cachedData;
+                } else if (process.env.TMDB_API_KEY) {
+                    try {
+                        const response = await fetchWithRetry(`https://api.themoviedb.org/3/movie/${movieId}`);
+                        const apiData = response.data;
+                        
+                        movieData = {
+                            _id: apiData.id.toString(),
+                            tmdbId: apiData.id.toString(), // Ensure tmdbId is set
+                            title: apiData.title,
+                            overview: apiData.overview,
+                            poster_path: apiData.poster_path,
+                            backdrop_path: apiData.backdrop_path,
+                            release_date: apiData.release_date,
+                            vote_average: apiData.vote_average,
+                            original_language: apiData.original_language,
+                            genre_ids: apiData.genre_ids,
+                            runtime: apiData.runtime,
+                            status: apiData.status,
+                            tagline: apiData.tagline,
+                            vote_count: apiData.vote_count,
+                            popularity: apiData.popularity,
+                            adult: apiData.adult,
+                            video: apiData.video,
+                            original_title: apiData.original_title
+                        };
+                        
+                        setCachedMovieData(movieId, movieData);
+                    } catch (error) {
+                        console.error('Error fetching movie data from TMDB:', error);
+                        // Continue with fallback movie creation
+                    }
+                }
 
-                // Get the first official trailer or teaser
-                const trailer = movieVideosData.results.find(video => 
-                    (video.type === 'Trailer' || video.type === 'Teaser') && 
-                    video.site === 'YouTube' &&
-                    video.official === true
-                ) || movieVideosData.results.find(video => 
-                    (video.type === 'Trailer' || video.type === 'Teaser') && 
-                    video.site === 'YouTube'
-                );
-
-                console.log('Found trailer:', trailer);
-                console.log('Trailer type:', typeof trailer);
-                console.log('Trailer structure:', JSON.stringify(trailer, null, 2));
+                // Create or update movie in database
+                let movie = await Movie.findOne({ _id: movieId });
                 
-                 const movieDetails = {
-                    _id: movieId.toString(),
-                    title: movieApiData.title,
-                    overview: movieApiData.overview,
-                    poster_path: movieApiData.poster_path,
-                    backdrop_path: movieApiData.backdrop_path,
-                    genres: movieApiData.genres,
-                    casts: movieCreditsData.cast,
-                    release_date: movieApiData.release_date,
-                    original_language: movieApiData.original_language,
-                    tagline: movieApiData.tagline || "",
-                    vote_average: movieApiData.vote_average,
-                    runtime: movieApiData.runtime,
-                    trailer: trailer ? {
-                        key: trailer.key || null,
-                        name: trailer.name || null,
-                        site: trailer.site || null,
-                        type: trailer.type || null
-                    } : null
-                 }
+                if (movieData && !movie) {
+                    try {
+                        movie = new Movie({
+                            ...movieData,
+                            tmdbId: movieId // Ensure tmdbId is set
+                        });
+                        await movie.save();
+                    } catch (saveError) {
+                        console.error('Error saving movie with TMDB data:', saveError);
+                        // Try fallback creation
+                        try {
+                            movie = new Movie({
+                                _id: movieId,
+                                tmdbId: movieId,
+                                title: movieData.title || `Movie ${movieId}`,
+                                overview: movieData.overview || 'Movie information not available',
+                                poster_path: movieData.poster_path || '/default-poster.jpg',
+                                backdrop_path: movieData.backdrop_path || '/default-backdrop.jpg',
+                                release_date: movieData.release_date || new Date().toISOString().split('T')[0],
+                                vote_average: movieData.vote_average || 0,
+                                original_language: movieData.original_language || 'en',
+                                genre_ids: movieData.genre_ids || []
+                            });
+                            await movie.save();
+                        } catch (fallbackError) {
+                            console.error('Error saving fallback movie:', fallbackError);
+                            return res.status(500).json({ 
+                                success: false, 
+                                message: 'Failed to create movie record',
+                                error: fallbackError.message 
+                            });
+                        }
+                    }
+                } else if (!movie) {
+                    // Create basic movie as fallback
+                    try {
+                        movie = new Movie({
+                            _id: movieId,
+                            tmdbId: movieId, // Ensure tmdbId is set
+                            title: `Movie ${movieId}`,
+                            overview: 'Movie information not available',
+                            poster_path: '/default-poster.jpg',
+                            backdrop_path: '/default-backdrop.jpg',
+                            release_date: new Date().toISOString().split('T')[0],
+                            vote_average: 0,
+                            original_language: 'en',
+                            genre_ids: []
+                        });
+                        await movie.save();
+                    } catch (fallbackError) {
+                        console.error('Error saving basic movie:', fallbackError);
+                        return res.status(500).json({ 
+                            success: false, 
+                            message: 'Failed to create basic movie record',
+                            error: fallbackError.message 
+                        });
+                    }
+                }
 
-                 console.log('Creating movie in database...');
-                 console.log('Movie details to create:', JSON.stringify(movieDetails, null, 2));
-                 console.log('TMDB API data received:', JSON.stringify(movieApiData, null, 2));
-                 
-                 // Test with minimal movie data first
-                 try {
-                     const movieData = {
-                         _id: movieId.toString(),
-                         title: movieApiData.title || `Movie ${movieId}`,
-                         overview: movieApiData.overview || "No overview available",
-                         poster_path: movieApiData.poster_path || "/default-poster.jpg",
-                         backdrop_path: movieApiData.backdrop_path || "/default-backdrop.jpg",
-                         release_date: movieApiData.release_date || "Unknown",
-                         vote_average: movieApiData.vote_average || 0,
-                         runtime: movieApiData.runtime || 120,
-                         genres: movieApiData.genres || [],
-                         casts: movieApiData.casts || []
-                     };
-                     
-                     console.log('Attempting to create movie with data:', JSON.stringify(movieData, null, 2));
-                     
-                     // Use the bypass validation function
-                     const testMovie = await createMovieBypassValidation(movieData);
-                     console.log('Test movie created successfully:', testMovie._id);
-                     movie = testMovie;
-                 } catch (testError) {
-                     console.error('Error creating test movie:', testError);
-                     console.error('Test error details:', testError.message);
-                     console.error('Full error:', testError);
-                     return res.json({success: false, message: 'Failed to create movie in database: ' + testError.message});
-                 }
-            } catch (error) {
-                console.error('Error fetching from TMDB API:', error);
-                console.error('Error details:', error.response?.data || error.message);
-                console.error('Error status:', error.response?.status);
-                
-                // Try to create a basic movie with just the ID and title
+                // Create the show
                 try {
-                    console.log('TMDB API failed, creating basic movie...');
-                    const basicMovieData = {
-                        _id: movieId.toString(),
-                        title: `Movie ${movieId}`,
-                        overview: "Movie details not available",
-                        poster_path: "/default-poster.jpg",
-                        backdrop_path: "/default-backdrop.jpg",
-                        release_date: "Unknown",
-                        vote_average: 0,
-                        runtime: 120,
-                        genres: [],
-                        casts: []
-                    };
-                    
-                    console.log('Creating basic movie with data:', JSON.stringify(basicMovieData, null, 2));
-                    
-                    // Use the bypass validation function
-                    movie = await createMovieBypassValidation(basicMovieData);
-                    console.log('Basic movie created successfully:', movie._id);
-                } catch (basicError) {
-                    console.error('Error creating basic movie:', basicError);
-                    console.error('Full basic error:', basicError);
-                    return res.json({success: false, message: 'Failed to create movie: ' + basicError.message});
-                }
-            }
-        }
+                    const show = new Show({
+                        movie: movieId,
+                        showDateTime: showDateTime,
+                        silverPrice: Number(silverPrice),
+                        goldPrice: Number(goldPrice),
+                        diamondPrice: Number(diamondPrice),
+                        occupiedSeats: {}
+                    });
 
-        console.log('Creating shows with data:', { movieId, showsInput, showPrice });
-        
-        const showsToCreate = [];
-        showsInput.forEach(show => {
-            show.time.forEach((dateTimeString)=>{
-                console.log('Processing datetime:', dateTimeString);
-                const parsedDate = new Date(dateTimeString);
-                console.log('Parsed date:', parsedDate);
-                console.log('Is valid date:', !isNaN(parsedDate.getTime()));
-                
-                if (isNaN(parsedDate.getTime())) {
-                    console.error('Invalid date:', dateTimeString);
-                    return res.json({success: false, message: 'Invalid date format'});
-                }
-                
-                const showData = {
-                    movie: movieId.toString(),
-                    showDateTime: parsedDate,
-                    showPrice,
-                    occupiedSeats: {}
-                };
-                
-                console.log('Show data to create:', showData);
-                showsToCreate.push(showData);
-            })
-        });
-
-        console.log('Shows to create:', showsToCreate.length);
-
-        if(showsToCreate.length > 0){
-            try {
-                console.log('Attempting to create shows in database...');
-                console.log('Shows to create:', showsToCreate.length);
-                
-                const createdShows = await Show.insertMany(showsToCreate);
-                console.log('Shows created successfully:', createdShows.length);
-                console.log('Created show IDs:', createdShows.map(s => s._id));
-                
-                // Verify shows were created
-                const verifyShows = await Show.find({ movie: movieId.toString() });
-                console.log('Verified shows in database:', verifyShows.length);
-            } catch (error) {
-                console.error('Error creating shows:', error);
-                console.error('Error details:', error.message);
-                console.error('Error stack:', error.stack);
-                return res.json({success: false, message: 'Failed to create shows in database: ' + error.message});
-            }
-        } else {
-            console.log('No shows to create');
-            return res.json({success: false, message: 'No valid shows to create'});
-        }
-
-        console.log('=== ADD SHOW COMPLETED SUCCESSFULLY ===');
-        
-        // Send simple notification email (optional)
-        try {
-            const users = await User.find({}).limit(10); // Limit to first 10 users
-            for (const user of users) {
-                await sendEmail({
-                    to: user.email,
-                    subject: `🎬 New Show Added: ${movie.title}`,
-                    body: `<div style="font-family: Arial, sans-serif; padding: 20px;">
-                        <h2>Hi ${user.name},</h2>
-                        <p>We've just added a new show to our library:</p>
-                        <h3 style="color: #1E90FF;">"${movie.title}"</h3>
-                        <p>Visit our website to book your tickets!</p>
-                        <br/>
-                        <p>Thanks,<br/>FlashCheck Team</p>
-                    </div>`
-                });
-            }
-            console.log(`Sent notifications to ${users.length} users`);
-        } catch (error) {
-            console.log('Email notification failed:', error.message);
-            // Don't fail the request if email fails
-        }
-        
-        res.json({success: true, message: 'Show Added successfully.'})
-    } catch (error) {
-        console.error('=== ADD SHOW ERROR ===');
-        console.error('Error in addShow:', error);
-        console.error('Error stack:', error.stack);
-        res.json({success: false, message: error.message})
-    }
-}
-
-// API to get all shows from the database
-export const getShows = async (req, res) =>{
-    try {
-        console.log('=== GET SHOWS REQUEST ===');
-        console.log('Request URL:', req.url);
-        console.log('Request method:', req.method);
-        console.log('Request headers:', req.headers);
-        console.log('Fetching all shows...');
-        
-        // Get shows from 30 days ago to 30 days in the future
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        
-        const thirtyDaysFromNow = new Date();
-        thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-        
-        console.log('Date range:', { from: thirtyDaysAgo, to: thirtyDaysFromNow });
-        
-        // Add error handling for the database query
-        let shows;
-        try {
-            shows = await Show.find({
-                showDateTime: { 
-                    $gte: thirtyDaysAgo,
-                    $lte: thirtyDaysFromNow
-                }
-            }).populate('movie').sort({ showDateTime: 1 });
-        } catch (dbError) {
-            console.error('Database query error:', dbError);
-            return res.json({ success: false, message: 'Failed to fetch shows from database' });
-        }
-        
-        console.log('Total shows found:', shows.length);
-
-        // filter unique movies by _id with proper validation
-        const uniqueMovies = [];
-        const seenMovieIds = new Set();
-        
-        shows.forEach(show => {
-            try {
-                // Validate that show and movie exist and have required fields
-                if (show && 
-                    show.movie && 
-                    show.movie._id && 
-                    typeof show.movie._id.toString === 'function' &&
-                    !seenMovieIds.has(show.movie._id.toString())) {
-                    
-                    seenMovieIds.add(show.movie._id.toString());
-                    
-                    // Validate movie has required fields before adding
-                    if (show.movie.title && show.movie.overview) {
-                        uniqueMovies.push(show.movie);
-                    } else {
-                        console.log('Skipping movie with missing required fields:', show.movie._id);
-                    }
-                } else {
-                    console.log('Skipping invalid show or movie:', show?._id, show?.movie?._id);
-                }
-            } catch (validationError) {
-                console.error('Error validating show/movie:', validationError);
-                // Continue processing other shows
-            }
-        });
-
-        console.log('Unique movies with shows:', uniqueMovies.length);
-        console.log('=== GET SHOWS RESPONSE ===');
-        
-        // Return empty array if no valid movies found
-        res.json({
-            success: true, 
-            shows: uniqueMovies,
-            totalShows: shows.length,
-            validMovies: uniqueMovies.length
-        });
-    } catch (error) {
-        console.error('Error fetching shows:', error);
-        res.json({ 
-            success: false, 
-            message: error.message,
-            error: process.env.NODE_ENV === 'development' ? error.stack : undefined
-        });
-    }
-}
-
-// API to get a single show from the database
-export const getShow = async (req, res) =>{
-    try {
-        const {movieId} = req.params;
-        
-        if (!movieId) {
-            return res.json({ success: false, message: 'Movie ID is required' });
-        }
-        
-        console.log('Fetching shows for movie ID:', movieId);
-        
-        // get all upcoming shows for the movie with error handling
-        let shows;
-        try {
-            shows = await Show.find({
-                movie: movieId, 
-                showDateTime: { $gte: new Date() }
-            });
-        } catch (dbError) {
-            console.error('Database query error:', dbError);
-            return res.json({ success: false, message: 'Failed to fetch shows from database' });
-        }
-
-        console.log('Found shows:', shows.length);
-
-        // Get movie with error handling
-        let movie;
-        try {
-            movie = await Movie.findById(movieId);
-            if (!movie) {
-                return res.json({ success: false, message: 'Movie not found' });
-            }
-        } catch (movieError) {
-            console.error('Error fetching movie:', movieError);
-            return res.json({ success: false, message: 'Failed to fetch movie details' });
-        }
-
-        const dateTime = {};
-
-        shows.forEach((show) => {
-            try {
-                if (show && show.showDateTime) {
-                    const date = show.showDateTime.toISOString().split("T")[0];
-                    if (!dateTime[date]) {
-                        dateTime[date] = [];
-                    }
-                    dateTime[date].push({ 
-                        time: show.showDateTime, 
-                        showId: show._id.toString() 
+                    await show.save();
+                } catch (showError) {
+                    console.error('Error saving show:', showError);
+                    return res.status(500).json({ 
+                        success: false, 
+                        message: 'Failed to create show',
+                        error: showError.message 
                     });
                 }
-            } catch (showError) {
-                console.error('Error processing show:', showError);
-                // Continue processing other shows
             }
-        });
+        }
 
-        console.log('Processed dateTime object:', Object.keys(dateTime).length, 'dates');
-        
-        res.json({
-            success: true, 
-            movie, 
-            dateTime,
-            totalShows: shows.length
-        });
+        res.json({ success: true, message: 'Shows added successfully' });
+
     } catch (error) {
-        console.error('Error in getShow:', error);
-        res.json({ 
+        console.error('Error adding show:', error);
+        
+        // Provide more specific error messages
+        if (error.code === 11000) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Duplicate movie or show detected. Please try again.',
+                error: error.message 
+            });
+        }
+        
+        res.status(500).json({ 
             success: false, 
-            message: error.message,
-            error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            message: 'Failed to add show',
+            error: error.message 
         });
     }
-}
+};
 
-// API to get trailer data for a specific movie
+// API to get all shows
+export const getShows = async (req, res) => {
+    try {
+        const shows = await Show.find().populate('movie');
+        
+        console.log('Raw shows from database:', shows.map(s => ({ 
+            showId: s._id, 
+            movieId: s.movie, 
+            movieTitle: s.movie?.title,
+            showDateTime: s.showDateTime 
+        })));
+        
+        const showsWithMovies = shows.map(show => {
+            if (!show.movie) {
+                return {
+                    ...show.toObject(),
+                    movie: {
+                        _id: show.movie,
+                        tmdbId: show.movie, // Add tmdbId for consistency
+                        title: 'Movie not found',
+                        overview: 'Movie information not available',
+                        poster_path: '/default-poster.jpg',
+                        backdrop_path: '/default-backdrop.jpg',
+                        release_date: new Date().toISOString().split('T')[0],
+                        vote_average: 0,
+                        original_language: 'en',
+                        genre_ids: []
+                    }
+                };
+            }
+            return show;
+        });
+
+        console.log('Processed shows:', showsWithMovies.map(s => ({ 
+            showId: s._id, 
+            movieId: s.movie, 
+            movieTitle: s.movie?.title,
+            showDateTime: s.showDateTime 
+        })));
+
+        res.json({ success: true, shows: showsWithMovies });
+
+    } catch (error) {
+        console.error('Error fetching shows:', error);
+        
+        // Provide more specific error messages
+        if (error.name === 'CastError') {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Invalid data format in shows',
+                error: error.message 
+            });
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to fetch shows',
+            error: error.message 
+        });
+    }
+};
+
+// API to get a show by movie ID
+export const getShowByMovieId = async (req, res) => {
+    try {
+        const { movieId } = req.params;
+        
+        if (!movieId) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Movie ID is required' 
+            });
+        }
+        
+        console.log('Looking for shows with movie ID:', movieId);
+        
+        // Try to find a show for this movie with different ID formats
+        let show = await Show.findOne({ movie: movieId }).populate('movie');
+        
+        // If not found, try with string conversion
+        if (!show) {
+            show = await Show.findOne({ movie: movieId.toString() }).populate('movie');
+        }
+        
+        // If still not found, try to find any show and check if movie ID matches
+        if (!show) {
+            const allShows = await Show.find().populate('movie');
+            console.log('Available shows:', allShows.map(s => ({ showId: s._id, movieId: s.movie, movieTitle: s.movie?.title })));
+            
+            // Try to find by movie title or other properties
+            show = allShows.find(s => s.movie && (
+                s.movie._id === movieId || 
+                s.movie._id === movieId.toString() ||
+                s.movie.tmdbId === movieId ||
+                s.movie.tmdbId === movieId.toString()
+            ));
+        }
+        
+        if (!show) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'No shows found for this movie',
+                debug: {
+                    requestedMovieId: movieId,
+                    availableShows: await Show.countDocuments()
+                }
+            });
+        }
+
+        // If movie exists but doesn't have cast/trailer data, try to fetch it from TMDB
+        if (show.movie && (!show.movie.casts || show.movie.casts.length === 0)) {
+            try {
+                const fetchWithRetry = async (url, retries = 3) => {
+                    for (let i = 0; i < retries; i++) {
+                        try {
+                            if (!checkRateLimit('tmdb-api')) {
+                                await new Promise(resolve => setTimeout(resolve, 2000));
+                                continue;
+                            }
+                            
+                            const response = await axios.get(url, {
+                                headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
+                                timeout: 15000
+                            });
+                            return response;
+                        } catch (error) {
+                            console.error(`API call failed for ${url} (attempt ${i + 1}/${retries}):`, error.message);
+                            if (i === retries - 1) throw error;
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                        }
+                    }
+                };
+
+                // Fetch cast data
+                const castResponse = await fetchWithRetry(`https://api.themoviedb.org/3/movie/${movieId}/credits`);
+                const castData = castResponse.data.cast || [];
+                
+                // Update movie with cast data
+                show.movie.casts = castData.slice(0, 12).map(cast => ({
+                    name: cast.name,
+                    profile_path: cast.profile_path,
+                    character: cast.character
+                }));
+                
+                // Save updated movie
+                await show.movie.save();
+                
+            } catch (error) {
+                console.error('Error fetching cast data:', error);
+                // Continue without cast data
+            }
+        }
+
+        res.json({ success: true, show });
+
+    } catch (error) {
+        console.error('Error fetching show by movie ID:', error);
+        
+        // Provide more specific error messages
+        if (error.name === 'CastError') {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Invalid movie ID format',
+                error: error.message 
+            });
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to fetch show',
+            error: error.message 
+        });
+    }
+};
+
+// API to get a specific show by show ID
+export const getShow = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        if (!id) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Show ID is required' 
+            });
+        }
+        
+        const show = await Show.findById(id).populate('movie');
+        
+        if (!show) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Show not found' 
+            });
+        }
+
+        res.json({ success: true, show });
+
+    } catch (error) {
+        console.error('Error fetching show:', error);
+        
+        // Provide more specific error messages
+        if (error.name === 'CastError') {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Invalid show ID format',
+                error: error.message 
+            });
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to fetch show',
+            error: error.message 
+        });
+    }
+};
+
+// API to get movie trailer
 export const getMovieTrailer = async (req, res) => {
     try {
         const { movieId } = req.params;
-        console.log('Fetching trailer for movie ID:', movieId);
-        console.log('TMDB API Key available:', !!process.env.TMDB_API_KEY);
         
-        if (!process.env.TMDB_API_KEY) {
-            return res.json({ success: false, message: 'TMDB API Key not configured' });
+        if (!movieId) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Movie ID is required' 
+            });
         }
 
-        // Add retry logic for network issues
-        let retries = 3;
-        let lastError;
-
-        while (retries > 0) {
-            try {
-                // Check rate limit before making API call
-                if (!checkRateLimit('tmdb-api')) {
-                    console.log('Rate limit hit, waiting 2 seconds...');
+        const fetchWithRetry = async (url, retries = 3) => {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    if (!checkRateLimit('tmdb-api')) {
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        continue;
+                    }
+                    
+                    const response = await axios.get(url, {
+                        headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
+                        timeout: 15000
+                    });
+                    return response;
+                } catch (error) {
+                    console.error(`Trailer API call failed for ${url} (attempt ${i + 1}/${retries}):`, error.message);
+                    if (i === retries - 1) throw error;
                     await new Promise(resolve => setTimeout(resolve, 2000));
-                    continue;
-                }
-                
-                // Fetch movie videos from TMDB API with timeout
-                const { data } = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}/videos`, {
-                    headers: { Authorization: `Bearer ${process.env.TMDB_API_KEY}` },
-                    timeout: 15000 // Increased timeout
-                });
-
-                console.log('TMDB API response:', data);
-                console.log('Available videos:', data.results?.length || 0);
-
-                // Get the first official trailer or teaser
-                const trailer = data.results.find(video => 
-                    (video.type === 'Trailer' || video.type === 'Teaser') && 
-                    video.site === 'YouTube' &&
-                    video.official === true
-                ) || data.results.find(video => 
-                    (video.type === 'Trailer' || video.type === 'Teaser') && 
-                    video.site === 'YouTube'
-                );
-
-                console.log('Found trailer:', trailer);
-
-                return res.json({ 
-                    success: true, 
-                    trailer: trailer ? {
-                        key: trailer.key,
-                        name: trailer.name,
-                        site: trailer.site,
-                        type: trailer.type
-                    } : null
-                });
-            } catch (error) {
-                lastError = error;
-                console.log(`TMDB API call failed (${retries} retries left):`, error.message);
-                retries--;
-                
-                if (retries > 0) {
-                    // Wait before retrying
-                    await new Promise(resolve => setTimeout(resolve, 1000));
                 }
             }
+        };
+
+        const response = await fetchWithRetry(`https://api.themoviedb.org/3/movie/${movieId}/videos`);
+        const videos = response.data.results;
+        
+        // Find trailer
+        const trailer = videos.find(video => 
+            (video.type === 'Trailer' || video.type === 'Teaser') && 
+            video.site === 'YouTube' &&
+            video.official === true
+        ) || videos.find(video => 
+            (video.type === 'Trailer' || video.type === 'Teaser') && 
+            video.site === 'YouTube'
+        );
+
+        if (!trailer) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'No trailer found for this movie' 
+            });
         }
 
-        // If all retries failed
-        console.error('All TMDB API retries failed:', lastError);
-        return res.json({ 
+        res.json({ success: true, trailer });
+
+    } catch (error) {
+        console.error('Error fetching movie trailer:', error);
+        
+        // Provide more specific error messages
+        if (error.response?.status === 404) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Movie not found',
+                error: error.message 
+            });
+        }
+        
+        res.status(500).json({ 
             success: false, 
-            message: 'Failed to fetch trailer after multiple attempts' 
+            message: 'Failed to fetch movie trailer',
+            error: error.message 
         });
-    } catch (error) {
-        console.error('Error in getMovieTrailer:', error);
-        res.json({ success: false, message: error.message });
     }
 };
 
-// Test function to verify movie creation works
-export const testMovieCreation = async (req, res) => {
+// API to search movies
+export const searchMovies = async (req, res) => {
     try {
-        console.log('Testing movie creation...');
+        const { query } = req.query;
         
-        const testMovieData = {
-            _id: "test-movie-123",
-            title: "Test Movie",
-            overview: "This is a test movie",
-            poster_path: "/default-poster.jpg",
-            backdrop_path: "/default-backdrop.jpg",
-            release_date: "2024-01-01",
-            vote_average: 7.5,
-            runtime: 120,
-            genres: ["Action", "Drama"],
-            casts: ["Actor 1", "Actor 2"]
+        if (!query || query.trim() === '') {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Search query is required' 
+            });
+        }
+
+        if (!process.env.TMDB_API_KEY) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'TMDB API key not configured' 
+            });
+        }
+
+        const fetchWithRetry = async (url, retries = 3) => {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    if (!checkRateLimit('tmdb-api')) {
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        continue;
+                    }
+                    
+                    const response = await axios.get(url, {
+                        headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
+                        timeout: 15000
+                    });
+                    return response;
+                } catch (error) {
+                    console.error(`Search API call failed for ${url} (attempt ${i + 1}/${retries}):`, error.message);
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                }
+            }
         };
-        
-        console.log('Creating test movie with data:', JSON.stringify(testMovieData, null, 2));
-        
-        // Use the bypass validation function
-        const testMovie = await createMovieBypassValidation(testMovieData);
-        console.log('Test movie created successfully:', testMovie._id);
-        
-        res.json({success: true, message: 'Test movie created successfully', movie: testMovie});
+
+        const response = await fetchWithRetry(`https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}`);
+        const movies = response.data.results;
+
+        res.json({ success: true, movies });
+
     } catch (error) {
-        console.error('Test movie creation failed:', error);
-        res.json({success: false, message: 'Test movie creation failed: ' + error.message});
+        console.error('Error searching movies:', error);
+        
+        // Provide more specific error messages
+        if (error.response?.status === 401) {
+            return res.status(401).json({ 
+                success: false, 
+                message: 'TMDB API key is invalid',
+                error: error.message 
+            });
+        }
+        
+        if (error.response?.status === 429) {
+            return res.status(429).json({ 
+                success: false, 
+                message: 'TMDB API rate limit exceeded. Please try again later.',
+                error: error.message 
+            });
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to search movies',
+            error: error.message 
+        });
     }
 };
 
-// Alternative movie creation function that bypasses validation
-const createMovieBypassValidation = async (movieData) => {
+// API to get popular movies
+export const getPopularMovies = async (req, res) => {
     try {
-        // Ensure all required fields are present
-        const completeMovieData = {
-            _id: movieData._id,
-            title: movieData.title || `Movie ${movieData._id}`,
-            overview: movieData.overview || "No overview available",
-            poster_path: movieData.poster_path || "/default-poster.jpg",
-            backdrop_path: movieData.backdrop_path || "/default-backdrop.jpg",
-            release_date: movieData.release_date || "Unknown",
-            vote_average: movieData.vote_average || 0,
-            runtime: movieData.runtime || 120,
-            genres: movieData.genres || [],
-            casts: movieData.casts || []
+        if (!process.env.TMDB_API_KEY) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'TMDB API key not configured' 
+            });
+        }
+
+        const fetchWithRetry = async (url, retries = 3) => {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    if (!checkRateLimit('tmdb-api')) {
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        continue;
+                    }
+                    
+                    const response = await axios.get(url, {
+                        headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
+                        timeout: 15000
+                    });
+                    return response;
+                } catch (error) {
+                    console.error(`Popular movies API call failed for ${url} (attempt ${i + 1}/${retries}):`, error.message);
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                }
+            }
         };
-        
-        console.log('Creating movie with bypass validation:', JSON.stringify(completeMovieData, null, 2));
-        
-        // Use insertMany to bypass individual document validation
-        const result = await Movie.insertMany([completeMovieData], { validateBeforeSave: false });
-        console.log('Movie created successfully with bypass:', result[0]._id);
-        return result[0];
+
+        const response = await fetchWithRetry('https://api.themoviedb.org/3/movie/popular');
+        const movies = response.data.results;
+
+        res.json({ success: true, movies });
+
     } catch (error) {
-        console.error('Error creating movie with bypass:', error);
-        throw error;
+        console.error('Error fetching popular movies:', error);
+        
+        // Provide more specific error messages
+        if (error.response?.status === 401) {
+            return res.status(401).json({ 
+                success: false, 
+                message: 'TMDB API key is invalid',
+                error: error.message 
+            });
+        }
+        
+        if (error.response?.status === 429) {
+            return res.status(429).json({ 
+                success: false, 
+                message: 'TMDB API rate limit exceeded. Please try again later.',
+                error: error.message 
+            });
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to fetch popular movies',
+            error: error.message 
+        });
     }
 };

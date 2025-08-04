@@ -7,13 +7,19 @@ import './Layout.css'
 
 const Layout = () => {
 
-  const {isAdmin, fetchIsAdmin} = useAppContext()
+  const { user, loading } = useAppContext()
 
-  useEffect(()=>{
-    fetchIsAdmin()
-  },[])
+  // Show loading while checking authentication
+  if (loading) {
+    return <Loading />
+  }
 
-  return isAdmin ? (
+  // If no user or user is not admin, show loading (will redirect via App.jsx)
+  if (!user || user.role !== 'admin') {
+    return <Loading />
+  }
+
+  return (
     <>
       <AdminNavbar />
       <div className='admin-layout'>
@@ -22,7 +28,7 @@ const Layout = () => {
         </div>
       </div>
     </>
-  ) : <Loading/>
+  )
 }
 
 export default Layout

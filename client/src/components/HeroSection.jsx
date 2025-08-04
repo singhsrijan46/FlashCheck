@@ -9,8 +9,12 @@ const HeroSection = () => {
   const { shows, image_base_url } = useAppContext()
   const [currentSlide, setCurrentSlide] = useState(0)
 
+  // Debug logging
+  console.log('HeroSection - shows:', shows)
+  console.log('HeroSection - image_base_url:', image_base_url)
+
   // Get first 5 movies for slideshow
-  const slideshowMovies = shows.slice(0, 5)
+  const slideshowMovies = shows.slice(0, 5).map(show => show.movie || show)
 
   useEffect(() => {
     if (slideshowMovies.length === 0) return
@@ -36,22 +40,50 @@ const HeroSection = () => {
     navigate(`/movies/${movieId}`)
   }
 
+  // Show fallback when no shows are available
   if (slideshowMovies.length === 0) {
     return (
       <div className='hero-section'>
+        <div 
+          className='hero-background'
+          style={{
+            backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.8) 100%), url(https://image.tmdb.org/t/p/original/1E5baAaEse26fej7uHcjOgEE2t2.jpg)`
+          }}
+        />
         <div className='hero-content'>
-          <h1 className='hero-title'>Welcome to FlashCheck</h1>
-          <p className='hero-description'>Discover the latest movies and book your tickets</p>
-          <button onClick={handleExploreClick} className='hero-button'>
-            Explore Movies
-            <ArrowRight className="hero-button-icon"/>
-          </button>
+          <div className='hero-movie-info'>
+            <h1 className='hero-title'>Welcome to FlashCheck</h1>
+            <div className='hero-meta'>
+              <span>EN</span>
+              <div className='hero-meta-item'>
+                <CalendarIcon className='hero-meta-icon'/> 
+                2024
+              </div>
+              <div className='hero-meta-item'>
+                <StarIcon className='hero-meta-icon'/> 
+                8.5
+              </div>
+            </div>
+            <p className='hero-description'>
+              Discover the latest movies and book your tickets with ease. Experience the best in entertainment with our premium movie booking platform.
+            </p>
+            <div className='hero-buttons'>
+              <button onClick={handleExploreClick} className='hero-button'>
+                Explore Movies
+                <ArrowRight className="hero-button-icon"/>
+              </button>
+              <button onClick={() => navigate('/movies')} className='hero-button-secondary'>
+                View All Movies
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     )
   }
 
   const currentMovie = slideshowMovies[currentSlide]
+  console.log('HeroSection - currentMovie:', currentMovie)
   const hasTrailer = currentMovie.trailer && currentMovie.trailer.key
 
   return (
@@ -83,26 +115,22 @@ const HeroSection = () => {
         <div className='hero-movie-info'>
           <h1 className='hero-title'>{currentMovie.title}</h1>
 
-      <div className='hero-meta'>
-            <span>{currentMovie.genres.map(genre => genre.name).join(' | ')}</span>
+          <div className='hero-meta'>
+            <span>{currentMovie.original_language?.toUpperCase() || 'EN'}</span>
             <div className='hero-meta-item'>
               <CalendarIcon className='hero-meta-icon'/> 
               {new Date(currentMovie.release_date).getFullYear()}
             </div>
-        <div className='hero-meta-item'>
-              <ClockIcon className='hero-meta-icon'/> 
-              {Math.floor(currentMovie.runtime / 60)}h {currentMovie.runtime % 60}m
-        </div>
-        <div className='hero-meta-item'>
+            <div className='hero-meta-item'>
               <StarIcon className='hero-meta-icon'/> 
-              {currentMovie.vote_average.toFixed(1)}
+              {currentMovie.vote_average?.toFixed(1) || '0.0'}
             </div>
           </div>
           
           <p className='hero-description'>
-            {currentMovie.overview.length > 200 
+            {currentMovie.overview && currentMovie.overview.length > 200 
               ? currentMovie.overview.substring(0, 200) + '...' 
-              : currentMovie.overview
+              : currentMovie.overview || 'No description available'
             }
           </p>
           

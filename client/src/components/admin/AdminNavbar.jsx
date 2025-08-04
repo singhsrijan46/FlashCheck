@@ -61,6 +61,7 @@ const AdminNavbar = () => {
   const adminNavlinks = [
     { name: 'Dashboard', path: '/admin' },
     { name: 'Add Shows', path: '/admin/add-shows' },
+    { name: 'Add Theatre', path: '/admin/add-theatre' },
     { name: 'List Shows', path: '/admin/list-shows' },
     { name: 'List Bookings', path: '/admin/list-bookings' },
   ]

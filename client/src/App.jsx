@@ -12,6 +12,7 @@ import Footer from './components/Footer'
 import Layout from './pages/admin/Layout'
 import Dashboard from './pages/admin/Dashboard'
 import AddShows from './pages/admin/AddShows'
+import AddTheatre from './pages/admin/AddTheatre'
 import ListShows from './pages/admin/ListShows'
 import ListBookings from './pages/admin/ListBookings'
 import { useAppContext } from './context/AppContext'
@@ -51,6 +52,7 @@ const App = () => {
         <Route path='/admin/*' element={user && user.role === 'admin' ? <Layout/> : <Login state={{ from: location }}/>}>
           <Route index element={<Dashboard/>}/>
           <Route path="add-shows" element={<AddShows/>}/>
+          <Route path="add-theatre" element={<AddTheatre/>}/>
           <Route path="list-shows" element={<ListShows/>}/>
           <Route path="list-bookings" element={<ListBookings/>}/>
         </Route>
