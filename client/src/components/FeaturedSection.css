@@ -112,4 +112,27 @@
 .featured-show-more-btn:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.3);
+}
+
+.featured-no-movies {
+    text-align: center;
+    padding: 40px 20px;
+    color: #9ca3af;
+}
+
+.featured-no-movies p {
+    margin: 10px 0;
+    font-size: 1rem;
+}
+
+.featured-loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: #1E90FF;
+}
+
+.featured-loading p {
+    margin: 10px 0;
+    font-size: 1rem;
+    font-weight: 500;
 } 

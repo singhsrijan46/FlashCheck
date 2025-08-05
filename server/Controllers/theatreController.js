@@ -1,5 +1,28 @@
 import Theatre from "../models/Theatre.js";
 
+// Get all unique states
+export const getAllStates = async (req, res) => {
+    try {
+        const states = await Theatre.distinct('state', { isActive: true }).sort();
+        res.json({ success: true, states });
+    } catch (error) {
+        console.error('Error fetching states:', error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+// Get cities by state
+export const getCitiesByState = async (req, res) => {
+    try {
+        const { state } = req.params;
+        const cities = await Theatre.distinct('city', { state, isActive: true }).sort();
+        res.json({ success: true, cities });
+    } catch (error) {
+        console.error('Error fetching cities by state:', error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
 // Get all theatres
 export const getAllTheatres = async (req, res) => {
     try {
@@ -27,7 +50,11 @@ export const getTheatresByState = async (req, res) => {
 export const getTheatresByCity = async (req, res) => {
     try {
         const { city } = req.params;
+        console.log('getTheatresByCity - Requested city:', city);
+        
         const theatres = await Theatre.find({ city, isActive: true }).sort({ name: 1 });
+        console.log('getTheatresByCity - Found theatres:', theatres.length);
+        
         res.json({ success: true, theatres });
     } catch (error) {
         console.error('Error fetching theatres by city:', error);
@@ -38,9 +65,11 @@ export const getTheatresByCity = async (req, res) => {
 // Add new theatre
 export const addTheatre = async (req, res) => {
     try {
+        console.log('addTheatre - Request body:', req.body);
         const { name, state, city, address, numberOfScreens } = req.body;
 
         if (!name || !state || !city || !address || !numberOfScreens) {
+            console.log('addTheatre - Missing required fields:', { name, state, city, address, numberOfScreens });
             return res.json({ success: false, message: 'All fields are required' });
         }
 
@@ -50,6 +79,14 @@ export const addTheatre = async (req, res) => {
             screens.push(`Screen ${i}`);
         }
 
+        console.log('addTheatre - Creating theatre with data:', {
+            name,
+            state,
+            city,
+            address,
+            screens
+        });
+
         const theatre = await Theatre.create({
             name,
             state,
@@ -57,6 +94,8 @@ export const addTheatre = async (req, res) => {
             address,
             screens
         });
+
+        console.log('addTheatre - Theatre created successfully:', theatre);
 
         res.json({ 
             success: true, 

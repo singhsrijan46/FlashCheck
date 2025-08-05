@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import AdminNavbar from '../../components/admin/AdminNavbar';
 import AdminSidebar from '../../components/admin/AdminSidebar';
+import toast from 'react-hot-toast';
 import './AddTheatre.css';
 
 const AddTheatre = () => {
   const navigate = useNavigate();
-  const { user } = useAppContext();
+  const { user, axios, getToken } = useAppContext();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -21,6 +22,7 @@ const AddTheatre = () => {
 
   // States and cities data
   const statesAndCities = {
+    'Madhya Pradesh': ['Gwalior', 'Bhopal', 'Indore', 'Jabalpur', 'Ujjain', 'Sagar', 'Rewa', 'Satna'],
     'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Thane', 'Nashik', 'Aurangabad', 'Solapur', 'Kolhapur'],
     'Delhi': ['New Delhi', 'Delhi', 'Gurgaon', 'Noida', 'Faridabad'],
     'Karnataka': ['Bangalore', 'Mysore', 'Hubli', 'Mangalore', 'Belgaum'],
@@ -56,19 +58,20 @@ const AddTheatre = () => {
     setMessage('');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/theatre/add`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(formData)
+      console.log('Submitting theatre data:', formData);
+      
+      const token = await getToken();
+      const { data } = await axios.post('/api/theatre/add', formData, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
-      const data = await response.json();
+      console.log('Theatre API response:', data);
 
       if (data.success) {
-        setMessage('Theatre added successfully!');
+        toast.success('Theatre added successfully!');
         setFormData({
           name: '',
           state: '',
@@ -76,11 +79,30 @@ const AddTheatre = () => {
           address: '',
           numberOfScreens: 1
         });
+        setMessage('Theatre added successfully!');
       } else {
+        toast.error(data.message || 'Failed to add theatre');
         setMessage(data.message || 'Failed to add theatre');
       }
     } catch (error) {
-      setMessage('Error adding theatre. Please try again.');
+      console.error('Error adding theatre:', error);
+      
+      let errorMessage = 'Error adding theatre. Please try again.';
+      
+      if (error.response?.status === 401) {
+        errorMessage = 'Authentication failed. Please login again.';
+      } else if (error.response?.status === 400) {
+        errorMessage = error.response.data.message || 'Invalid theatre data';
+      } else if (error.response?.status === 500) {
+        errorMessage = 'Server error. Please try again later.';
+      } else if (error.code === 'ECONNREFUSED') {
+        errorMessage = 'Cannot connect to server. Please check if the server is running.';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      toast.error(errorMessage);
+      setMessage(errorMessage);
     } finally {
       setLoading(false);
     }

@@ -9,6 +9,54 @@
   padding-top: 5rem;
 }
 
+/* Loading and Error States */
+.seat-layout-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  width: 100%;
+}
+
+.seat-layout-error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  width: 100%;
+  text-align: center;
+  padding: 2rem;
+}
+
+.seat-layout-error h2 {
+  color: #ef4444;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.seat-layout-error p {
+  color: #9ca3af;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+.seat-layout-back-btn {
+  padding: 0.75rem 1.5rem;
+  background-color: #1E90FF;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.seat-layout-back-btn:hover {
+  background-color: #4682B4;
+}
+
 .seat-layout-container {
   display: flex;
   gap: 2rem;
@@ -80,6 +128,12 @@
   font-size: 0.9rem;
   color: #a855f7;
   margin: 0;
+}
+
+.seat-layout-theatre-info {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 0.25rem 0 0 0;
 }
 
 .seat-layout-seats-info {

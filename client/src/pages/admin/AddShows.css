@@ -82,6 +82,71 @@
     margin-bottom: 40px;
 }
 
+/* Theatre Selection Section */
+.add-shows-theatre-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.add-shows-dropdown-group {
+    margin-bottom: 20px;
+}
+
+.add-shows-dropdown-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #d1d5db;
+    margin-bottom: 8px;
+}
+
+.add-shows-dropdown-icon {
+    width: 16px;
+    height: 16px;
+    color: #8b5cf6;
+}
+
+.add-shows-dropdown {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.add-shows-dropdown:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.add-shows-dropdown:disabled {
+    background: rgba(255, 255, 255, 0.05);
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+.add-shows-dropdown option {
+    background: #1a1a1a;
+    color: white;
+    padding: 8px;
+}
+
+.add-shows-loading {
+    font-size: 0.875rem;
+    color: #8b5cf6;
+    margin-top: 4px;
+    font-style: italic;
+}
+
 /* Manual Input Help Text */
 .add-shows-manual-help {
     font-size: 1rem;
@@ -286,13 +351,31 @@
 
 .add-shows-datetime-section {
     margin-bottom: 30px;
-    max-width: 400px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.add-shows-datetime-input {
+.add-shows-datetime-inputs {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: end;
+}
+
+.add-shows-datetime-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 200px;
+}
+
+.add-shows-datetime-group label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #d1d5db;
+    margin-bottom: 5px;
 }
 
 .add-shows-datetime-field {
@@ -356,13 +439,41 @@
 .add-shows-time-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    background: #333;
-    border-radius: 4px;
-    color: white;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.add-shows-time-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.add-shows-time-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.add-shows-time-datetime {
+    font-weight: 600;
+    color: #d1d5db;
     font-size: 1rem;
-    font-weight: 500;
+}
+
+.add-shows-time-screen {
+    font-size: 0.9rem;
+    color: #9ca3af;
+}
+
+.add-shows-time-format {
+    font-size: 0.9rem;
+    color: #9ca3af;
 }
 
 .add-shows-time-delete {
@@ -680,3 +791,111 @@
   color: #667eea;
   font-weight: 600;
 }
+
+/* Movie Format Section */
+.add-shows-format-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.add-shows-format-input {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.add-shows-format-input label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #d1d5db;
+    margin-bottom: 5px;
+}
+
+.add-shows-format-dropdown {
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.add-shows-format-dropdown:focus {
+    outline: none;
+    border-color: #1E90FF;
+    box-shadow: 0 0 0 2px rgba(30, 144, 255, 0.2);
+}
+
+.add-shows-format-dropdown option {
+    background: #1a1a1a;
+    color: white;
+    padding: 8px;
+}
+
+/* Screen Selection Section */
+.add-shows-screen-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.add-shows-screen-input {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.add-shows-screen-input label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #d1d5db;
+    margin-bottom: 5px;
+}
+
+.add-shows-screen-dropdown {
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.add-shows-screen-dropdown:focus {
+    outline: none;
+    border-color: #1E90FF;
+    box-shadow: 0 0 0 2px rgba(30, 144, 255, 0.2);
+}
+
+.add-shows-screen-dropdown option {
+    background: #1a1a1a;
+    color: white;
+    padding: 8px;
+}
+
+/* Debug Info */
+.add-shows-debug-info {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(255, 165, 0, 0.1);
+    border: 1px solid rgba(255, 165, 0, 0.3);
+    border-radius: 8px;
+    color: #ffa500;
+    font-size: 0.9rem;
+}
+
+.add-shows-debug-info p {
+    margin: 5px 0;
+    font-family: monospace;
+}
+
+/* Seat Prices Input */

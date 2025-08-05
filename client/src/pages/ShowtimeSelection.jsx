@@ -6,68 +6,80 @@ import './ShowtimeSelection.css';
 const ShowtimeSelection = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { axios, image_base_url } = useAppContext();
+  const { axios, image_base_url, selectedCity } = useAppContext();
   
   const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedTime, setSelectedTime] = useState(null);
+  const [selectedTheatre, setSelectedTheatre] = useState(null);
+  const [selectedShowtime, setSelectedShowtime] = useState(null);
   const [currentMovie, setCurrentMovie] = useState(null);
-  const [showData, setShowData] = useState(null);
+  const [showData, setShowData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchShowData = async () => {
       try {
         setLoading(true);
-        const { data } = await axios.get(`/api/show/${id}`);
-        if (data.success) {
-          setCurrentMovie(data.show.movie);
-          // Get all shows for this movie to display showtimes
-          const showsResponse = await axios.get(`/api/show/all`);
-          if (showsResponse.data.success) {
-            console.log('All shows:', showsResponse.data.shows);
-            console.log('Looking for movie ID:', id);
-            
-            // Try different ways to match the movie ID
-            const movieShows = showsResponse.data.shows.filter(show => {
-              const showMovieId = show.movie;
-              const requestedId = id;
-              
-              console.log('Comparing:', { 
-                showMovieId, 
-                requestedId, 
-                showMovieIdType: typeof showMovieId,
-                requestedIdType: typeof requestedId,
-                isObject: typeof showMovieId === 'object'
-              });
-              
-              // If show.movie is an object (populated), check its _id
-              if (typeof showMovieId === 'object' && showMovieId._id) {
-                return showMovieId._id === requestedId || 
-                       showMovieId._id === requestedId.toString() ||
-                       showMovieId._id.toString() === requestedId ||
-                       showMovieId._id.toString() === requestedId.toString();
-              }
-              
-              // If show.movie is a string (movie ID), compare directly
-              return showMovieId === requestedId || 
-                     showMovieId === requestedId.toString() ||
-                     showMovieId.toString() === requestedId ||
-                     showMovieId.toString() === requestedId.toString();
-            });
-            
-            console.log('Filtered shows for movie:', movieShows);
-            setShowData(movieShows);
-          }
+        setError(null);
+        
+        console.log('🔍 Starting to fetch show data...');
+        console.log('🔍 Movie ID:', id);
+        console.log('🔍 Selected City:', selectedCity);
+        
+        // Get movie details first
+        console.log('🔍 Fetching movie details...');
+        const movieResponse = await axios.get(`/api/show/${id}`);
+        console.log('🔍 Movie response:', movieResponse.data);
+        
+        if (movieResponse.data.success) {
+          setCurrentMovie(movieResponse.data.show.movie);
+          console.log('🔍 Movie set:', movieResponse.data.show.movie.title);
+        }
+        
+        // Get shows for this movie in the selected city
+        const city = selectedCity || 'Varanasi';
+        console.log('🔍 Fetching shows for movie:', id, 'in city:', city);
+        
+        const showsResponse = await axios.get(`/api/show/${id}/city/${city}`);
+        console.log('🔍 Shows response:', showsResponse.data);
+        
+        if (showsResponse.data.success) {
+          console.log('🔍 Shows found:', showsResponse.data.shows.length);
+          setShowData(showsResponse.data.shows);
+        } else {
+          console.log('🔍 No shows found for this movie in', city);
+          setShowData([]);
         }
       } catch (error) {
-        console.error('Error fetching show data:', error);
+        console.error('❌ Error fetching show data:', error);
+        console.error('❌ Error details:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status,
+          config: error.config
+        });
+        
+        let errorMessage = 'Failed to load showtimes. Please try again.';
+        
+        if (error.code === 'ECONNREFUSED') {
+          errorMessage = 'Cannot connect to server. Please check if the server is running.';
+        } else if (error.response?.status === 404) {
+          errorMessage = 'Movie not found.';
+        } else if (error.response?.status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        } else if (error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        }
+        
+        setError(errorMessage);
+        setShowData([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchShowData();
-  }, [id, axios]);
+  }, [id, selectedCity, axios]);
 
   // Generate dates for the next 7 days
   const generateDates = () => {
@@ -104,23 +116,7 @@ const ShowtimeSelection = () => {
     });
   };
 
-  const handleDateSelect = (date) => {
-    setSelectedDate(date);
-    setSelectedTime(null);
-  };
-
-  const handleTimeSelect = (timeSlot) => {
-    setSelectedTime(timeSlot);
-  };
-
-  const handleBookSeats = () => {
-    if (selectedDate && selectedTime) {
-      const dateStr = selectedDate.toISOString().split('T')[0];
-      navigate(`/movies/${id}/${dateStr}`);
-    }
-  };
-
-  // Helper function to check if a date has shows
+  // Check if a date has shows
   const hasShowsForDate = (date) => {
     if (!showData || !Array.isArray(showData)) return false;
     const dateStr = date.toISOString().split('T')[0];
@@ -130,7 +126,7 @@ const ShowtimeSelection = () => {
     });
   };
 
-  // Helper function to get shows for a specific date
+  // Get shows for a specific date
   const getShowsForDate = (date) => {
     if (!showData || !Array.isArray(showData)) return [];
     const dateStr = date.toISOString().split('T')[0];
@@ -140,12 +136,73 @@ const ShowtimeSelection = () => {
     });
   };
 
+  // Group shows by theatre for a specific date
+  const getTheatresForDate = (date) => {
+    const shows = getShowsForDate(date);
+    const theatreMap = new Map();
+    
+    shows.forEach(show => {
+      const theatreId = show.theatre?._id || show.theatre;
+      const theatreName = show.theatre?.name || 'Unknown Theatre';
+      
+      if (!theatreMap.has(theatreId)) {
+        theatreMap.set(theatreId, {
+          theatreId: theatreId,
+          theatreName: theatreName,
+          shows: []
+        });
+      }
+      
+      theatreMap.get(theatreId).shows.push(show);
+    });
+    
+    return Array.from(theatreMap.values());
+  };
+
+  const handleDateSelect = (date) => {
+    setSelectedDate(date);
+    setSelectedTheatre(null);
+    setSelectedShowtime(null);
+  };
+
+  const handleTheatreSelect = (theatre) => {
+    setSelectedTheatre(theatre);
+    setSelectedShowtime(null);
+  };
+
+  const handleShowtimeSelect = (showtime) => {
+    setSelectedShowtime(showtime);
+  };
+
+  const handleBookSeats = () => {
+    if (selectedDate && selectedShowtime) {
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      navigate(`/movies/${id}/${dateStr}`);
+    }
+  };
+
   if (loading) {
-    return <div className="showtime-loading">Loading...</div>;
+    return (
+      <div className="showtime-selection-page">
+        <div className="showtime-loading">Loading showtimes...</div>
+      </div>
+    );
   }
 
-  if (!currentMovie || !showData) {
-    return <div className="showtime-error">No shows available for this movie.</div>;
+  if (error) {
+    return (
+      <div className="showtime-selection-page">
+        <div className="showtime-error">{error}</div>
+      </div>
+    );
+  }
+
+  if (!currentMovie) {
+    return (
+      <div className="showtime-selection-page">
+        <div className="showtime-error">Movie not found.</div>
+      </div>
+    );
   }
 
   return (
@@ -161,7 +218,7 @@ const ShowtimeSelection = () => {
           <div className="showtime-movie-details">
             <h1 className="showtime-movie-title">{currentMovie.title}</h1>
             <p className="showtime-movie-meta">
-              {currentMovie.runtime} min • {currentMovie.genres.map(genre => genre.name).join(", ")}
+              {currentMovie.runtime} min • {currentMovie.genres?.map(genre => genre.name).join(", ") || 'Action, Drama'}
             </p>
           </div>
         </div>
@@ -169,10 +226,10 @@ const ShowtimeSelection = () => {
 
       {/* Date Selection */}
       <div className="showtime-date-section">
+        <h2 className="showtime-section-title">Select Date</h2>
         <div className="showtime-date-picker">
           {dates.map((date, index) => {
             const formatted = formatDate(date);
-            const dateStr = date.toISOString().split('T')[0];
             const hasShows = hasShowsForDate(date);
             const isSelected = selectedDate && 
               selectedDate.getDate() === date.getDate() && 
@@ -181,50 +238,86 @@ const ShowtimeSelection = () => {
             return (
               <button
                 key={index}
-                className={`showtime-date-btn ${isSelected ? 'selected' : ''} ${!hasShows ? 'disabled' : ''}`}
+                className={`showtime-date-btn ${isSelected ? 'selected' : ''} ${hasShows ? 'has-shows' : 'no-shows'}`}
                 onClick={() => hasShows && handleDateSelect(date)}
                 disabled={!hasShows}
               >
                 <span className="showtime-date-day">{formatted.day}</span>
                 <span className="showtime-date-number">{formatted.dateNum}</span>
                 <span className="showtime-date-month">{formatted.month}</span>
+                {hasShows && <span className="showtime-has-shows-indicator">●</span>}
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* Time Selection */}
+      {/* Theatre Selection */}
       {selectedDate && (
-        <div className="showtime-time-section">
-          <div className="showtime-time-container">
-            <h2 className="showtime-time-title">Select Showtime</h2>
-            <div className="showtime-time-grid">
-              {(() => {
-                const dateStr = selectedDate.toISOString().split('T')[0];
-                const timeSlots = getShowsForDate(selectedDate);
-                
-                return timeSlots.map((slot, index) => {
-                  const isSelected = selectedTime && selectedTime._id === slot._id;
-                  return (
+        <div className="showtime-theatre-section">
+          <h2 className="showtime-section-title">Select Theatre</h2>
+          <div className="showtime-theatre-list">
+            {(() => {
+              const theatres = getTheatresForDate(selectedDate);
+              
+              if (theatres.length === 0) {
+                return (
+                  <div className="showtime-no-theatres">
+                    No theatres available for the selected date.
+                  </div>
+                );
+              }
+              
+              return theatres.map((theatre, index) => {
+                const isSelected = selectedTheatre && selectedTheatre.theatreId === theatre.theatreId;
+                return (
+                  <div key={index} className="showtime-theatre-item">
                     <button
-                      key={index}
-                      className={`showtime-time-btn ${isSelected ? 'selected' : ''} available`}
-                      onClick={() => handleTimeSelect(slot)}
+                      className={`showtime-theatre-btn ${isSelected ? 'selected' : ''}`}
+                      onClick={() => handleTheatreSelect(theatre)}
                     >
-                      <span className="showtime-time">{formatTime(slot.showDateTime)}</span>
-                      <span className="showtime-format">2D</span>
+                      <div className="showtime-theatre-info">
+                        <span className="showtime-theatre-name">{theatre.theatreName}</span>
+                        <span className="showtime-theatre-count">{theatre.shows.length} showtimes</span>
+                      </div>
                     </button>
-                  );
-                });
-              })()}
-            </div>
+                  </div>
+                );
+              });
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* Showtime Selection */}
+      {selectedDate && selectedTheatre && (
+        <div className="showtime-time-section">
+          <h2 className="showtime-section-title">
+            Select Showtime - {selectedTheatre.theatreName}
+          </h2>
+          <div className="showtime-time-grid">
+            {selectedTheatre.shows.map((showtime, index) => {
+              const isSelected = selectedShowtime && selectedShowtime._id === showtime._id;
+              return (
+                <button
+                  key={index}
+                  className={`showtime-time-btn ${isSelected ? 'selected' : ''}`}
+                  onClick={() => handleShowtimeSelect(showtime)}
+                >
+                  <div className="showtime-slot-info">
+                    <span className="showtime-time">{formatTime(showtime.showDateTime)}</span>
+                    <span className="showtime-format">{showtime.format || '2D'}</span>
+                    <span className="showtime-screen">Screen {showtime.screen}</span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
 
       {/* Book Seats Button */}
-      {selectedDate && selectedTime && (
+      {selectedDate && selectedShowtime && (
         <div className="showtime-book-section">
           <button 
             className="showtime-book-btn"
@@ -232,6 +325,20 @@ const ShowtimeSelection = () => {
           >
             Book Seats
           </button>
+        </div>
+      )}
+
+      {/* Debug Info (remove in production) */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="showtime-debug-info">
+          <p>Debug: {showData.length} total shows found</p>
+          <p>Selected City: {selectedCity || 'Varanasi'}</p>
+          {selectedDate && (
+            <p>Selected Date: {selectedDate.toISOString().split('T')[0]} ({getShowsForDate(selectedDate).length} shows)</p>
+          )}
+          {selectedTheatre && (
+            <p>Selected Theatre: {selectedTheatre.theatreName} ({selectedTheatre.shows.length} showtimes)</p>
+          )}
         </div>
       )}
     </div>

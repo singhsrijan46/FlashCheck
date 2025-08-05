@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { assets } from '../assets/assets'
 import { MenuIcon, SearchIcon, TicketPlus, XIcon, LogOut, User, ChevronDown } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
+import CitySelector from './CitySelector'
 import './Navbar.css'
 
 const Navbar = () => {
@@ -77,6 +78,8 @@ const Navbar = () => {
         <div className='navbar-search-container' onClick={handleSearchClick}>
           <SearchIcon className='navbar-search-icon'/>
         </div>
+        
+        <CitySelector />
         
         <div className='navbar-nav-links'>
           <div className='navbar-nav-indicator'></div>

@@ -29,9 +29,17 @@ const App = () => {
 
   const { user, loading } = useAppContext()
 
+  // Debug logging
+  console.log('App - loading:', loading)
+  console.log('App - user:', user)
+  console.log('App - location:', location.pathname)
+
   if (loading) {
+    console.log('App - Showing Loading component')
     return <Loading />;
   }
+
+  console.log('App - Rendering main app')
 
   return (
     <>

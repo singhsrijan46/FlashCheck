@@ -1,25 +1,20 @@
 import express from "express";
 import { protectAdmin } from "../middleware/auth.js";
-import { 
-    getAllTheatres, 
-    getTheatresByState, 
-    getTheatresByCity, 
-    addTheatre, 
-    updateTheatre, 
-    deleteTheatre, 
-    getTheatreById 
-} from "../controllers/theatreController.js";
+import { getAllStates, getCitiesByState, getTheatresByCity, getAllTheatres, addTheatre, updateTheatre, deleteTheatre, getTheatreById } from "../controllers/theatreController.js";
 
 const theatreRouter = express.Router();
 
-// Get all theatres
-theatreRouter.get('/all', protectAdmin, getAllTheatres);
+// Get all states
+theatreRouter.get('/states', protectAdmin, getAllStates);
 
-// Get theatres by state
-theatreRouter.get('/state/:state', protectAdmin, getTheatresByState);
+// Get cities by state
+theatreRouter.get('/cities/:state', protectAdmin, getCitiesByState);
 
 // Get theatres by city
 theatreRouter.get('/city/:city', protectAdmin, getTheatresByCity);
+
+// Get all theatres
+theatreRouter.get('/all', protectAdmin, getAllTheatres);
 
 // Get theatre by ID
 theatreRouter.get('/:id', protectAdmin, getTheatreById);

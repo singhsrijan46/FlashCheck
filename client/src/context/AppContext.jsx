@@ -14,6 +14,7 @@ export const AppProvider = ({ children }) => {
     const [user, setUser] = useState(null)
     const [loading, setLoading] = useState(true)
     const [fetchingShows, setFetchingShows] = useState(false)
+    const [selectedCity, setSelectedCity] = useState("Varanasi") // Default city
 
     const image_base_url = import.meta.env.VITE_TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p/w500';
 
@@ -148,32 +149,23 @@ export const AppProvider = ({ children }) => {
     }
 
     const fetchShows = async () => {
-        // Prevent multiple simultaneous calls
-        if (fetchingShows) {
-            console.log('fetchShows already in progress, skipping...');
-            return;
-        }
-        
         try {
+            console.log('AppContext - Starting fetchShows')
             setFetchingShows(true);
-            console.log('Fetching shows from:', axios.defaults.baseURL + '/api/show/all');
-            const { data } = await axios.get('/api/show/all')
-            console.log('Shows API response:', data);
+            const { data } = await axios.get('/api/show/now-playing-public');
             
-            if(data.success){
-                console.log('Shows data received:', data.shows);
-                setShows(data.shows || [])
+            if (data.success) {
+                console.log('AppContext - Shows fetched successfully:', data.movies?.length || 0)
+                setShows(data.movies || []);
             } else {
-                console.error('Shows API returned success: false:', data.message);
-                toast.error(data.message)
+                console.error('Failed to fetch shows:', data.message);
+                toast.error('Failed to fetch shows');
             }
         } catch (error) {
             console.error('Error fetching shows:', error);
-            console.error('Error response:', error.response?.data);
-            console.error('Error status:', error.response?.status);
             
             // Provide more specific error messages
-            let errorMessage = 'Failed to fetch shows';
+            let errorMessage = 'Error fetching shows';
             
             if (error.response?.status === 404) {
                 errorMessage = 'Shows endpoint not found';
@@ -187,13 +179,13 @@ export const AppProvider = ({ children }) => {
                 errorMessage = error.response.data.message;
             }
             
+            console.log('AppContext - Show fetch error:', errorMessage)
             toast.error(errorMessage);
-            // Set empty shows array to prevent app from breaking
-            setShows([]);
         } finally {
             setFetchingShows(false);
+            console.log('AppContext - fetchShows completed')
         }
-    }
+    };
 
     const refreshAdminData = async () => {
         await fetchShows()
@@ -244,6 +236,7 @@ export const AppProvider = ({ children }) => {
     useEffect(() => {
         const checkAuth = async () => {
             try {
+                console.log('AppContext - Starting auth check')
                 const token = getToken();
                 if (token) {
                     try {
@@ -253,17 +246,23 @@ export const AppProvider = ({ children }) => {
                         if (data.success) {
                             setUser(data.user);
                             setIsAdmin(data.user.role === 'admin');
+                            console.log('AppContext - User authenticated:', data.user)
                         } else {
                             removeToken();
+                            console.log('AppContext - Auth failed, removing token')
                         }
                     } catch (error) {
                         console.error('Auth check error:', error);
                         removeToken();
+                        console.log('AppContext - Auth error, removing token')
                     }
+                } else {
+                    console.log('AppContext - No token found')
                 }
             } catch (error) {
                 console.error('Error in checkAuth:', error);
             } finally {
+                console.log('AppContext - Setting loading to false')
                 setLoading(false);
             }
         };
@@ -299,7 +298,7 @@ export const AppProvider = ({ children }) => {
         fetchIsAdmin,
         user, getToken, navigate, isAdmin, shows, 
         favoriteMovies, fetchFavoriteMovies, fetchShows, refreshAdminData, refreshShows, image_base_url,
-        login, register, logout, loading
+        login, register, logout, loading, selectedCity, setSelectedCity
     }
 
     return (

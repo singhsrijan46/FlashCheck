@@ -80,6 +80,14 @@
   margin-bottom: 2rem;
 }
 
+.showtime-section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
 .showtime-date-section::before {
   content: '';
   position: absolute;
@@ -113,6 +121,7 @@
   transition: all 0.2s;
   min-width: 5rem;
   flex-shrink: 0;
+  position: relative;
 }
 
 .showtime-date-btn:hover {
@@ -124,6 +133,36 @@
   background-color: #1E90FF;
   border-color: #1E90FF;
   color: white;
+}
+
+.showtime-date-btn.has-shows {
+  border-color: #10B981;
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.showtime-date-btn.has-shows:hover {
+  border-color: #10B981;
+  background-color: rgba(16, 185, 129, 0.2);
+}
+
+.showtime-date-btn.no-shows {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: #4b5563;
+  color: #6b7280;
+}
+
+.showtime-date-btn.no-shows:hover {
+  background-color: rgba(31, 41, 55, 0.8);
+  transform: none;
+}
+
+.showtime-has-shows-indicator {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  color: #10B981;
+  font-size: 0.5rem;
 }
 
 .showtime-date-day {
@@ -141,6 +180,104 @@
 .showtime-date-month {
   font-size: 0.75rem;
   font-weight: 500;
+}
+
+/* Theatre Selection Section */
+.showtime-theatre-section {
+  background: rgba(31, 41, 55, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  padding: 2rem;
+  margin: 0 auto 2rem auto;
+  max-width: 60rem;
+  position: relative;
+}
+
+.showtime-theatre-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(30, 144, 255, 0.05) 0%, rgba(70, 130, 180, 0.02) 100%);
+  pointer-events: none;
+  border-radius: 1rem;
+}
+
+.showtime-theatre-container {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.showtime-theatre-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.showtime-theatre-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.showtime-no-theatres {
+  text-align: center;
+  color: #6b7280;
+  font-size: 1rem;
+  padding: 2rem;
+}
+
+.showtime-theatre-item {
+  width: 100%;
+}
+
+.showtime-theatre-btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  background: rgba(31, 41, 55, 0.8);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.showtime-theatre-btn:hover {
+  border-color: #1E90FF;
+  background-color: rgba(30, 144, 255, 0.1);
+}
+
+.showtime-theatre-btn.selected {
+  background-color: #1E90FF;
+  border-color: #1E90FF;
+  color: white;
+}
+
+.showtime-theatre-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.showtime-theatre-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: inherit;
+}
+
+.showtime-theatre-count {
+  font-size: 0.75rem;
+  color: inherit;
+  opacity: 0.8;
 }
 
 /* Time Selection Section */
@@ -229,6 +366,42 @@
 .showtime-format {
   font-size: 0.75rem;
   font-weight: 500;
+}
+
+/* New showtime slot layout */
+.showtime-slot-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.showtime-theatre {
+  font-size: 0.7rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.showtime-screen {
+  font-size: 0.65rem;
+  color: #9ca3af;
+}
+
+/* Debug Info */
+.showtime-debug-info {
+  background: rgba(31, 41, 55, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 1rem auto;
+  max-width: 60rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.showtime-debug-info p {
+  margin: 0.25rem 0;
 }
 
 /* Book Seats Button */
@@ -349,6 +522,18 @@
   .showtime-date-btn {
     min-width: 4rem;
     padding: 0.75rem 1rem;
+  }
+  
+  .showtime-theatre-btn {
+    padding: 0.75rem 1rem;
+  }
+  
+  .showtime-theatre-name {
+    font-size: 0.875rem;
+  }
+  
+  .showtime-theatre-count {
+    font-size: 0.7rem;
   }
   
   .showtime-time-grid {

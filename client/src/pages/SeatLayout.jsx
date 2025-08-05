@@ -19,10 +19,12 @@ const SeatLayout = () => {
   const [selectedSeats, setSelectedSeats] = useState([])
   const [show, setShow] = useState(null)
   const [occupiedSeats, setOccupiedSeats] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const currency = import.meta.env.VITE_CURRENCY || '$'
 
   const navigate = useNavigate()
-  const {axios, getToken, user} = useAppContext();
+  const {axios, getToken, user, selectedCity} = useAppContext();
 
   useEffect(() => {
     if (!user) {
@@ -32,29 +34,42 @@ const SeatLayout = () => {
 
   const getShow = async () => {
     try {
-      // Find the specific show for this movie and date
-      const { data } = await axios.get(`/api/show/${id}`)
-      if (data.success){
-        // Get all shows for this movie and find the one for the specific date
-        const showsResponse = await axios.get(`/api/show/all`)
-        if (showsResponse.data.success) {
-          const dateStr = date; // date is already in YYYY-MM-DD format
-          const movieShows = showsResponse.data.shows.filter(show => {
-            const showMovieId = typeof show.movie === 'object' ? show.movie._id : show.movie;
-            const showDate = new Date(show.showDateTime).toISOString().split('T')[0];
-            
-            return (showMovieId === id || showMovieId === id.toString()) && showDate === dateStr;
-          });
-          
-          if (movieShows.length > 0) {
-            setShow(movieShows[0]);
-          } else {
-            console.error('No show found for movie', id, 'on date', date);
-          }
+      setLoading(true);
+      setError(null);
+      
+      console.log('🔍 SeatLayout - Fetching show for movie:', id, 'date:', date);
+      
+      // Get all shows for this movie in the selected city
+      const city = selectedCity || 'Varanasi';
+      const showsResponse = await axios.get(`/api/show/${id}/city/${city}`);
+      
+      if (showsResponse.data.success) {
+        const shows = showsResponse.data.shows;
+        console.log('🔍 Found shows:', shows.length);
+        
+        // Find the show for the specific date
+        const dateStr = date; // date is already in YYYY-MM-DD format
+        const showForDate = shows.find(show => {
+          const showDate = new Date(show.showDateTime).toISOString().split('T')[0];
+          return showDate === dateStr;
+        });
+        
+        if (showForDate) {
+          console.log('🔍 Found show for date:', showForDate);
+          setShow(showForDate);
+        } else {
+          console.error('❌ No show found for movie', id, 'on date', date);
+          setError('No show found for the selected date');
         }
+      } else {
+        console.error('❌ Failed to fetch shows');
+        setError('Failed to load show data');
       }
     } catch (error) {
-      console.error('Error fetching show:', error)
+      console.error('❌ Error fetching show:', error);
+      setError('Failed to load show data');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -82,6 +97,8 @@ const SeatLayout = () => {
   }
 
   const getSeatPrice = (seatId) => {
+    if (!show) return 0;
+    
     const rowLetter = seatId.charAt(0)
     if (silverRows.includes(rowLetter)) {
       return show.silverPrice
@@ -125,9 +142,10 @@ const SeatLayout = () => {
   }
 
   useEffect(() => {
-    console.log('SeatLayout - Fetching show for movie:', id, 'date:', date);
-    getShow()
-    getOccupiedSeats()
+    if (id && date) {
+      getShow()
+      getOccupiedSeats()
+    }
   }, [id, date])
 
   useEffect(() => {
@@ -193,6 +211,30 @@ const SeatLayout = () => {
 
   if (!user) return <Loading />
 
+  if (loading) {
+    return (
+      <div className='seat-layout-page'>
+        <div className='seat-layout-loading'>
+          <Loading />
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className='seat-layout-page'>
+        <div className='seat-layout-error'>
+          <h2>Error Loading Seat Layout</h2>
+          <p>{error}</p>
+          <button onClick={() => navigate('/movies')} className='seat-layout-back-btn'>
+            Back to Movies
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return show ? (
     <div className='seat-layout-page'>
       <div className='seat-layout-container'>
@@ -218,6 +260,11 @@ const SeatLayout = () => {
             <div className='seat-layout-movie-info'>
               <h3 className='seat-layout-movie-title'>{show.movie?.title || 'Movie'}</h3>
               <p className='seat-layout-movie-date'>{date}</p>
+              {show.theatre && (
+                <p className='seat-layout-theatre-info'>
+                  {show.theatre.name} • {show.format} • Screen {show.screen}
+                </p>
+              )}
             </div>
             
             {/* Selected Seats */}
@@ -267,7 +314,15 @@ const SeatLayout = () => {
       </div>
     </div>
   ) : (
-    <Loading />
+    <div className='seat-layout-page'>
+      <div className='seat-layout-error'>
+        <h2>No Show Found</h2>
+        <p>No show found for the selected date.</p>
+        <button onClick={() => navigate('/movies')} className='seat-layout-back-btn'>
+          Back to Movies
+        </button>
+      </div>
+    </div>
   )
 }
 

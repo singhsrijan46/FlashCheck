@@ -7,5 +7,10 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true
+  },
+  define: {
+    'import.meta.env.VITE_BASE_URL': JSON.stringify('http://localhost:8080'),
+    'import.meta.env.VITE_TMDB_IMAGE_BASE_URL': JSON.stringify('https://image.tmdb.org/t/p/w500'),
+    'import.meta.env.VITE_CURRENCY': JSON.stringify('$')
   }
 }) 

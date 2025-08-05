@@ -199,15 +199,96 @@ export const getNowPlayingMovies = async (req, res) => {
     }
 };
 
+// API to get movies available in a specific city
+export const getMoviesByCity = async (req, res) => {
+    try {
+        const { city } = req.params;
+        
+        if (!city) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'City parameter is required' 
+            });
+        }
+
+        console.log(`Fetching movies for city: ${city}`);
+
+        // Get all shows for the specified city
+        const cityShows = await Show.find({ city: city }).populate('movie');
+        
+        // Extract unique movies from the shows
+        const uniqueMovies = [];
+        const seenMovieIds = new Set();
+
+        cityShows.forEach(show => {
+            if (show.movie && !seenMovieIds.has(show.movie._id)) {
+                seenMovieIds.add(show.movie._id);
+                uniqueMovies.push(show.movie);
+            }
+        });
+
+        console.log(`Found ${uniqueMovies.length} unique movies in ${city}`);
+
+        res.json({ 
+            success: true, 
+            movies: uniqueMovies,
+            city: city
+        });
+
+    } catch (error) {
+        console.error('Error fetching movies by city:', error);
+        
+        // Provide more specific error messages
+        if (error.name === 'CastError') {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Invalid city format',
+                error: error.message 
+            });
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to fetch movies for city',
+            error: error.message 
+        });
+    }
+};
+
 // API to add a new show to the database
 export const addShow = async (req, res) => {
     try {
-        const { movieId, showsInput, silverPrice, goldPrice, diamondPrice } = req.body;
+        console.log('=== ADD SHOW REQUEST ===');
+        console.log('Request body:', JSON.stringify(req.body, null, 2));
+        
+        const { movieId, theatreId, state, city, format, showsInput, silverPrice, goldPrice, diamondPrice } = req.body;
 
         // Validate required fields
         if (!movieId) {
             return res.status(400).json({ success: false, message: 'Movie ID is required' });
         }
+        
+        if (!theatreId) {
+            return res.status(400).json({ success: false, message: 'Theatre ID is required' });
+        }
+        
+        if (!state) {
+            return res.status(400).json({ success: false, message: 'State is required' });
+        }
+        
+        if (!city) {
+            return res.status(400).json({ success: false, message: 'City is required' });
+        }
+        
+        // Screen validation is now done per show in showsInput
+        // if (!screen) {
+        //     return res.status(400).json({ success: false, message: 'Screen is required' });
+        // }
+        
+        // Format validation is now done per show in showsInput
+        // if (!format) {
+        //     return res.status(400).json({ success: false, message: 'Format is required' });
+        // }
         
         if (!showsInput || !Array.isArray(showsInput) || showsInput.length === 0) {
             return res.status(400).json({ success: false, message: 'Show times are required' });
@@ -222,12 +303,37 @@ export const addShow = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Prices must be valid numbers' });
         }
 
+        // Validate theatre exists
+        const Theatre = (await import('../models/Theatre.js')).default;
+        const theatre = await Theatre.findById(theatreId);
+        if (!theatre) {
+            return res.status(400).json({ success: false, message: 'Theatre not found' });
+        }
+
+        // Validate theatre location matches
+        if (theatre.state !== state || theatre.city !== city) {
+            return res.status(400).json({ success: false, message: 'Theatre location mismatch' });
+        }
+
         // Process each show time
         for (const showInput of showsInput) {
-            const { date, time } = showInput;
+            const { date, time, screen } = showInput;
+            
+            console.log('Processing showInput:', showInput);
+            console.log('Screen from showInput:', screen);
             
             if (!time || !Array.isArray(time) || time.length === 0) {
                 return res.status(400).json({ success: false, message: 'Show times are required' });
+            }
+            
+            if (!screen) {
+                console.log('Screen validation failed - screen is empty or undefined');
+                return res.status(400).json({ success: false, message: 'Screen is required for each show' });
+            }
+
+            // Validate screen exists in theatre
+            if (!theatre.screens.includes(screen)) {
+                return res.status(400).json({ success: false, message: `Screen '${screen}' does not exist in this theatre` });
             }
 
             // Create shows for each time slot
@@ -239,25 +345,25 @@ export const addShow = async (req, res) => {
                 }
 
                 // Fetch movie data from TMDB API
-                const fetchWithRetry = async (url, retries = 3) => {
-                    for (let i = 0; i < retries; i++) {
-                        try {
-                            if (!checkRateLimit('tmdb-api')) {
-                                await new Promise(resolve => setTimeout(resolve, 2000));
-                                continue;
-                            }
-                            
-                            const response = await axios.get(url, {
-                                headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
-                                timeout: 15000
-                            });
-                            return response;
-                        } catch (error) {
-                            if (i === retries - 1) throw error;
+            const fetchWithRetry = async (url, retries = 3) => {
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        if (!checkRateLimit('tmdb-api')) {
                             await new Promise(resolve => setTimeout(resolve, 2000));
+                            continue;
                         }
+                        
+                        const response = await axios.get(url, {
+                            headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
+                            timeout: 15000
+                        });
+                        return response;
+                    } catch (error) {
+                        if (i === retries - 1) throw error;
+                        await new Promise(resolve => setTimeout(resolve, 2000));
                     }
-                };
+                }
+            };
 
                 let movieData = null;
                 
@@ -340,12 +446,12 @@ export const addShow = async (req, res) => {
                         movie = new Movie({
                             _id: movieId,
                             tmdbId: movieId, // Ensure tmdbId is set
-                            title: `Movie ${movieId}`,
+                        title: `Movie ${movieId}`,
                             overview: 'Movie information not available',
                             poster_path: '/default-poster.jpg',
                             backdrop_path: '/default-backdrop.jpg',
                             release_date: new Date().toISOString().split('T')[0],
-                            vote_average: 0,
+                        vote_average: 0,
                             original_language: 'en',
                             genre_ids: []
                         });
@@ -363,8 +469,13 @@ export const addShow = async (req, res) => {
                 // Create the show
                 try {
                     const show = new Show({
-                        movie: movieId,
+                        movie: movie._id, // Use the actual movie object ID
+                        theatre: theatreId,
+                        state: state,
+                        city: city,
+                        screen: screen, // Add screen field
                         showDateTime: showDateTime,
+                        format: req.body.format, // Use global format from request body
                         silverPrice: Number(silverPrice),
                         goldPrice: Number(goldPrice),
                         diamondPrice: Number(diamondPrice),
@@ -408,19 +519,23 @@ export const addShow = async (req, res) => {
 // API to get all shows
 export const getShows = async (req, res) => {
     try {
-        const shows = await Show.find().populate('movie');
+        const shows = await Show.find().populate('movie').populate('theatre');
         
         console.log('Raw shows from database:', shows.map(s => ({ 
             showId: s._id, 
             movieId: s.movie, 
             movieTitle: s.movie?.title,
+            theatreId: s.theatre,
+            theatreName: s.theatre?.name,
+            state: s.state,
+            city: s.city,
             showDateTime: s.showDateTime 
         })));
         
         const showsWithMovies = shows.map(show => {
             if (!show.movie) {
                 return {
-                    ...show.toObject(),
+                        ...show.toObject(),
                     movie: {
                         _id: show.movie,
                         tmdbId: show.movie, // Add tmdbId for consistency
@@ -442,6 +557,10 @@ export const getShows = async (req, res) => {
             showId: s._id, 
             movieId: s.movie, 
             movieTitle: s.movie?.title,
+            theatreId: s.theatre,
+            theatreName: s.theatre?.name,
+            state: s.state,
+            city: s.city,
             showDateTime: s.showDateTime 
         })));
 
@@ -453,7 +572,7 @@ export const getShows = async (req, res) => {
         // Provide more specific error messages
         if (error.name === 'CastError') {
             return res.status(400).json({ 
-                success: false, 
+            success: false, 
                 message: 'Invalid data format in shows',
                 error: error.message 
             });
@@ -467,7 +586,77 @@ export const getShows = async (req, res) => {
     }
 };
 
-// API to get a show by movie ID
+// API to get shows by movie ID and city
+export const getShowsByMovieAndCity = async (req, res) => {
+    try {
+        const { movieId, city } = req.params;
+        
+        if (!movieId) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Movie ID is required' 
+            });
+        }
+        
+        if (!city) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'City is required' 
+            });
+        }
+        
+        console.log('Looking for shows with movie ID:', movieId, 'and city:', city);
+        
+        // Find all shows for this movie in the specified city
+        const shows = await Show.find({ 
+            movie: movieId,
+            city: city 
+        }).populate('movie').populate('theatre');
+        
+        console.log('Found shows:', shows.length);
+        
+        if (shows.length === 0) {
+            return res.json({ 
+                success: true, 
+                shows: [],
+                message: 'No shows found for this movie in the specified city'
+            });
+        }
+        
+        // Process shows to include theatre and format information
+        const processedShows = shows.map(show => ({
+            _id: show._id,
+            movie: show.movie,
+            theatre: show.theatre,
+            state: show.state,
+            city: show.city,
+            screen: show.screen,
+            format: show.format,
+            showDateTime: show.showDateTime,
+            silverPrice: show.silverPrice,
+            goldPrice: show.goldPrice,
+            diamondPrice: show.diamondPrice,
+            occupiedSeats: show.occupiedSeats
+        }));
+        
+        res.json({ 
+            success: true, 
+            shows: processedShows,
+            message: `Found ${processedShows.length} shows for this movie in ${city}`
+        });
+        
+    } catch (error) {
+        console.error('Error fetching shows by movie and city:', error);
+        
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to fetch shows',
+            error: error.message 
+        });
+    }
+};
+
+// API to get a show by movie ID (legacy - keeping for backward compatibility)
 export const getShowByMovieId = async (req, res) => {
     try {
         const { movieId } = req.params;
@@ -519,16 +708,16 @@ export const getShowByMovieId = async (req, res) => {
             try {
                 const fetchWithRetry = async (url, retries = 3) => {
                     for (let i = 0; i < retries; i++) {
-                        try {
-                            if (!checkRateLimit('tmdb-api')) {
-                                await new Promise(resolve => setTimeout(resolve, 2000));
-                                continue;
-                            }
-                            
+            try {
+                if (!checkRateLimit('tmdb-api')) {
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    continue;
+                }
+                
                             const response = await axios.get(url, {
                                 headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
-                                timeout: 15000
-                            });
+                    timeout: 15000
+                });
                             return response;
                         } catch (error) {
                             console.error(`API call failed for ${url} (attempt ${i + 1}/${retries}):`, error.message);
@@ -658,7 +847,7 @@ export const getMovieTrailer = async (req, res) => {
 
         const response = await fetchWithRetry(`https://api.themoviedb.org/3/movie/${movieId}/videos`);
         const videos = response.data.results;
-        
+
         // Find trailer
         const trailer = videos.find(video => 
             (video.type === 'Trailer' || video.type === 'Teaser') && 
@@ -730,7 +919,7 @@ export const searchMovies = async (req, res) => {
                         timeout: 15000
                     });
                     return response;
-                } catch (error) {
+    } catch (error) {
                     console.error(`Search API call failed for ${url} (attempt ${i + 1}/${retries}):`, error.message);
                     if (i === retries - 1) throw error;
                     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -776,7 +965,7 @@ export const getPopularMovies = async (req, res) => {
     try {
         if (!process.env.TMDB_API_KEY) {
             return res.status(400).json({ 
-                success: false, 
+            success: false, 
                 message: 'TMDB API key not configured' 
             });
         }
@@ -813,11 +1002,11 @@ export const getPopularMovies = async (req, res) => {
         // Provide more specific error messages
         if (error.response?.status === 401) {
             return res.status(401).json({ 
-                success: false, 
+            success: false, 
                 message: 'TMDB API key is invalid',
-                error: error.message 
-            });
-        }
+            error: error.message
+        });
+    }
         
         if (error.response?.status === 429) {
             return res.status(429).json({ 
@@ -830,7 +1019,7 @@ export const getPopularMovies = async (req, res) => {
         res.status(500).json({ 
             success: false, 
             message: 'Failed to fetch popular movies',
-            error: error.message 
+            error: error.message
         });
     }
 };

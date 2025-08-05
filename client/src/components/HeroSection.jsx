@@ -6,15 +6,46 @@ import './HeroSection.css'
 
 const HeroSection = () => {
     const navigate = useNavigate()
-  const { shows, image_base_url } = useAppContext()
+  const { shows, image_base_url, selectedCity } = useAppContext()
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [cityMovies, setCityMovies] = useState([])
+  const [loading, setLoading] = useState(true)
 
   // Debug logging
   console.log('HeroSection - shows:', shows)
   console.log('HeroSection - image_base_url:', image_base_url)
+  console.log('HeroSection - selectedCity:', selectedCity)
+
+  // Fetch movies for the selected city
+  useEffect(() => {
+    const fetchCityMovies = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`http://localhost:8080/api/show/city/${selectedCity}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          console.log(`HeroSection - Found ${data.movies.length} movies for ${selectedCity}`);
+          setCityMovies(data.movies);
+        } else {
+          console.error('HeroSection - Failed to fetch city movies:', data.message);
+          setCityMovies([]);
+        }
+      } catch (error) {
+        console.error('HeroSection - Error fetching city movies:', error);
+        setCityMovies([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (selectedCity) {
+      fetchCityMovies();
+    }
+  }, [selectedCity]);
 
   // Get first 5 movies for slideshow
-  const slideshowMovies = shows.slice(0, 5).map(show => show.movie || show)
+  const slideshowMovies = cityMovies.slice(0, 5)
 
   useEffect(() => {
     if (slideshowMovies.length === 0) return
@@ -41,6 +72,27 @@ const HeroSection = () => {
   }
 
   // Show fallback when no shows are available
+  if (loading) {
+    return (
+      <div className='hero-section'>
+        <div 
+          className='hero-background'
+          style={{
+            backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.8) 100%), url(https://image.tmdb.org/t/p/original/1E5baAaEse26fej7uHcjOgEE2t2.jpg)`
+          }}
+        />
+        <div className='hero-content'>
+          <div className='hero-movie-info'>
+            <h1 className='hero-title'>Loading Movies...</h1>
+            <p className='hero-description'>
+              Finding the best movies in {selectedCity} for you.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (slideshowMovies.length === 0) {
     return (
       <div className='hero-section'>
@@ -52,7 +104,7 @@ const HeroSection = () => {
         />
         <div className='hero-content'>
           <div className='hero-movie-info'>
-            <h1 className='hero-title'>Welcome to FlashCheck</h1>
+            <h1 className='hero-title'>No Movies Available</h1>
             <div className='hero-meta'>
               <span>EN</span>
               <div className='hero-meta-item'>
@@ -61,11 +113,11 @@ const HeroSection = () => {
               </div>
               <div className='hero-meta-item'>
                 <StarIcon className='hero-meta-icon'/> 
-                8.5
+                -
               </div>
             </div>
             <p className='hero-description'>
-              Discover the latest movies and book your tickets with ease. Experience the best in entertainment with our premium movie booking platform.
+              No movies are currently available in {selectedCity}. Please try another city or check back later for new releases.
             </p>
             <div className='hero-buttons'>
               <button onClick={handleExploreClick} className='hero-button'>
