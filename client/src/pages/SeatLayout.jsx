@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { assets } from '../assets/assets'
 import Loading from '../components/Loading'
 import { ArrowRightIcon } from 'lucide-react'
@@ -15,7 +15,8 @@ const goldRows = seatRowLetters.slice(3, 7) // D-G
 const diamondRows = seatRowLetters.slice(7) // H-K
 
 const SeatLayout = () => {
-  const {id, date } = useParams()
+  const {id, date, showtimeId } = useParams()
+  const location = useLocation()
   const [selectedSeats, setSelectedSeats] = useState([])
   const [show, setShow] = useState(null)
   const [occupiedSeats, setOccupiedSeats] = useState([])
@@ -37,37 +38,79 @@ const SeatLayout = () => {
       setLoading(true);
       setError(null);
       
-      console.log('🔍 SeatLayout - Fetching show for movie:', id, 'date:', date);
+      console.log('🔍 SeatLayout - Starting to fetch show data...');
+      console.log('🔍 Parameters:', { id, date, showtimeId });
+      console.log('🔍 Location state:', location.state);
       
-      // Get all shows for this movie in the selected city
-      const city = selectedCity || 'Varanasi';
-      const showsResponse = await axios.get(`/api/show/${id}/city/${city}`);
+      let selectedShow = null;
       
-      if (showsResponse.data.success) {
-        const shows = showsResponse.data.shows;
-        console.log('🔍 Found shows:', shows.length);
+      // First, try to use the showtime data from navigation state
+      if (location.state?.showtimeData) {
+        console.log('🔍 Using showtime data from navigation state');
+        selectedShow = location.state.showtimeData;
+      }
+      
+      // If we don't have state data, use date-based search
+      if (!selectedShow && id && date) {
+        console.log('🔍 Using date-based search for movie:', id, 'date:', date);
         
-        // Find the show for the specific date
-        const dateStr = date; // date is already in YYYY-MM-DD format
-        const showForDate = shows.find(show => {
-          const showDate = new Date(show.showDateTime).toISOString().split('T')[0];
-          return showDate === dateStr;
-        });
+        // Get all shows for this movie in the selected city
+        const city = selectedCity || 'Varanasi';
+        console.log('🔍 Fetching shows for city:', city);
         
-        if (showForDate) {
-          console.log('🔍 Found show for date:', showForDate);
-          setShow(showForDate);
-        } else {
-          console.error('❌ No show found for movie', id, 'on date', date);
-          setError('No show found for the selected date');
+        try {
+          const showsResponse = await axios.get(`/api/show/${id}/city/${city}`);
+          console.log('🔍 Shows response:', showsResponse.data);
+          
+          if (showsResponse.data.success) {
+            const shows = showsResponse.data.shows;
+            console.log('🔍 Found shows:', shows.length);
+            
+            // Find the show for the specific date
+            const dateStr = date; // date is already in YYYY-MM-DD format
+            const showsForDate = shows.filter(show => {
+              const showDate = new Date(show.showDateTime).toISOString().split('T')[0];
+              return showDate === dateStr;
+            });
+            
+            console.log('🔍 Shows for date:', showsForDate.length);
+            
+            if (showsForDate.length > 0) {
+              // Use the first show for the date
+              selectedShow = showsForDate[0];
+              console.log('🔍 Selected show from date search:', selectedShow);
+            } else {
+              console.error('❌ No show found for movie', id, 'on date', date);
+              setError('No show found for the selected date');
+              return;
+            }
+          } else {
+            console.error('❌ Failed to fetch shows');
+            setError('Failed to load show data');
+            return;
+          }
+        } catch (error) {
+          console.error('❌ Error fetching shows:', error);
+          setError('Failed to load show data. Please try again.');
+          return;
         }
+      }
+      
+      if (selectedShow) {
+        console.log('🔍 Final selected show:', selectedShow);
+        console.log('🔍 Show prices:', {
+          silver: selectedShow.silverPrice,
+          gold: selectedShow.goldPrice,
+          diamond: selectedShow.diamondPrice
+        });
+        setShow(selectedShow);
       } else {
-        console.error('❌ Failed to fetch shows');
-        setError('Failed to load show data');
+        console.error('❌ No show found');
+        setError('No show found. Please try selecting a different showtime.');
       }
     } catch (error) {
       console.error('❌ Error fetching show:', error);
-      setError('Failed to load show data');
+      setError('Failed to load show data. Please try again.');
     } finally {
       setLoading(false);
     }

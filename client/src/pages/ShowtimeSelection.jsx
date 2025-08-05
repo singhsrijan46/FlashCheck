@@ -177,7 +177,14 @@ const ShowtimeSelection = () => {
   const handleBookSeats = () => {
     if (selectedDate && selectedShowtime) {
       const dateStr = selectedDate.toISOString().split('T')[0];
-      navigate(`/movies/${id}/${dateStr}`);
+      // Temporarily use date-based route for testing
+      navigate(`/movies/${id}/${dateStr}`, {
+        state: {
+          showtimeData: selectedShowtime,
+          movieId: id,
+          date: dateStr
+        }
+      });
     }
   };
 

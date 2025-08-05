@@ -769,6 +769,63 @@ export const getShowByMovieId = async (req, res) => {
     }
 };
 
+// API to get a specific showtime by ID
+export const getSpecificShow = async (req, res) => {
+    try {
+        const { showtimeId } = req.params;
+        
+        if (!showtimeId) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Showtime ID is required' 
+            });
+        }
+        
+        console.log('Looking for showtime with ID:', showtimeId);
+        
+        // Find the specific showtime by ID
+        const show = await Show.findById(showtimeId).populate('movie').populate('theatre');
+        
+        if (!show) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Showtime not found' 
+            });
+        }
+        
+        // Process show to include theatre and format information
+        const processedShow = {
+            _id: show._id,
+            movie: show.movie,
+            theatre: show.theatre,
+            state: show.state,
+            city: show.city,
+            screen: show.screen,
+            format: show.format,
+            showDateTime: show.showDateTime,
+            silverPrice: show.silverPrice,
+            goldPrice: show.goldPrice,
+            diamondPrice: show.diamondPrice,
+            occupiedSeats: show.occupiedSeats
+        };
+        
+        res.json({ 
+            success: true, 
+            show: processedShow,
+            message: 'Showtime found'
+        });
+        
+    } catch (error) {
+        console.error('Error fetching specific showtime:', error);
+        
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to fetch showtime',
+            error: error.message 
+        });
+    }
+};
+
 // API to get a specific show by show ID
 export const getShow = async (req, res) => {
     try {

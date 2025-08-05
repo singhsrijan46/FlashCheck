@@ -50,6 +50,7 @@ const App = () => {
         <Route path='/movies' element={<Movies/>} />
         <Route path='/movies/:id' element={<MovieDetails/>} />
         <Route path='/movies/:id/showtimes' element={<ShowtimeSelection/>} />
+        <Route path='/seat-layout/:showtimeId' element={<SeatLayout/>} />
         <Route path='/movies/:id/:date' element={<SeatLayout/>} />
         <Route path='/my-bookings' element={user ? <MyBookings/> : <Login state={{ from: location }}/>} />
         <Route path='/loading/:nextUrl' element={<Loading/>} />
