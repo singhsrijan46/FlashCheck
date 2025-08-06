@@ -2,19 +2,15 @@ import Booking from "../models/Booking.js";
 import Show from "../models/Show.js";
 import mongoose from "mongoose";
 
-const checkSeatsAvailability = async (movieId, date, selectedSeats) => {
+const checkSeatsAvailability = async (showId, selectedSeats) => {
     try {
-        const allShowsForMovie = await Show.find({ movie: movieId.toString() });
+        console.log('🔍 Checking seats availability for show:', showId);
+        console.log('🔍 Selected seats:', selectedSeats);
         
-        const showData = await Show.findOne({
-            movie: movieId.toString(),
-            showDateTime: {
-                $gte: new Date(date + 'T00:00:00.000Z'),
-                $lt: new Date(date + 'T23:59:59.999Z')
-            }
-        });
+        const showData = await Show.findById(showId);
         
         if (!showData) {
+            console.log('❌ Show not found');
             return false;
         }
         
@@ -22,14 +18,22 @@ const checkSeatsAvailability = async (movieId, date, selectedSeats) => {
             showData.occupiedSeats = {};
         }
         
+        console.log('🔍 Current occupied seats:', Object.keys(showData.occupiedSeats));
+        
         if (!Array.isArray(selectedSeats) || selectedSeats.length === 0) {
+            console.log('❌ Invalid selected seats');
             return false;
         }
         
         const isAnySeatTaken = selectedSeats.some(seat => showData.occupiedSeats[seat]);
-        return !isAnySeatTaken;
+        console.log('🔍 Is any seat taken?', isAnySeatTaken);
+        
+        const result = !isAnySeatTaken;
+        console.log('🔍 Seats available?', result);
+        
+        return result;
     } catch (error) {
-        console.error('checkSeatsAvailability error:', error.message);
+        console.error('❌ checkSeatsAvailability error:', error.message);
         return false;
     }
 }
@@ -37,21 +41,28 @@ const checkSeatsAvailability = async (movieId, date, selectedSeats) => {
 export const createBooking = async (req, res)=>{
     try {
         const userId = req.user._id;
-        const {movieId, date, selectedSeats} = req.body;
+        const {showId, selectedSeats} = req.body;
 
-        const isAvailable = await checkSeatsAvailability(movieId, date, selectedSeats)
+        console.log('🔍 Creating booking for user:', userId);
+        console.log('🔍 Show ID:', showId);
+        console.log('🔍 Selected seats:', selectedSeats);
+
+        const isAvailable = await checkSeatsAvailability(showId, selectedSeats)
+        console.log('🔍 Are seats available?', isAvailable);
 
         if(!isAvailable){
+            console.log('❌ Seats are not available');
             return res.json({success: false, message: "Selected Seats are not available."})
         }
 
-        const showData = await Show.findOne({
-            movie: movieId.toString(),
-            showDateTime: {
-                $gte: new Date(date + 'T00:00:00.000Z'),
-                $lt: new Date(date + 'T23:59:59.999Z')
-            }
-        }).populate('movie');
+        const showData = await Show.findById(showId).populate('movie');
+
+        if (!showData) {
+            console.log('❌ Show not found');
+            return res.json({success: false, message: "Show not found"});
+        }
+
+        console.log('🔍 Show data found:', showData.movie?.title);
 
         // Calculate total amount based on seat prices
         const calculateSeatPrice = (seatId) => {
@@ -74,6 +85,8 @@ export const createBooking = async (req, res)=>{
             return total + calculateSeatPrice(seatId);
         }, 0);
 
+        console.log('🔍 Total amount:', totalAmount);
+
         const booking = await Booking.create({
             user: userId,
             show: showData._id,
@@ -82,6 +95,8 @@ export const createBooking = async (req, res)=>{
             isPaid: true
         })
 
+        console.log('🔍 Booking created:', booking._id);
+
         selectedSeats.map((seat)=>{
             showData.occupiedSeats[seat] = userId;
         })
@@ -89,25 +104,21 @@ export const createBooking = async (req, res)=>{
         showData.markModified('occupiedSeats');
         await showData.save();
 
+        console.log('🔍 Show updated with occupied seats');
+
         res.json({success: true, message: 'Booking created successfully', bookingId: booking._id})
 
     } catch (error) {
-        console.error('Error in createBooking:', error.message);
+        console.error('❌ Error in createBooking:', error.message);
         res.json({success: false, message: error.message})
     }
 }
 
 export const getOccupiedSeats = async (req, res)=>{
     try {
-        const {movieId, date} = req.params;
+        const {showId} = req.params;
 
-        const showData = await Show.findOne({
-            movie: movieId.toString(),
-            showDateTime: {
-                $gte: new Date(date + 'T00:00:00.000Z'),
-                $lt: new Date(date + 'T23:59:59.999Z')
-            }
-        });
+        const showData = await Show.findById(showId);
 
         if (!showData) {
             return res.json({success: false, message: "Show not found"});

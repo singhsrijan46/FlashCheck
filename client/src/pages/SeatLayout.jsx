@@ -118,14 +118,24 @@ const SeatLayout = () => {
 
   const getOccupiedSeats = async () => {
     try {
-      const { data } = await axios.get(`/api/booking/occupied-seats/${id}/${date}`)
+      if (!show) {
+        console.log('🔍 No show data available for occupied seats check');
+        return;
+      }
+      
+      console.log('🔍 Fetching occupied seats for show:', show._id);
+      const { data } = await axios.get(`/api/booking/occupied-seats/${show._id}`)
+      
       if (data.success) {
         // Convert object keys to array of occupied seat IDs
         const occupiedSeatIds = Object.keys(data.occupiedSeats || {});
+        console.log('🔍 Found occupied seats:', occupiedSeatIds);
         setOccupiedSeats(occupiedSeatIds);
+      } else {
+        console.error('❌ Failed to fetch occupied seats:', data.message);
       }
     } catch (error) {
-      console.error('Error getting occupied seats:', error)
+      console.error('❌ Error getting occupied seats:', error);
     }
   }
 
@@ -163,33 +173,72 @@ const SeatLayout = () => {
     if (selectedSeats.length === 0) {
       return toast("Please select at least one seat")
     }
+    
+    if (!show) {
+      return toast("No show data available")
+    }
+    
+    if (!user) {
+      return toast("Please login to book tickets")
+    }
+    
     try {
+      console.log('🔍 Creating booking for show:', show._id);
+      console.log('🔍 Selected seats:', selectedSeats);
+      console.log('🔍 Total amount:', calculateTotalAmount());
+      console.log('🔍 User:', user._id);
+      
+      const token = await getToken();
+      if (!token) {
+        console.error('❌ No authentication token found');
+        toast.error("Please login to book tickets");
+        return;
+      }
+      
       const { data } = await axios.post('/api/booking/create', {
-        movieId: id,
-        date: date,
+        showId: show._id,
         selectedSeats,
         amount: calculateTotalAmount()
       }, {
-        headers: { Authorization: `Bearer ${await getToken()}` }
+        headers: { Authorization: `Bearer ${token}` }
       })
+      
+      console.log('🔍 Booking response:', data);
+      
       if (data.success) {
         toast.success("Booking created successfully!")
         navigate('/my-bookings')
       } else {
-        toast.error(data.message)
+        console.error('❌ Booking failed:', data.message);
+        toast.error(data.message || "Booking failed")
       }
     } catch (error) {
-      console.error('Error creating booking:', error)
-      toast.error("Error creating booking")
+      console.error('❌ Error creating booking:', error);
+      console.error('❌ Error details:', error.response?.data);
+      
+      if (error.response?.status === 401) {
+        toast.error("Please login to book tickets");
+      } else if (error.response?.status === 400) {
+        toast.error(error.response.data.message || "Invalid booking data");
+      } else if (error.response?.status === 500) {
+        toast.error("Server error. Please try again.");
+      } else {
+        toast.error("Error creating booking. Please try again.");
+      }
     }
   }
 
   useEffect(() => {
     if (id && date) {
       getShow()
-      getOccupiedSeats()
     }
   }, [id, date])
+
+  useEffect(() => {
+    if (show) {
+      getOccupiedSeats()
+    }
+  }, [show])
 
   useEffect(() => {
     console.log('SeatLayout - Show data:', show);
