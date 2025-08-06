@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { assets } from '../assets/assets'
 import Loading from '../components/Loading'
+import PaymentForm from '../components/PaymentForm'
 import { ArrowRightIcon } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAppContext } from '../context/AppContext'
@@ -22,6 +23,7 @@ const SeatLayout = () => {
   const [occupiedSeats, setOccupiedSeats] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [showPayment, setShowPayment] = useState(false)
   const currency = import.meta.env.VITE_CURRENCY || '$'
 
   const navigate = useNavigate()
@@ -169,7 +171,7 @@ const SeatLayout = () => {
     }, 0)
   }
 
-  const bookTickets = async () => {
+  const handleCheckout = () => {
     if (selectedSeats.length === 0) {
       return toast("Please select at least one seat")
     }
@@ -182,50 +184,16 @@ const SeatLayout = () => {
       return toast("Please login to book tickets")
     }
     
-    try {
-      console.log('🔍 Creating booking for show:', show._id);
-      console.log('🔍 Selected seats:', selectedSeats);
-      console.log('🔍 Total amount:', calculateTotalAmount());
-      console.log('🔍 User:', user._id);
-      
-      const token = await getToken();
-      if (!token) {
-        console.error('❌ No authentication token found');
-        toast.error("Please login to book tickets");
-        return;
-      }
-      
-      const { data } = await axios.post('/api/booking/create', {
-        showId: show._id,
-        selectedSeats,
-        amount: calculateTotalAmount()
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      
-      console.log('🔍 Booking response:', data);
-      
-      if (data.success) {
-        toast.success("Booking created successfully!")
-        navigate('/my-bookings')
-      } else {
-        console.error('❌ Booking failed:', data.message);
-        toast.error(data.message || "Booking failed")
-      }
-    } catch (error) {
-      console.error('❌ Error creating booking:', error);
-      console.error('❌ Error details:', error.response?.data);
-      
-      if (error.response?.status === 401) {
-        toast.error("Please login to book tickets");
-      } else if (error.response?.status === 400) {
-        toast.error(error.response.data.message || "Invalid booking data");
-      } else if (error.response?.status === 500) {
-        toast.error("Server error. Please try again.");
-      } else {
-        toast.error("Error creating booking. Please try again.");
-      }
-    }
+    setShowPayment(true)
+  }
+
+  const handlePaymentSuccess = (bookingId) => {
+    toast.success("Payment successful! Booking confirmed.")
+    navigate('/my-bookings')
+  }
+
+  const handlePaymentCancel = () => {
+    setShowPayment(false)
   }
 
   useEffect(() => {
@@ -329,6 +297,19 @@ const SeatLayout = () => {
 
   return show ? (
     <div className='seat-layout-page'>
+      {/* Payment Form Overlay */}
+      {showPayment && (
+        <div className='payment-overlay'>
+          <PaymentForm
+            amount={calculateTotalAmount()}
+            showId={show._id}
+            selectedSeats={selectedSeats}
+            onSuccess={handlePaymentSuccess}
+            onCancel={handlePaymentCancel}
+          />
+        </div>
+      )}
+      
       <div className='seat-layout-container'>
         <div className='seat-layout-main seat-layout-main-large'>
           <h1 className='seat-layout-title'>Select your seat</h1>
@@ -394,7 +375,7 @@ const SeatLayout = () => {
             
             {/* Checkout Button */}
             <button 
-              onClick={bookTickets} 
+              onClick={handleCheckout} 
               className='seat-layout-checkout-btn'
               disabled={selectedSeats.length === 0}
             >

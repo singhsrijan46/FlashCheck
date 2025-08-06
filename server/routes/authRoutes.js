@@ -2,6 +2,7 @@ import express from "express";
 import { protect, protectAdmin } from "../middleware/auth.js";
 import { generateToken } from "../utils/jwt.js";
 import User from "../models/User.js";
+import { sendWelcomeEmail } from "../services/emailService.js";
 
 const authRouter = express.Router();
 
@@ -27,6 +28,14 @@ authRouter.post('/register', async (req, res) => {
 
         // Generate token
         const token = generateToken(user._id);
+
+        // Send welcome email (non-blocking)
+        try {
+            await sendWelcomeEmail(user.email, user.name);
+        } catch (emailError) {
+            console.error('❌ Error sending welcome email:', emailError);
+            // Don't fail registration if email fails
+        }
 
         res.status(201).json({
             success: true,
