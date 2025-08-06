@@ -322,10 +322,20 @@ const AddShows = () => {
                 return;
             }
 
-            const showsInput = dateTimeSelection.map(slot => ({
+            // Group dateTimeSelection by screen to create proper showsInput structure
+            const showsByScreen = {};
+            
+            dateTimeSelection.forEach(slot => {
+                if (!showsByScreen[slot.screen]) {
+                    showsByScreen[slot.screen] = [];
+                }
+                showsByScreen[slot.screen].push(slot.dateTime);
+            });
+            
+            const showsInput = Object.entries(showsByScreen).map(([screen, times]) => ({
                 date: "combined",
-                time: [slot.dateTime],
-                screen: slot.screen
+                time: times,
+                screen: screen
             }));
             
             const payload = {
@@ -341,9 +351,10 @@ const AddShows = () => {
             }
 
             console.log('=== PAYLOAD BEING SENT ===');
-            console.log('Payload:', JSON.stringify(payload, null, 2));
             console.log('dateTimeSelection:', dateTimeSelection);
+            console.log('showsByScreen:', showsByScreen);
             console.log('showsInput:', showsInput);
+            console.log('Payload:', JSON.stringify(payload, null, 2));
 
             const token = await getToken();
 
