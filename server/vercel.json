@@ -3,15 +3,7 @@
   "builds": [
     {
       "src": "server.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": [
-          "controllers/**",
-          "middleware/**",
-          "routes/**"
-        ],
-        "maxDuration": 30
-      }
+      "use": "@vercel/node"
     }
   ],
   "routes": [
