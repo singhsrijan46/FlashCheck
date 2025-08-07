@@ -1,2 +1,3 @@
-# Ignore stripeWebhooks file to prevent import errors
-controllers/stripeWebhooks.js 
+node_modules
+.env
+*.log 
