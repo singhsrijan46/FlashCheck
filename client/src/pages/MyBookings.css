@@ -111,6 +111,20 @@
   border-color: rgba(139, 92, 246, 0.3);
 }
 
+.my-bookings-card.cancelled {
+  opacity: 0.6;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.my-bookings-card.cancelled::before {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+}
+
+.my-bookings-card.cancelled:hover {
+  transform: none;
+  opacity: 0.7;
+}
+
 /* Card Header */
 .my-bookings-card-header {
   display: flex;
@@ -282,6 +296,17 @@
 .my-bookings-cancel-btn:hover {
   background: rgba(239, 68, 68, 0.3);
   transform: translateY(-1px);
+}
+
+.my-bookings-cancel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.my-bookings-cancel-btn:disabled:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: none;
 }
 
 /* Responsive Design */

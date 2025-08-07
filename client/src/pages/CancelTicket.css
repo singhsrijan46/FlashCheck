@@ -1,0 +1,332 @@
+.cancel-ticket-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.cancel-ticket-header {
+    text-align: center;
+    margin-bottom: 40px;
+    color: white;
+}
+
+.cancel-ticket-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.cancel-ticket-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.cancellation-policy {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.cancellation-policy h3 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.policy-details p {
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.policy-restrictions {
+    margin-top: 15px;
+}
+
+.policy-restrictions ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.policy-restrictions li {
+    margin-bottom: 5px;
+    color: #666;
+}
+
+.no-bookings {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 60px 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.no-bookings-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.no-bookings h3 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+.no-bookings p {
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.browse-movies-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.browse-movies-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.bookings-list {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+}
+
+.booking-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.booking-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.booking-card.cancelled {
+    border-color: #ef4444;
+    opacity: 0.7;
+}
+
+.booking-card.passed {
+    border-color: #f59e0b;
+    opacity: 0.8;
+}
+
+.booking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.booking-status {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.status-active {
+    color: #10b981;
+    background: #d1fae5;
+    padding: 5px 12px;
+    border-radius: 20px;
+}
+
+.status-cancelled {
+    color: #ef4444;
+    background: #fee2e2;
+    padding: 5px 12px;
+    border-radius: 20px;
+}
+
+.status-passed {
+    color: #f59e0b;
+    background: #fef3c7;
+    padding: 5px 12px;
+    border-radius: 20px;
+}
+
+.booking-id {
+    font-size: 0.8rem;
+    color: #666;
+    font-family: monospace;
+}
+
+.booking-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.movie-info h3 {
+    color: #333;
+    margin-bottom: 5px;
+    font-size: 1.3rem;
+}
+
+.theatre-name {
+    color: #666;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.booking-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.label {
+    font-weight: 600;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.value {
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.refund-amount {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.booking-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.cancel-btn {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.cancel-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+.cancel-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.cannot-cancel, .already-cancelled {
+    color: #666;
+    font-style: italic;
+    text-align: center;
+    margin: 0;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.cancel-ticket-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    color: white;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .cancel-ticket-container {
+        padding: 15px;
+    }
+
+    .cancel-ticket-header h1 {
+        font-size: 2rem;
+    }
+
+    .bookings-list {
+        grid-template-columns: 1fr;
+    }
+
+    .booking-card {
+        padding: 20px;
+    }
+
+    .booking-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cancel-ticket-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .booking-card {
+        padding: 15px;
+    }
+
+    .movie-info h3 {
+        font-size: 1.1rem;
+    }
+} 

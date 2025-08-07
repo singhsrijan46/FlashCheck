@@ -279,6 +279,253 @@ export const sendBookingConfirmationEmail = async (bookingData) => {
     }
 };
 
+// Email template for booking cancellation
+const createCancellationEmailTemplate = (cancellationData) => {
+    const {
+        userName,
+        movieTitle,
+        theatreName,
+        screen,
+        format,
+        showDateTime,
+        bookedSeats,
+        amount,
+        bookingId,
+        refundAmount,
+        refundId
+    } = cancellationData;
+
+    const formattedDate = new Date(showDateTime).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+
+    const formattedTime = new Date(showDateTime).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Booking Cancellation - MovieTicket</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f4f4f4;
+            }
+            .email-container {
+                background-color: #ffffff;
+                border-radius: 10px;
+                padding: 30px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+                text-align: center;
+                border-bottom: 3px solid #EF4444;
+                padding-bottom: 20px;
+                margin-bottom: 30px;
+            }
+            .logo {
+                font-size: 28px;
+                font-weight: bold;
+                color: #EF4444;
+                margin-bottom: 10px;
+            }
+            .subtitle {
+                color: #666;
+                font-size: 16px;
+            }
+            .cancellation-details {
+                background-color: #fef2f2;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 20px 0;
+                border-left: 4px solid #EF4444;
+            }
+            .detail-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 10px;
+                padding: 8px 0;
+                border-bottom: 1px solid #e9ecef;
+            }
+            .detail-row:last-child {
+                border-bottom: none;
+            }
+            .detail-label {
+                font-weight: 600;
+                color: #495057;
+            }
+            .detail-value {
+                color: #212529;
+            }
+            .refund-section {
+                background-color: #f0fdf4;
+                border-radius: 8px;
+                padding: 15px;
+                margin: 20px 0;
+                border-left: 4px solid #10B981;
+            }
+            .refund-title {
+                font-weight: 600;
+                color: #10B981;
+                margin-bottom: 10px;
+            }
+            .footer {
+                text-align: center;
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid #e9ecef;
+                color: #666;
+                font-size: 14px;
+            }
+            .contact-info {
+                margin-top: 15px;
+                font-size: 12px;
+                color: #999;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <div class="header">
+                <div class="logo">🎬 MovieTicket</div>
+                <div class="subtitle">Booking Cancellation Confirmation</div>
+            </div>
+
+            <h2>Hello ${userName}!</h2>
+            <p>Your booking has been successfully cancelled. We're sorry to see you go!</p>
+
+            <div class="cancellation-details">
+                <h3>📋 Cancelled Booking Details</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Booking ID:</span>
+                    <span class="detail-value">${bookingId}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Movie:</span>
+                    <span class="detail-value">${movieTitle}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Theatre:</span>
+                    <span class="detail-value">${theatreName}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Screen:</span>
+                    <span class="detail-value">${screen}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Format:</span>
+                    <span class="detail-value">${format}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Show Date:</span>
+                    <span class="detail-value">${formattedDate}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Show Time:</span>
+                    <span class="detail-value">${formattedTime}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Cancelled Seats:</span>
+                    <span class="detail-value">${bookedSeats.join(', ')}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Original Amount:</span>
+                    <span class="detail-value">$${amount}</span>
+                </div>
+            </div>
+
+            <div class="refund-section">
+                <div class="refund-title">💰 Refund Information</div>
+                <div class="detail-row">
+                    <span class="detail-label">Refund Amount:</span>
+                    <span class="detail-value">$${refundAmount}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Refund ID:</span>
+                    <span class="detail-value">${refundId || 'Processing...'}</span>
+                </div>
+                <p><strong>Note:</strong> The refund will be processed to your original payment method within 5-7 business days.</p>
+            </div>
+
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3>📝 Important Information</h3>
+                <ul style="margin: 0; padding-left: 20px;">
+                    <li>Your seats have been released and are now available for other customers</li>
+                    <li>The refund will be processed to your original payment method</li>
+                    <li>Refund processing time: 5-7 business days</li>
+                    <li>You can book new tickets anytime through our platform</li>
+                </ul>
+            </div>
+
+            <div class="footer">
+                <p>Thank you for using MovieTicket!</p>
+                <p>We hope to see you again soon! 🎬</p>
+                <div class="contact-info">
+                    <p>For any queries, please contact us at support@movieticket.com</p>
+                    <p>© 2024 MovieTicket. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+};
+
+// Send cancellation email
+export const sendCancellationEmail = async (cancellationData) => {
+    try {
+        // Check if email configuration is available
+        if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+            console.log('⚠️ Email configuration not found. Skipping email send.');
+            return {
+                success: false,
+                message: 'Email configuration not available'
+            };
+        }
+
+        const transporter = createTransporter();
+        const emailTemplate = createCancellationEmailTemplate(cancellationData);
+
+        const mailOptions = {
+            from: process.env.SENDER_EMAIL || process.env.SMTP_USER,
+            to: cancellationData.userEmail,
+            subject: `Booking Cancelled - ${cancellationData.movieTitle}`,
+            html: emailTemplate
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        
+        console.log('✅ Cancellation email sent successfully');
+        console.log('📧 Email sent to:', cancellationData.userEmail);
+        console.log('📧 Message ID:', info.messageId);
+
+        return {
+            success: true,
+            messageId: info.messageId
+        };
+
+    } catch (error) {
+        console.error('❌ Error sending cancellation email:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+};
+
 // Send welcome email (optional)
 export const sendWelcomeEmail = async (userEmail, userName) => {
     try {

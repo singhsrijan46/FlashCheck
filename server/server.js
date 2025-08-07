@@ -9,6 +9,7 @@ import userRouter from './routes/userRoutes.js';
 import authRouter from './routes/authRoutes.js';
 import theatreRouter from './routes/theatreRoutes.js';
 import paymentRouter from './routes/paymentRoutes.js';
+import cancellationRouter from './routes/cancellationRoutes.js';
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -102,6 +103,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api/user', userRouter);
 app.use('/api/theatre', theatreRouter);
 app.use('/api/payment', paymentRouter);
+app.use('/api/cancellation', cancellationRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

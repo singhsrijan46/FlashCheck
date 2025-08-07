@@ -10,7 +10,10 @@ const bookingSchema = new mongoose.Schema({
     paymentStatus: {type: String, enum: ['pending', 'succeeded', 'failed', 'canceled'], default: 'pending'},
     paymentMethod: {type: String, default: 'stripe'},
     refunded: {type: Boolean, default: false},
-    refundAmount: {type: Number, default: 0}
+    refundAmount: {type: Number, default: 0},
+    status: {type: String, enum: ['active', 'cancelled'], default: 'active'},
+    cancelledAt: {type: Date},
+    refundId: {type: String} // Stripe refund ID
 },{timestamps: true })
 
 const Booking = mongoose.model("Booking", bookingSchema);

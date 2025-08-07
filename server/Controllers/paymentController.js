@@ -3,6 +3,7 @@ import { sendBookingConfirmationEmail } from '../services/emailService.js';
 import Booking from '../models/Booking.js';
 import Show from '../models/Show.js';
 import User from '../models/User.js';
+import Movie from '../models/Movie.js';
 
 export const createPayment = async (req, res) => {
     try {
@@ -20,12 +21,18 @@ export const createPayment = async (req, res) => {
         }
 
         // Validate that the show exists
-        const show = await Show.findById(showId).populate('movie').populate('theatre');
+        const show = await Show.findById(showId).populate('theatre');
         if (!show) {
             return res.status(404).json({
                 success: false,
                 message: 'Show not found'
             });
+        }
+
+        // Get movie details separately since movie ID is a string
+        const movie = await Movie.findById(show.movie);
+        if (!movie) {
+            console.error('❌ Movie not found:', show.movie);
         }
 
         // Check seat availability
@@ -42,7 +49,7 @@ export const createPayment = async (req, res) => {
             userId: userId.toString(),
             showId: showId,
             selectedSeats: selectedSeats.join(','),
-            movieTitle: show.movie?.title || 'Unknown Movie',
+            movieTitle: movie?.title || 'Unknown Movie',
             theatreName: show.theatre?.name || 'Unknown Theatre',
             showDateTime: show.showDateTime.toISOString(),
             screen: show.screen,
@@ -114,13 +121,19 @@ export const confirmPaymentAndBook = async (req, res) => {
 
         console.log('🔍 Creating booking from payment:', { showId, selectedSeats, amount });
 
-        // Get the show with populated movie and theatre data
-        const show = await Show.findById(showId).populate('movie').populate('theatre');
+        // Get the show with populated theatre data
+        const show = await Show.findById(showId).populate('theatre');
         if (!show) {
             return res.status(404).json({
                 success: false,
                 message: 'Show not found'
             });
+        }
+
+        // Get movie details separately since movie ID is a string
+        const movie = await Movie.findById(show.movie);
+        if (!movie) {
+            console.error('❌ Movie not found:', show.movie);
         }
 
         // Parse selected seats
@@ -168,7 +181,7 @@ export const confirmPaymentAndBook = async (req, res) => {
                 const emailData = {
                     userName: user.name || user.email.split('@')[0],
                     userEmail: user.email,
-                    movieTitle: show.movie?.title || 'Unknown Movie',
+                    movieTitle: movie?.title || 'Unknown Movie',
                     theatreName: show.theatre?.name || 'Unknown Theatre',
                     screen: show.screen,
                     format: show.format,

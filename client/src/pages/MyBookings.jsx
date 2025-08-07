@@ -6,6 +6,7 @@ import { dateFormat } from '../lib/dateFormat'
 import { useAppContext } from '../context/AppContext'
 import { Link } from 'react-router-dom'
 import { CalendarIcon, ClockIcon, MapPinIcon, CreditCardIcon, TicketIcon } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 import './MyBookings.css'
 
 const MyBookings = () => {
@@ -15,6 +16,7 @@ const MyBookings = () => {
 
   const [bookings, setBookings] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const [cancelling, setCancelling] = useState(false)
 
   const getMyBookings = async () =>{
     try {
@@ -61,13 +63,52 @@ const MyBookings = () => {
     const showDate = new Date(booking.show?.showDateTime)
     const now = new Date()
     
-    if (showDate < now) {
+    if (booking.status === 'cancelled') {
+      return { status: 'cancelled', text: 'Cancelled', color: '#ef4444' }
+    } else if (showDate < now) {
       return { status: 'completed', text: 'Completed', color: '#10b981' }
     } else if (showDate.getTime() - now.getTime() < 24 * 60 * 60 * 1000) {
       return { status: 'upcoming', text: 'Today', color: '#f59e0b' }
     } else {
       return { status: 'upcoming', text: 'Upcoming', color: '#3b82f6' }
     }
+  }
+
+  const handleCancelBooking = async (bookingId) => {
+    if (!window.confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) {
+      return
+    }
+
+    setCancelling(true)
+    try {
+      const token = await getToken()
+      console.log('🔍 Token:', token ? 'Present' : 'Missing')
+      console.log('🔍 Booking ID:', bookingId)
+      
+      const response = await axios.post(`/api/cancellation/cancel/${bookingId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (response.data.success) {
+        toast.success('Booking cancelled successfully! Check your email for refund details.')
+        getMyBookings() // Refresh the bookings list
+      } else {
+        toast.error(response.data.message || 'Failed to cancel booking')
+      }
+    } catch (error) {
+      console.error('Error cancelling booking:', error)
+      const errorMessage = error.response?.data?.message || 'Failed to cancel booking'
+      toast.error(errorMessage)
+    } finally {
+      setCancelling(false)
+    }
+  }
+
+  const canCancelBooking = (booking) => {
+    if (booking.status === 'cancelled') return false
+    const showDate = new Date(booking.show?.showDateTime)
+    const now = new Date()
+    return showDate > now // Can only cancel future shows
   }
 
   return !isLoading ? (
@@ -93,7 +134,7 @@ const MyBookings = () => {
           {bookings.map((booking) => {
             const status = getBookingStatus(booking)
             return (
-              <div key={booking._id} className="my-bookings-card">
+              <div key={booking._id} className={`my-bookings-card ${booking.status === 'cancelled' ? 'cancelled' : ''}`}>
                 <div className="my-bookings-card-header">
                   <div className="my-bookings-movie-poster">
                     <img 
@@ -149,7 +190,18 @@ const MyBookings = () => {
                     <div className="my-bookings-amount">
                       <CreditCardIcon className="my-bookings-amount-icon" />
                       <span className="my-bookings-amount-text">
-                        {currency}{booking.amount}
+                        {booking.status === 'cancelled' ? (
+                          <>
+                            <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>
+                              {currency}{booking.amount}
+                            </span>
+                            <span style={{ color: '#10b981', marginLeft: '0.5rem' }}>
+                              Refund: {currency}{booking.refundAmount || booking.amount}
+                            </span>
+                          </>
+                        ) : (
+                          `${currency}${booking.amount}`
+                        )}
                       </span>
                     </div>
                     
@@ -157,9 +209,13 @@ const MyBookings = () => {
                       <button className="my-bookings-action-btn my-bookings-view-btn">
                         View Details
                       </button>
-                      {status.status === 'upcoming' && (
-                        <button className="my-bookings-action-btn my-bookings-cancel-btn">
-                          Cancel
+                      {canCancelBooking(booking) && (
+                        <button 
+                          className="my-bookings-action-btn my-bookings-cancel-btn"
+                          onClick={() => handleCancelBooking(booking._id)}
+                          disabled={cancelling}
+                        >
+                          {cancelling ? 'Cancelling...' : 'Cancel'}
                         </button>
                       )}
                     </div>

@@ -476,10 +476,10 @@ export const addShow = async (req, res) => {
                         screen: screen, // Add screen field
                         showDateTime: showDateTime,
                         format: req.body.format, // Use global format from request body
-                        silverPrice: Number(silverPrice),
-                        goldPrice: Number(goldPrice),
-                        diamondPrice: Number(diamondPrice),
-                        occupiedSeats: {}
+                    silverPrice: Number(silverPrice),
+                    goldPrice: Number(goldPrice),
+                    diamondPrice: Number(diamondPrice),
+                    occupiedSeats: {}
                     });
 
                     await show.save();
@@ -639,7 +639,7 @@ export const getShowsByMovieAndCity = async (req, res) => {
             occupiedSeats: show.occupiedSeats
         }));
         
-        res.json({ 
+        res.json({
             success: true, 
             shows: processedShows,
             message: `Found ${processedShows.length} shows for this movie in ${city}`
@@ -694,7 +694,7 @@ export const getShowByMovieId = async (req, res) => {
         
         if (!show) {
             return res.status(404).json({ 
-                success: false, 
+            success: false, 
                 message: 'No shows found for this movie',
                 debug: {
                     requestedMovieId: movieId,
@@ -706,26 +706,26 @@ export const getShowByMovieId = async (req, res) => {
         // If movie exists but doesn't have cast/trailer data, try to fetch it from TMDB
         if (show.movie && (!show.movie.casts || show.movie.casts.length === 0)) {
             try {
-                const fetchWithRetry = async (url, retries = 3) => {
-                    for (let i = 0; i < retries; i++) {
-            try {
-                if (!checkRateLimit('tmdb-api')) {
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    continue;
-                }
-                
-                            const response = await axios.get(url, {
-                                headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
-                    timeout: 15000
-                });
-                            return response;
-                        } catch (error) {
-                            console.error(`API call failed for ${url} (attempt ${i + 1}/${retries}):`, error.message);
-                            if (i === retries - 1) throw error;
-                            await new Promise(resolve => setTimeout(resolve, 2000));
-                        }
+        const fetchWithRetry = async (url, retries = 3) => {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    if (!checkRateLimit('tmdb-api')) {
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        continue;
                     }
-                };
+                    
+                    const response = await axios.get(url, {
+                        headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
+                        timeout: 15000
+                    });
+                    return response;
+                } catch (error) {
+                            console.error(`API call failed for ${url} (attempt ${i + 1}/${retries}):`, error.message);
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                }
+            }
+        };
 
                 // Fetch cast data
                 const castResponse = await fetchWithRetry(`https://api.themoviedb.org/3/movie/${movieId}/credits`);
@@ -733,8 +733,8 @@ export const getShowByMovieId = async (req, res) => {
                 
                 // Update movie with cast data
                 show.movie.casts = castData.slice(0, 12).map(cast => ({
-                    name: cast.name,
-                    profile_path: cast.profile_path,
+            name: cast.name,
+            profile_path: cast.profile_path,
                     character: cast.character
                 }));
                 
@@ -795,22 +795,22 @@ export const getSpecificShow = async (req, res) => {
         
         // Process show to include theatre and format information
         const processedShow = {
-            _id: show._id,
-            movie: show.movie,
+                    _id: show._id,
+                    movie: show.movie,
             theatre: show.theatre,
             state: show.state,
             city: show.city,
             screen: show.screen,
             format: show.format,
-            showDateTime: show.showDateTime,
-            silverPrice: show.silverPrice,
-            goldPrice: show.goldPrice,
+                    showDateTime: show.showDateTime,
+                    silverPrice: show.silverPrice,
+                    goldPrice: show.goldPrice,
             diamondPrice: show.diamondPrice,
             occupiedSeats: show.occupiedSeats
         };
         
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             show: processedShow,
             message: 'Showtime found'
         });
@@ -855,7 +855,7 @@ export const getShow = async (req, res) => {
         // Provide more specific error messages
         if (error.name === 'CastError') {
             return res.status(400).json({ 
-                success: false, 
+            success: false, 
                 message: 'Invalid show ID format',
                 error: error.message 
             });
@@ -930,7 +930,7 @@ export const getMovieTrailer = async (req, res) => {
         // Provide more specific error messages
         if (error.response?.status === 404) {
             return res.status(404).json({ 
-                success: false, 
+            success: false, 
                 message: 'Movie not found',
                 error: error.message 
             });
@@ -1012,7 +1012,7 @@ export const searchMovies = async (req, res) => {
         res.status(500).json({ 
             success: false, 
             message: 'Failed to search movies',
-            error: error.message 
+            error: error.message
         });
     }
 };

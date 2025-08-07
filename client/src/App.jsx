@@ -20,6 +20,7 @@ import Login from './components/Login'
 import Loading from './components/Loading'
 import ShowtimeSelection from './pages/ShowtimeSelection'
 import SearchMovies from './pages/SearchMovies'
+import CancelTicket from './pages/CancelTicket'
 
 const App = () => {
 
@@ -53,6 +54,7 @@ const App = () => {
         <Route path='/seat-layout/:showtimeId' element={<SeatLayout/>} />
         <Route path='/movies/:id/:date' element={<SeatLayout/>} />
         <Route path='/my-bookings' element={user ? <MyBookings/> : <Login state={{ from: location }}/>} />
+        <Route path='/cancel-ticket' element={user ? <CancelTicket/> : <Login state={{ from: location }}/>} />
         <Route path='/loading/:nextUrl' element={<Loading/>} />
         <Route path='/favorite' element={user ? <Favorite/> : <Login state={{ from: location }}/>} />
         <Route path='/login' element={<Home/>} />
