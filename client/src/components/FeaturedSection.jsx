@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import MovieCard from './MovieCard'
 import { useAppContext } from '../context/AppContext'
 import './FeaturedSection.css'
+import dotenv from 'dotenv'
+dotenv.config()
 
 const FeaturedSection = () => {
 
@@ -17,7 +19,7 @@ const FeaturedSection = () => {
         const fetchCityMovies = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`http://localhost:8080/api/show/city/${selectedCity}`);
+                const response = await fetch(`${process.env.VITE_BASE_URL}/api/show/city/${selectedCity}`);
                 const data = await response.json();
                 
                 if (data.success) {

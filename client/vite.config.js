@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-
+import dotenv from 'dotenv'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
@@ -9,7 +9,7 @@ export default defineConfig({
     open: true
   },
   define: {
-    'import.meta.env.VITE_BASE_URL': JSON.stringify('http://localhost:8080'),
+    'import.meta.env.VITE_BASE_URL': JSON.stringify(process.env.VITE_BASE_URL),
     'import.meta.env.VITE_TMDB_IMAGE_BASE_URL': JSON.stringify('https://image.tmdb.org/t/p/w500'),
     'import.meta.env.VITE_CURRENCY': JSON.stringify('$')
   }
