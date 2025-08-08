@@ -1,4 +1,5 @@
 import React from 'react'
+import { useEffect } from 'react'
 import MovieCard from '../components/MovieCard'
 import { useAppContext } from '../context/AppContext'
 import './Movies.css'
