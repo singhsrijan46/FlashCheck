@@ -336,7 +336,7 @@ const ShowtimeSelection = () => {
       )}
 
       {/* Debug Info (remove in production) */}
-      {process.env.NODE_ENV === 'development' && (
+      {import.meta.env.VITE_NODE_ENV === 'development' && (
         <div className="showtime-debug-info">
           <p>Debug: {showData.length} total shows found</p>
           <p>Selected City: {selectedCity || 'Varanasi'}</p>

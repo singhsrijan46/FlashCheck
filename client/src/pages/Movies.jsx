@@ -5,7 +5,11 @@ import './Movies.css'
 
 const Movies = () => {
 
-  const { shows } = useAppContext()
+  const { shows, getShows } = useAppContext();
+
+  useEffect(() => {
+    getShows();
+  }, []);
 
   return shows.length > 0 ? (
     <div className='movies-page'>
