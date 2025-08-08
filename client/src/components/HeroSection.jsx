@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { ArrowRight, CalendarIcon, ClockIcon, StarIcon } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { ArrowRight, CalendarIcon, ClockIcon, StarIcon, Play } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../context/AppContext'
 import './HeroSection.css'
@@ -10,6 +10,9 @@ const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [cityMovies, setCityMovies] = useState([])
   const [loading, setLoading] = useState(true)
+  const [hoveredSlide, setHoveredSlide] = useState(null)
+  const [trailers, setTrailers] = useState({})
+  const videoRefs = useRef({})
 
   // Debug logging
   console.log('HeroSection - shows:', shows)
@@ -44,6 +47,33 @@ const HeroSection = () => {
     }
   }, [selectedCity]);
 
+  // Fetch trailers for movies
+  useEffect(() => {
+    const fetchTrailers = async () => {
+      const trailerPromises = cityMovies.map(async (movie) => {
+        try {
+          const response = await fetch(`http://localhost:8080/api/show/${movie._id}/trailer`);
+          const data = await response.json();
+          return { movieId: movie._id, trailer: data.success ? data.trailer : null };
+        } catch (error) {
+          console.error(`Error fetching trailer for movie ${movie._id}:`, error);
+          return { movieId: movie._id, trailer: null };
+        }
+      });
+
+      const trailerResults = await Promise.all(trailerPromises);
+      const trailerMap = {};
+      trailerResults.forEach(({ movieId, trailer }) => {
+        trailerMap[movieId] = trailer;
+      });
+      setTrailers(trailerMap);
+    };
+
+    if (cityMovies.length > 0) {
+      fetchTrailers();
+    }
+  }, [cityMovies]);
+
   // Get first 5 movies for slideshow
   const slideshowMovies = cityMovies.slice(0, 5)
 
@@ -54,13 +84,36 @@ const HeroSection = () => {
       setCurrentSlide((prev) => 
         prev === slideshowMovies.length - 1 ? 0 : prev + 1
       )
-    }, 8000) // Change slide every 8 seconds for videos
+    }, 30000) // Change slide every 30 seconds
 
     return () => clearInterval(interval)
   }, [slideshowMovies.length])
 
   const handleSlideChange = (index) => {
     setCurrentSlide(index)
+    setHoveredSlide(null) // Stop any playing video when changing slides
+  }
+
+  const handleSlideHover = (index) => {
+    setHoveredSlide(index)
+    const currentMovie = slideshowMovies[index]
+    const trailer = trailers[currentMovie._id]
+    
+    if (trailer && videoRefs.current[index]) {
+      // Start playing the video
+      const videoElement = videoRefs.current[index]
+      videoElement.src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&loop=1&playlist=${trailer.key}&controls=0&showinfo=0&rel=0&modestbranding=1&enablejsapi=1&version=3&playerapiid=ytplayer`
+    }
+  }
+
+  const handleSlideLeave = () => {
+    setHoveredSlide(null)
+    // Reset video sources to stop playback
+    Object.keys(videoRefs.current).forEach(key => {
+      if (videoRefs.current[key]) {
+        videoRefs.current[key].src = ''
+      }
+    })
   }
 
   const handleExploreClick = () => {
@@ -136,16 +189,27 @@ const HeroSection = () => {
 
   const currentMovie = slideshowMovies[currentSlide]
   console.log('HeroSection - currentMovie:', currentMovie)
-  const hasTrailer = currentMovie.trailer && currentMovie.trailer.key
+  const currentTrailer = trailers[currentMovie._id]
+  const isHovering = hoveredSlide === currentSlide
+  const hasTrailer = currentTrailer && currentTrailer.key
 
   return (
     <div className='hero-section'>
-      {/* Video Background */}
-      {hasTrailer ? (
+      {/* Background Image (always visible) */}
+      <div 
+        className='hero-background'
+        style={{
+          backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.8) 100%), url(${image_base_url + currentMovie.backdrop_path})`
+        }}
+      />
+
+      {/* Video Overlay (only on hover) */}
+      {hasTrailer && isHovering && (
         <div className='hero-video-container'>
           <iframe
+            ref={(el) => videoRefs.current[currentSlide] = el}
             className='hero-video'
-            src={`https://www.youtube.com/embed/${currentMovie.trailer.key}?autoplay=1&mute=1&loop=1&playlist=${currentMovie.trailer.key}&controls=0&showinfo=0&rel=0&modestbranding=1&enablejsapi=1&version=3&playerapiid=ytplayer`}
+            src={`https://www.youtube.com/embed/${currentTrailer.key}?autoplay=1&mute=1&loop=1&playlist=${currentTrailer.key}&controls=0&showinfo=0&rel=0&modestbranding=1&enablejsapi=1&version=3&playerapiid=ytplayer`}
             title="Movie Trailer"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -153,13 +217,16 @@ const HeroSection = () => {
           />
           <div className='hero-video-overlay' />
         </div>
-      ) : (
-        <div 
-          className='hero-background'
-          style={{
-            backgroundImage: `linear-gradient(to right, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.8) 100%), url(${image_base_url + currentMovie.backdrop_path})`
-          }}
-        />
+      )}
+
+      {/* Play Button Overlay */}
+      {hasTrailer && !isHovering && (
+        <div className='hero-play-overlay'>
+          <div className='hero-play-button'>
+            <Play className='hero-play-icon' />
+            <span>Watch Trailer</span>
+          </div>
+        </div>
       )}
 
       {/* Movie Content */}
@@ -230,6 +297,13 @@ const HeroSection = () => {
           ›
       </button>
       </div>
+
+      {/* Hover Area for Video Trigger */}
+      <div 
+        className='hero-hover-area'
+        onMouseEnter={() => handleSlideHover(currentSlide)}
+        onMouseLeave={handleSlideLeave}
+      />
     </div>
   )
 }
