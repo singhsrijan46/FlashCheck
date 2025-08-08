@@ -3,11 +3,10 @@ import { ArrowRight, CalendarIcon, ClockIcon, StarIcon, Play } from 'lucide-reac
 import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../context/AppContext'
 import './HeroSection.css'
-import dotenv from 'dotenv'
-dotenv.config()
 
 const HeroSection = () => {
-    const navigate = useNavigate()
+  const url = import.meta.env.VITE_BASE_URL;
+  const navigate = useNavigate()
   const { shows, image_base_url, selectedCity } = useAppContext()
   const [currentSlide, setCurrentSlide] = useState(0)
   const [cityMovies, setCityMovies] = useState([])
@@ -26,7 +25,7 @@ const HeroSection = () => {
     const fetchCityMovies = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${process.env.VITE_BASE_URL}/api/show/city/${selectedCity}`);
+        const response = await fetch(`${url}/api/show/city/${selectedCity}`);
         const data = await response.json();
         
         if (data.success) {
@@ -54,7 +53,7 @@ const HeroSection = () => {
     const fetchTrailers = async () => {
       const trailerPromises = cityMovies.map(async (movie) => {
         try {
-          const response = await fetch(`${process.env.VITE_BASE_URL}/api/show/${movie._id}/trailer`);
+          const response = await fetch(`${url}/api/show/${movie._id}/trailer`);
           const data = await response.json();
           return { movieId: movie._id, trailer: data.success ? data.trailer : null };
         } catch (error) {
