@@ -23,16 +23,13 @@ const MovieDetails = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log('MovieDetails - Fetching show for ID:', id);
       const { data } = await axios.get(`/api/show/${id}`)
-      console.log('MovieDetails - Show data received:', data);
       if(data.success){
         setShow(data.show)
       } else {
         setError(data.message || 'Failed to fetch movie details');
       }
     } catch (error) {
-      console.error('Error fetching show:', error)
       setError('Failed to load movie details. Please try again.');
     } finally {
       setLoading(false);
@@ -58,7 +55,7 @@ const MovieDetails = () => {
         setTrailer(null)
       }
     } catch (error) {
-      console.error('Error fetching trailer:', error)
+
       setTrailer(null)
     } finally {
       setLoadingTrailer(false)
@@ -76,7 +73,7 @@ const MovieDetails = () => {
         toast.success(data.message)
       }
     } catch (error) {
-      console.error('Error updating favorite:', error)
+
     }
   }
 
@@ -101,10 +98,7 @@ const MovieDetails = () => {
   }, [id]);
 
   useEffect(() => {
-    console.log('MovieDetails - show data:', show);
-    console.log('MovieDetails - movie data:', show?.movie);
-    console.log('MovieDetails - casts:', show?.movie?.casts);
-    console.log('MovieDetails - trailer:', trailer);
+
   }, [show, trailer]);
 
   return (

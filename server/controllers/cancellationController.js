@@ -10,7 +10,7 @@ export const cancelBooking = async (req, res) => {
         const { bookingId } = req.params;
         const userId = req.user._id;
 
-        console.log('🔍 Cancelling booking:', bookingId, 'for user:', userId);
+        // console.log('🔍 Cancelling booking:', bookingId, 'for user:', userId);
 
         // Find the booking
         const booking = await Booking.findById(bookingId);
@@ -59,13 +59,13 @@ export const cancelBooking = async (req, res) => {
         // Get movie details
         const movie = await Movie.findById(show.movie);
         if (!movie) {
-            console.error('❌ Movie not found:', show.movie);
+            // console.error('❌ Movie not found:', show.movie);
         }
 
         // Get user details
         const user = await User.findById(userId);
         if (!user) {
-            console.error('❌ User not found:', userId);
+            // console.error('❌ User not found:', userId);
         }
 
         // Process refund if payment was made
@@ -75,7 +75,7 @@ export const cancelBooking = async (req, res) => {
                 refundResult = await createRefund(booking.paymentIntentId, booking.amount);
                 
                 if (!refundResult.success) {
-                    console.error('❌ Refund failed:', refundResult.error);
+                    // console.error('❌ Refund failed:', refundResult.error);
                     return res.status(500).json({
                         success: false,
                         message: 'Failed to process refund',
@@ -83,9 +83,9 @@ export const cancelBooking = async (req, res) => {
                     });
                 }
                 
-                console.log('✅ Refund processed successfully:', refundResult.refundId);
+                // console.log('✅ Refund processed successfully:', refundResult.refundId);
             } catch (refundError) {
-                console.error('❌ Error processing refund:', refundError);
+                // console.error('❌ Error processing refund:', refundError);
                 return res.status(500).json({
                     success: false,
                     message: 'Failed to process refund',
@@ -118,7 +118,7 @@ export const cancelBooking = async (req, res) => {
         show.markModified('occupiedSeats');
         await show.save();
 
-        console.log('✅ Booking cancelled successfully:', bookingId);
+        // console.log('✅ Booking cancelled successfully:', bookingId);
 
         // Send cancellation email
         if (user && user.email) {
@@ -141,12 +141,12 @@ export const cancelBooking = async (req, res) => {
                 const emailResult = await sendCancellationEmail(emailData);
                 
                 if (emailResult.success) {
-                    console.log('✅ Cancellation email sent successfully');
+                    // console.log('✅ Cancellation email sent successfully');
                 } else {
-                    console.log('⚠️ Cancellation email not sent:', emailResult.message);
+                    // console.log('⚠️ Cancellation email not sent:', emailResult.message);
                 }
             } catch (emailError) {
-                console.error('❌ Error sending cancellation email:', emailError);
+                // console.error('❌ Error sending cancellation email:', emailError);
                 // Don't fail the cancellation if email fails
             }
         }
@@ -160,7 +160,7 @@ export const cancelBooking = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error cancelling booking:', error);
+        // console.error('❌ Error cancelling booking:', error);
         res.status(500).json({
             success: false,
             message: 'Internal server error',
@@ -188,7 +188,7 @@ export const getCancellationPolicy = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error getting cancellation policy:', error);
+        // console.error('❌ Error getting cancellation policy:', error);
         res.status(500).json({
             success: false,
             message: 'Internal server error',
@@ -228,7 +228,7 @@ export const getUserBookings = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error getting user bookings:', error);
+        // console.error('❌ Error getting user bookings:', error);
         res.status(500).json({
             success: false,
             message: 'Internal server error',

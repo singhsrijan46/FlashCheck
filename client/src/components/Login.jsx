@@ -50,7 +50,6 @@ const Login = ({ state }) => {
                 toast.error(result.message);
             }
         } catch (error) {
-            console.error('Form submission error:', error);
             toast.error('An error occurred');
         } finally {
             setLoading(false);

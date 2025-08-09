@@ -28,7 +28,7 @@ const MyBookings = () => {
         }
 
     } catch (error) {
-      console.error('Error fetching bookings:', error)
+      // Silent error handling
     }
     setIsLoading(false)
   }
@@ -82,8 +82,6 @@ const MyBookings = () => {
     setCancelling(true)
     try {
       const token = await getToken()
-      console.log('🔍 Token:', token ? 'Present' : 'Missing')
-      console.log('🔍 Booking ID:', bookingId)
       
       const response = await axios.post(`/api/cancellation/cancel/${bookingId}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
@@ -96,7 +94,6 @@ const MyBookings = () => {
         toast.error(response.data.message || 'Failed to cancel booking')
       }
     } catch (error) {
-      console.error('Error cancelling booking:', error)
       const errorMessage = error.response?.data?.message || 'Failed to cancel booking'
       toast.error(errorMessage)
     } finally {

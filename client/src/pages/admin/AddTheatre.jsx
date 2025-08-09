@@ -58,7 +58,7 @@ const AddTheatre = () => {
     setMessage('');
 
     try {
-      console.log('Submitting theatre data:', formData);
+
       
       const token = await getToken();
       const { data } = await axios.post('/api/theatre/add', formData, {
@@ -68,7 +68,7 @@ const AddTheatre = () => {
         }
       });
 
-      console.log('Theatre API response:', data);
+
 
       if (data.success) {
         toast.success('Theatre added successfully!');
@@ -85,7 +85,7 @@ const AddTheatre = () => {
         setMessage(data.message || 'Failed to add theatre');
       }
     } catch (error) {
-      console.error('Error adding theatre:', error);
+
       
       let errorMessage = 'Error adding theatre. Please try again.';
       

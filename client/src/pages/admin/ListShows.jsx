@@ -24,7 +24,7 @@ const ListShows = () => {
             setAdminShows(data.shows || [])
             setLoading(false);
         } catch (error) {
-            console.error('Error fetching admin shows:', error);
+
             setLoading(false);
         }
     }

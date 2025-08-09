@@ -39,34 +39,26 @@ const SeatLayout = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      console.log('🔍 SeatLayout - Starting to fetch show data...');
-      console.log('🔍 Parameters:', { id, date, showtimeId });
-      console.log('🔍 Location state:', location.state);
-      
       let selectedShow = null;
       
       // First, try to use the showtime data from navigation state
       if (location.state?.showtimeData) {
-        console.log('🔍 Using showtime data from navigation state');
         selectedShow = location.state.showtimeData;
       }
       
       // If we don't have state data, use date-based search
       if (!selectedShow && id && date) {
-        console.log('🔍 Using date-based search for movie:', id, 'date:', date);
+
         
         // Get all shows for this movie in the selected city
         const city = selectedCity || 'Varanasi';
-        console.log('🔍 Fetching shows for city:', city);
+
         
         try {
           const showsResponse = await axios.get(`/api/show/${id}/city/${city}`);
-          console.log('🔍 Shows response:', showsResponse.data);
           
           if (showsResponse.data.success) {
             const shows = showsResponse.data.shows;
-            console.log('🔍 Found shows:', shows.length);
             
             // Find the show for the specific date
             const dateStr = date; // date is already in YYYY-MM-DD format
@@ -75,43 +67,38 @@ const SeatLayout = () => {
               return showDate === dateStr;
             });
             
-            console.log('🔍 Shows for date:', showsForDate.length);
+
             
             if (showsForDate.length > 0) {
               // Use the first show for the date
               selectedShow = showsForDate[0];
-              console.log('🔍 Selected show from date search:', selectedShow);
+
             } else {
-              console.error('❌ No show found for movie', id, 'on date', date);
+
               setError('No show found for the selected date');
               return;
             }
           } else {
-            console.error('❌ Failed to fetch shows');
+
             setError('Failed to load show data');
             return;
           }
         } catch (error) {
-          console.error('❌ Error fetching shows:', error);
+
           setError('Failed to load show data. Please try again.');
           return;
         }
       }
       
       if (selectedShow) {
-        console.log('🔍 Final selected show:', selectedShow);
-        console.log('🔍 Show prices:', {
-          silver: selectedShow.silverPrice,
-          gold: selectedShow.goldPrice,
-          diamond: selectedShow.diamondPrice
-        });
+
         setShow(selectedShow);
       } else {
-        console.error('❌ No show found');
+
         setError('No show found. Please try selecting a different showtime.');
       }
     } catch (error) {
-      console.error('❌ Error fetching show:', error);
+
       setError('Failed to load show data. Please try again.');
     } finally {
       setLoading(false);
@@ -121,23 +108,23 @@ const SeatLayout = () => {
   const getOccupiedSeats = async () => {
     try {
       if (!show) {
-        console.log('🔍 No show data available for occupied seats check');
+
         return;
       }
       
-      console.log('🔍 Fetching occupied seats for show:', show._id);
+
       const { data } = await axios.get(`/api/booking/occupied-seats/${show._id}`)
       
       if (data.success) {
         // Convert object keys to array of occupied seat IDs
         const occupiedSeatIds = Object.keys(data.occupiedSeats || {});
-        console.log('🔍 Found occupied seats:', occupiedSeatIds);
+
         setOccupiedSeats(occupiedSeatIds);
       } else {
-        console.error('❌ Failed to fetch occupied seats:', data.message);
+
       }
     } catch (error) {
-      console.error('❌ Error getting occupied seats:', error);
+
     }
   }
 
@@ -209,8 +196,7 @@ const SeatLayout = () => {
   }, [show])
 
   useEffect(() => {
-    console.log('SeatLayout - Show data:', show);
-    console.log('SeatLayout - Occupied seats:', occupiedSeats);
+
   }, [show, occupiedSeats]);
 
   const renderSeatBlock = (rowLetter, blockNumber) => {

@@ -8,7 +8,7 @@ export const isAdmin = async (req, res) =>{
     try {
         res.json({success: true, message: "Admin verified"})
     } catch (error) {
-        console.error(error);
+
         res.json({success: false, message: error.message})
     }
 }
@@ -48,7 +48,7 @@ export const getDashboardData = async (req, res) =>{
         
         res.json({success: true, dashboardData})
     } catch (error) {
-        console.error(error);
+
         res.json({success: false, message: error.message})
     }
 }
@@ -73,7 +73,7 @@ export const getAllShows = async (req, res) =>{
         
         res.json({success: true, shows})
     } catch (error) {
-        console.error('Error fetching admin shows:', error);
+
         res.json({success: false, message: error.message})
     }
 }
@@ -83,7 +83,7 @@ export const getAllBookings = async (req, res) =>{
         const bookings = await Booking.find({}).populate('user').populate('show').sort({ createdAt: -1 });
         res.json({success: true, bookings})
     } catch (error) {
-        console.error(error);
+
         res.json({success: false, message: error.message})
     }
 }
@@ -147,7 +147,7 @@ export const updateAllMoviesWithCompleteData = async (req, res) => {
                 await new Promise(resolve => setTimeout(resolve, 100));
                 
             } catch (error) {
-                console.error(`Error updating movie ${movie._id}:`, error.message);
+
                 errorCount++;
             }
         }
@@ -160,7 +160,7 @@ export const updateAllMoviesWithCompleteData = async (req, res) => {
         });
         
     } catch (error) {
-        console.error('Error updating movies:', error);
+
         res.json({ success: false, message: error.message });
     }
 };

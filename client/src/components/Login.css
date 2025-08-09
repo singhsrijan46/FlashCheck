@@ -7,7 +7,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(1, 9, 21, 0.4);
   backdrop-filter: blur(4px);
   padding: 1rem;
   box-sizing: border-box;
@@ -39,7 +39,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(1, 9, 21, 0.4);
   backdrop-filter: blur(4px);
 }
 
@@ -47,7 +47,7 @@
   max-width: 28rem;
   width: 100%;
   padding: 2rem;
-  background: rgba(31, 41, 55, 0.95);
+  background: rgba(1, 9, 21, 0.95);
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 1rem;
@@ -63,7 +63,7 @@
   position: fixed;
   top: 2rem;
   right: 2rem;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(1, 9, 21, 0.8);
   border: none;
   color: white;
   cursor: pointer;
@@ -79,7 +79,7 @@
 }
 
 .login-close-btn:hover {
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(1, 9, 21, 0.9);
   transform: scale(1.1);
   border-color: rgba(255, 255, 255, 0.2);
 }
@@ -149,7 +149,7 @@
   padding: 0.75rem 1rem;
   border: 1px solid rgba(75, 85, 99, 0.6);
   border-radius: 0.5rem;
-  background-color: rgba(55, 65, 81, 0.9);
+  background-color: rgba(1, 9, 21, 0.8);
   color: white;
   outline: none;
   box-sizing: border-box;
@@ -159,7 +159,7 @@
 
 .login-input:focus {
   border-color: #1E90FF;
-  background-color: rgba(75, 85, 99, 0.95);
+  background-color: rgba(1, 9, 21, 0.9);
   transform: translateY(-1px);
 }
 

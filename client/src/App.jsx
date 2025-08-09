@@ -21,6 +21,8 @@ import Loading from './components/Loading'
 import ShowtimeSelection from './pages/ShowtimeSelection'
 import SearchMovies from './pages/SearchMovies'
 import CancelTicket from './pages/CancelTicket'
+import AboutUs from './pages/AboutUs'
+import ContactUs from './pages/ContactUs'
 
 const App = () => {
 
@@ -30,17 +32,9 @@ const App = () => {
 
   const { user, loading } = useAppContext()
 
-  // Debug logging
-  console.log('App - loading:', loading)
-  console.log('App - user:', user)
-  console.log('App - location:', location.pathname)
-
   if (loading) {
-    console.log('App - Showing Loading component')
     return <Loading />;
   }
-
-  console.log('App - Rendering main app')
 
   return (
     <>
@@ -59,6 +53,8 @@ const App = () => {
         <Route path='/favorite' element={user ? <Favorite/> : <Login state={{ from: location }}/>} />
         <Route path='/login' element={<Home/>} />
         <Route path='/search' element={<SearchMovies />} />
+        <Route path='/about-us' element={<AboutUs />} />
+        <Route path='/contact-us' element={<ContactUs />} />
 
         <Route path='/admin/*' element={user && user.role === 'admin' ? <Layout/> : <Login state={{ from: location }}/>}>
           <Route index element={<Dashboard/>}/>

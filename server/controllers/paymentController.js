@@ -10,7 +10,7 @@ export const createPayment = async (req, res) => {
         const { showId, selectedSeats, amount } = req.body;
         const userId = req.user._id;
 
-        console.log('🔍 Creating payment for:', { showId, selectedSeats, amount, userId });
+        // console.log('🔍 Creating payment for:', { showId, selectedSeats, amount, userId });
 
         // Validate required fields
         if (!showId || !selectedSeats || !amount) {
@@ -32,7 +32,7 @@ export const createPayment = async (req, res) => {
         // Get movie details separately since movie ID is a string
         const movie = await Movie.findById(show.movie);
         if (!movie) {
-            console.error('❌ Movie not found:', show.movie);
+            // console.error('❌ Movie not found:', show.movie);
         }
 
         // Check seat availability
@@ -67,7 +67,7 @@ export const createPayment = async (req, res) => {
             });
         }
 
-        console.log('✅ Payment intent created:', paymentResult.paymentIntentId);
+        // console.log('✅ Payment intent created:', paymentResult.paymentIntentId);
 
         res.json({
             success: true,
@@ -77,7 +77,7 @@ export const createPayment = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error creating payment:', error);
+        // console.error('❌ Error creating payment:', error);
         res.status(500).json({
             success: false,
             message: 'Internal server error',
@@ -91,7 +91,7 @@ export const confirmPaymentAndBook = async (req, res) => {
         const { paymentIntentId } = req.body;
         const userId = req.user._id;
 
-        console.log('🔍 Confirming payment:', paymentIntentId);
+        // console.log('🔍 Confirming payment:', paymentIntentId);
 
         // Confirm payment with Stripe
         const paymentResult = await confirmPayment(paymentIntentId);
@@ -119,7 +119,7 @@ export const confirmPaymentAndBook = async (req, res) => {
         const { showId, selectedSeats } = paymentIntent.metadata;
         const amount = paymentIntent.amount / 100; // Convert from cents
 
-        console.log('🔍 Creating booking from payment:', { showId, selectedSeats, amount });
+        // console.log('🔍 Creating booking from payment:', { showId, selectedSeats, amount });
 
         // Get the show with populated theatre data
         const show = await Show.findById(showId).populate('theatre');
@@ -133,7 +133,7 @@ export const confirmPaymentAndBook = async (req, res) => {
         // Get movie details separately since movie ID is a string
         const movie = await Movie.findById(show.movie);
         if (!movie) {
-            console.error('❌ Movie not found:', show.movie);
+            // console.error('❌ Movie not found:', show.movie);
         }
 
         // Parse selected seats
@@ -151,7 +151,7 @@ export const confirmPaymentAndBook = async (req, res) => {
         // Get user details for email
         const user = await User.findById(userId);
         if (!user) {
-            console.error('❌ User not found for email:', userId);
+            // console.error('❌ User not found for email:', userId);
         }
 
         // Create the booking
@@ -173,7 +173,7 @@ export const confirmPaymentAndBook = async (req, res) => {
         show.markModified('occupiedSeats');
         await show.save();
 
-        console.log('✅ Booking created successfully:', booking._id);
+        // console.log('✅ Booking created successfully:', booking._id);
 
         // Send confirmation email
         if (user && user.email) {
@@ -195,16 +195,16 @@ export const confirmPaymentAndBook = async (req, res) => {
                 const emailResult = await sendBookingConfirmationEmail(emailData);
                 
                 if (emailResult.success) {
-                    console.log('✅ Booking confirmation email sent successfully');
+                    // console.log('✅ Booking confirmation email sent successfully');
                 } else {
-                    console.log('⚠️ Email not sent:', emailResult.message);
+                    // console.log('⚠️ Email not sent:', emailResult.message);
                 }
             } catch (emailError) {
-                console.error('❌ Error sending confirmation email:', emailError);
+                // console.error('❌ Error sending confirmation email:', emailError);
                 // Don't fail the booking if email fails
             }
         } else {
-            console.log('⚠️ No user email found, skipping confirmation email');
+            // console.log('⚠️ No user email found, skipping confirmation email');
         }
 
         res.json({
@@ -214,7 +214,7 @@ export const confirmPaymentAndBook = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error confirming payment and booking:', error);
+        // console.error('❌ Error confirming payment and booking:', error);
         res.status(500).json({
             success: false,
             message: 'Internal server error',
@@ -245,7 +245,7 @@ export const getPaymentStatus = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error getting payment status:', error);
+        // console.error('❌ Error getting payment status:', error);
         res.status(500).json({
             success: false,
             message: 'Internal server error',

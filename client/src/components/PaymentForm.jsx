@@ -39,7 +39,6 @@ const PaymentFormContent = ({ amount, showId, selectedSeats, onSuccess, onCancel
                 toast.error(data.message || 'Failed to create payment intent');
             }
         } catch (error) {
-            console.error('Error creating payment intent:', error);
             toast.error('Failed to initialize payment');
         } finally {
             setLoading(false);
@@ -69,7 +68,6 @@ const PaymentFormContent = ({ amount, showId, selectedSeats, onSuccess, onCancel
                 await confirmPaymentWithBackend(paymentIntent.id);
             }
         } catch (error) {
-            console.error('Payment error:', error);
             toast.error('Payment failed. Please try again.');
         } finally {
             setLoading(false);
@@ -92,7 +90,6 @@ const PaymentFormContent = ({ amount, showId, selectedSeats, onSuccess, onCancel
                 toast.error(data.message || 'Failed to confirm booking');
             }
         } catch (error) {
-            console.error('Error confirming payment:', error);
             toast.error('Failed to confirm booking');
         }
     };

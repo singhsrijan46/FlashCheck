@@ -388,21 +388,8 @@
   color: #9ca3af;
 }
 
-/* Debug Info */
-.showtime-debug-info {
-  background: rgba(31, 41, 55, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin: 1rem auto;
-  max-width: 60rem;
-  font-size: 0.75rem;
-  color: #9ca3af;
-}
 
-.showtime-debug-info p {
-  margin: 0.25rem 0;
-}
+
 
 /* Book Seats Button */
 .showtime-book-section {

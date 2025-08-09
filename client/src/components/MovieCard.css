@@ -111,7 +111,7 @@
 }
 
 .movie-card-genre-badge {
-  background: #1f2937;
+  background: rgba(1, 9, 21, 0.8);
   color: #d1d5db;
   font-size: 0.75rem;
   font-weight: 600;

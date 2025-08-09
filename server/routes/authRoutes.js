@@ -33,7 +33,7 @@ authRouter.post('/register', async (req, res) => {
         try {
             await sendWelcomeEmail(user.email, user.name);
         } catch (emailError) {
-            console.error('❌ Error sending welcome email:', emailError);
+            // console.error('❌ Error sending welcome email:', emailError);
             // Don't fail registration if email fails
         }
 
@@ -49,7 +49,7 @@ authRouter.post('/register', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error(error);
+        // console.error(error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
@@ -86,7 +86,7 @@ authRouter.post('/login', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error(error);
+        // console.error(error);
         res.status(500).json({ success: false, message: error.message });
     }
 });

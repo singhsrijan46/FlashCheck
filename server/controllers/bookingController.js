@@ -4,13 +4,12 @@ import mongoose from "mongoose";
 
 const checkSeatsAvailability = async (showId, selectedSeats) => {
     try {
-        console.log('🔍 Checking seats availability for show:', showId);
-        console.log('🔍 Selected seats:', selectedSeats);
+
         
         const showData = await Show.findById(showId);
         
         if (!showData) {
-            console.log('❌ Show not found');
+            // console.log('❌ Show not found');
             return false;
         }
         
@@ -18,22 +17,22 @@ const checkSeatsAvailability = async (showId, selectedSeats) => {
             showData.occupiedSeats = {};
         }
         
-        console.log('🔍 Current occupied seats:', Object.keys(showData.occupiedSeats));
+        // console.log('🔍 Current occupied seats:', Object.keys(showData.occupiedSeats));
         
         if (!Array.isArray(selectedSeats) || selectedSeats.length === 0) {
-            console.log('❌ Invalid selected seats');
+            // console.log('❌ Invalid selected seats');
             return false;
         }
         
         const isAnySeatTaken = selectedSeats.some(seat => showData.occupiedSeats[seat]);
-        console.log('🔍 Is any seat taken?', isAnySeatTaken);
+        // console.log('🔍 Is any seat taken?', isAnySeatTaken);
         
         const result = !isAnySeatTaken;
-        console.log('🔍 Seats available?', result);
+        // console.log('🔍 Seats available?', result);
         
         return result;
     } catch (error) {
-        console.error('❌ checkSeatsAvailability error:', error.message);
+        // console.error('❌ checkSeatsAvailability error:', error.message);
         return false;
     }
 }
@@ -43,26 +42,26 @@ export const createBooking = async (req, res)=>{
         const userId = req.user._id;
         const {showId, selectedSeats} = req.body;
 
-        console.log('🔍 Creating booking for user:', userId);
-        console.log('🔍 Show ID:', showId);
-        console.log('🔍 Selected seats:', selectedSeats);
+        // console.log('🔍 Creating booking for user:', userId);
+        // console.log('🔍 Show ID:', showId);
+        // console.log('🔍 Selected seats:', selectedSeats);
 
         const isAvailable = await checkSeatsAvailability(showId, selectedSeats)
-        console.log('🔍 Are seats available?', isAvailable);
+        // console.log('🔍 Are seats available?', isAvailable);
 
         if(!isAvailable){
-            console.log('❌ Seats are not available');
+            // console.log('❌ Seats are not available');
             return res.json({success: false, message: "Selected Seats are not available."})
         }
 
         const showData = await Show.findById(showId).populate('movie');
 
         if (!showData) {
-            console.log('❌ Show not found');
+            // console.log('❌ Show not found');
             return res.json({success: false, message: "Show not found"});
         }
 
-        console.log('🔍 Show data found:', showData.movie?.title);
+        // console.log('🔍 Show data found:', showData.movie?.title);
 
         // Calculate total amount based on seat prices
         const calculateSeatPrice = (seatId) => {
@@ -85,7 +84,7 @@ export const createBooking = async (req, res)=>{
             return total + calculateSeatPrice(seatId);
         }, 0);
 
-        console.log('🔍 Total amount:', totalAmount);
+        // console.log('🔍 Total amount:', totalAmount);
 
         const booking = await Booking.create({
             user: userId,
@@ -95,7 +94,7 @@ export const createBooking = async (req, res)=>{
             isPaid: true
         })
 
-        console.log('🔍 Booking created:', booking._id);
+        // console.log('🔍 Booking created:', booking._id);
 
         selectedSeats.map((seat)=>{
             showData.occupiedSeats[seat] = userId;
@@ -104,12 +103,12 @@ export const createBooking = async (req, res)=>{
         showData.markModified('occupiedSeats');
         await showData.save();
 
-        console.log('🔍 Show updated with occupied seats');
+        // console.log('🔍 Show updated with occupied seats');
 
         res.json({success: true, message: 'Booking created successfully', bookingId: booking._id})
 
     } catch (error) {
-        console.error('❌ Error in createBooking:', error.message);
+        // console.error('❌ Error in createBooking:', error.message);
         res.json({success: false, message: error.message})
     }
 }
@@ -127,7 +126,7 @@ export const getOccupiedSeats = async (req, res)=>{
         res.json({success: true, occupiedSeats: showData.occupiedSeats || {}})
 
     } catch (error) {
-        console.error('Error in getOccupiedSeats:', error.message);
+        // console.error('Error in getOccupiedSeats:', error.message);
         res.json({success: false, message: error.message})
     }
 }

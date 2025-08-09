@@ -38,6 +38,12 @@
   font-weight: 700;
 }
 
+.featured-shiny-title {
+  font-size: inherit;
+  font-weight: inherit;
+  color: #ffffff;
+}
+
 .featured-view-all {
   display: flex;
   align-items: center;
@@ -68,17 +74,59 @@
 }
 
 .featured-movies {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 0 2rem;
   margin-top: 1.5rem;
+  width: 100%;
+}
+
+/* ChromaMovieGrid integration styles */
+.featured-chroma-grid {
+  width: 100%;
+  position: relative;
+}
+
+.featured-chroma-grid .chroma-movie-grid-container {
+  padding: 0;
+  max-width: none;
+  margin: 0;
+}
+
+.featured-chroma-grid .chroma-movie-grid-layout {
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+/* Enhanced chroma effect for featured section */
+.featured-chroma-grid .chroma-movie-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: linear-gradient(145deg, #010915, rgba(14, 20, 47, 0.9733)) !important;
+  margin-bottom: 1rem;
+}
+
+.featured-chroma-grid .chroma-movie-card:hover {
+  box-shadow: none;
+  z-index: 10;
+}
+
+/* Responsive adjustments for featured section */
+@media (max-width: 1200px) {
+  .featured-chroma-grid .chroma-movie-grid-layout {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .featured-chroma-grid .chroma-movie-grid-layout {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
 }
 
 @media (max-width: 639px) {
-  .featured-movies {
-    justify-content: flex-start;
-    gap: 0 2rem;
+  .featured-chroma-grid .chroma-movie-grid-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    justify-items: center;
   }
 }
 

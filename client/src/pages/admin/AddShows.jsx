@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { dummyShowsData } from '../../assets/assets';
+
 import Loading from '../../components/Loading';
 import { CheckIcon, DeleteIcon, StarIcon, MapPinIcon, BuildingIcon, GlobeIcon, PlusIcon } from 'lucide-react';
 import { kConverter } from '../../lib/kConverter';
@@ -45,11 +45,11 @@ const AddShows = () => {
             if (data.success) {
                 setNowPlayingMovies(data.movies || []);
             } else {
-                console.error('Failed to fetch movies:', data.message);
+
                 toast.error('Failed to fetch movies');
             }
         } catch (error) {
-            console.error('Error fetching movies:', error);
+
             toast.error('Error fetching movies');
         } finally {
             setLoadingMovies(false);
@@ -60,24 +60,23 @@ const AddShows = () => {
     const fetchStates = async () => {
         try {
             setLoadingStates(true);
-            console.log('Fetching states...');
+
             
             const { data } = await axios.get('/api/theatre/states', {
                 headers: { Authorization: `Bearer ${await getToken()}` }
             });
             
-            console.log('States API response:', data);
+
             
             if (data.success) {
                 setStates(data.states || []);
-                console.log('States set:', data.states || []);
+
             } else {
-                console.error('Failed to fetch states:', data.message);
+
                 toast.error('Failed to fetch states');
             }
         } catch (error) {
-            console.error('Error fetching states:', error);
-            console.error('Error response:', error.response?.data);
+
             toast.error('Error fetching states');
         } finally {
             setLoadingStates(false);
@@ -93,24 +92,23 @@ const AddShows = () => {
             setSelectedCity("");
             setSelectedTheatre("");
             
-            console.log('Fetching cities for state:', state);
+
             
             const { data } = await axios.get(`/api/theatre/cities/${state}`, {
                 headers: { Authorization: `Bearer ${await getToken()}` }
             });
             
-            console.log('Cities API response:', data);
+
             
             if (data.success) {
                 setCities(data.cities || []);
-                console.log('Cities set:', data.cities || []);
+
             } else {
-                console.error('Failed to fetch cities:', data.message);
+
                 toast.error('Failed to fetch cities');
             }
         } catch (error) {
-            console.error('Error fetching cities:', error);
-            console.error('Error response:', error.response?.data);
+
             toast.error('Error fetching cities');
         } finally {
             setLoadingCities(false);
@@ -126,24 +124,23 @@ const AddShows = () => {
             setSelectedScreen("");
             setTheatreScreens([]);
             
-            console.log('Fetching theatres for city:', city);
+
             
             const { data } = await axios.get(`/api/theatre/city/${city}`, {
                 headers: { Authorization: `Bearer ${await getToken()}` }
             });
             
-            console.log('Theatres API response:', data);
+
             
             if (data.success) {
-                console.log('Setting theatres:', data.theatres);
+
                 setTheatres(data.theatres || []);
             } else {
-                console.error('Failed to fetch theatres:', data.message);
+
                 toast.error('Failed to fetch theatres');
             }
         } catch (error) {
-            console.error('Error fetching theatres:', error);
-            console.error('Error response:', error.response?.data);
+
             toast.error('Error fetching theatres');
         } finally {
             setLoadingTheatres(false);
@@ -168,22 +165,20 @@ const AddShows = () => {
 
     // Handle theatre selection
     const handleTheatreChange = (theatreId) => {
-        console.log('handleTheatreChange called with theatreId:', theatreId);
+
         setSelectedTheatre(theatreId);
         setSelectedScreen(""); // Reset screen selection
         
         // Find the selected theatre and get its screens
         const selectedTheatreData = theatres.find(theatre => theatre._id === theatreId);
-        console.log('Selected theatre data:', selectedTheatreData);
-        console.log('All theatres:', theatres);
+
         
         if (selectedTheatreData && selectedTheatreData.screens && selectedTheatreData.screens.length > 0) {
-            console.log('Setting theatre screens:', selectedTheatreData.screens);
+
             setTheatreScreens(selectedTheatreData.screens);
             toast.success(`Found ${selectedTheatreData.screens.length} screens for this theatre`);
         } else {
-            console.log('No screens found for theatre');
-            console.log('Theatre screens property:', selectedTheatreData?.screens);
+
             setTheatreScreens([]);
             toast.error('This theatre has no screens. Please add screens to the theatre first.');
         }
@@ -350,11 +345,7 @@ const AddShows = () => {
                 diamondPrice: Number(diamondPrice)
             }
 
-            console.log('=== PAYLOAD BEING SENT ===');
-            console.log('dateTimeSelection:', dateTimeSelection);
-            console.log('showsByScreen:', showsByScreen);
-            console.log('showsInput:', showsInput);
-            console.log('Payload:', JSON.stringify(payload, null, 2));
+
 
             const token = await getToken();
 
@@ -388,11 +379,7 @@ const AddShows = () => {
                 toast.error(data.message)
             }
         } catch (error) {
-            console.error("=== ADD SHOW ERROR ===");
-            console.error("Submission error:", error);
-            console.error("Error status:", error.response?.status);
-            console.error("Error response:", error.response?.data);
-            console.error("Error message:", error.message);
+
             
             if (error.response?.status === 401) {
                 toast.error('Authentication failed. Please login again.');
@@ -407,7 +394,7 @@ const AddShows = () => {
         setAddingShow(false)
     }
 
-    // Debug selectedMovie changes
+
     useEffect(() => {
 
     }, [selectedMovie]);
@@ -682,14 +669,7 @@ const AddShows = () => {
                         </div>
                     )}
                     
-                    {/* Debug Info */}
-                    {selectedTheatre && (
-                        <div className="add-shows-debug-info" style={{marginTop: '10px'}}>
-                            <p style={{color: 'blue', fontSize: '11px'}}>
-                                Debug: Theatre ID: {selectedTheatre} | Screens: {theatreScreens.length} | Selected Screen: {selectedScreen}
-                            </p>
-                        </div>
-                    )}
+
                     
                     {/* Add Button */}
                     <button onClick={handleDateTimeAdd} className="add-shows-datetime-button">

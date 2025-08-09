@@ -22,43 +22,24 @@ const ShowtimeSelection = () => {
         setLoading(true);
         setError(null);
         
-        console.log('🔍 Starting to fetch show data...');
-        console.log('🔍 Movie ID:', id);
-        console.log('🔍 Selected City:', selectedCity);
-        
         // Get movie details first
-        console.log('🔍 Fetching movie details...');
         const movieResponse = await axios.get(`/api/show/${id}`);
-        console.log('🔍 Movie response:', movieResponse.data);
         
         if (movieResponse.data.success) {
           setCurrentMovie(movieResponse.data.show.movie);
-          console.log('🔍 Movie set:', movieResponse.data.show.movie.title);
         }
         
         // Get shows for this movie in the selected city
         const city = selectedCity || 'Varanasi';
-        console.log('🔍 Fetching shows for movie:', id, 'in city:', city);
         
         const showsResponse = await axios.get(`/api/show/${id}/city/${city}`);
-        console.log('🔍 Shows response:', showsResponse.data);
         
         if (showsResponse.data.success) {
-          console.log('🔍 Shows found:', showsResponse.data.shows.length);
           setShowData(showsResponse.data.shows);
         } else {
-          console.log('🔍 No shows found for this movie in', city);
           setShowData([]);
         }
       } catch (error) {
-        console.error('❌ Error fetching show data:', error);
-        console.error('❌ Error details:', {
-          message: error.message,
-          response: error.response?.data,
-          status: error.response?.status,
-          config: error.config
-        });
-        
         let errorMessage = 'Failed to load showtimes. Please try again.';
         
         if (error.code === 'ECONNREFUSED') {
@@ -332,20 +313,6 @@ const ShowtimeSelection = () => {
           >
             Book Seats
           </button>
-        </div>
-      )}
-
-      {/* Debug Info (remove in production) */}
-      {import.meta.env.VITE_NODE_ENV === 'development' && (
-        <div className="showtime-debug-info">
-          <p>Debug: {showData.length} total shows found</p>
-          <p>Selected City: {selectedCity || 'Varanasi'}</p>
-          {selectedDate && (
-            <p>Selected Date: {selectedDate.toISOString().split('T')[0]} ({getShowsForDate(selectedDate).length} shows)</p>
-          )}
-          {selectedTheatre && (
-            <p>Selected Theatre: {selectedTheatre.theatreName} ({selectedTheatre.shows.length} showtimes)</p>
-          )}
         </div>
       )}
     </div>

@@ -6,7 +6,7 @@ export const getAllStates = async (req, res) => {
         const states = await Theatre.distinct('state', { isActive: true }).sort();
         res.json({ success: true, states });
     } catch (error) {
-        console.error('Error fetching states:', error);
+
         res.json({ success: false, message: error.message });
     }
 };
@@ -18,7 +18,7 @@ export const getCitiesByState = async (req, res) => {
         const cities = await Theatre.distinct('city', { state, isActive: true }).sort();
         res.json({ success: true, cities });
     } catch (error) {
-        console.error('Error fetching cities by state:', error);
+
         res.json({ success: false, message: error.message });
     }
 };
@@ -29,7 +29,7 @@ export const getAllTheatres = async (req, res) => {
         const theatres = await Theatre.find({ isActive: true }).sort({ createdAt: -1 });
         res.json({ success: true, theatres });
     } catch (error) {
-        console.error('Error fetching theatres:', error);
+
         res.json({ success: false, message: error.message });
     }
 };
@@ -41,7 +41,7 @@ export const getTheatresByState = async (req, res) => {
         const theatres = await Theatre.find({ state, isActive: true }).sort({ name: 1 });
         res.json({ success: true, theatres });
     } catch (error) {
-        console.error('Error fetching theatres by state:', error);
+
         res.json({ success: false, message: error.message });
     }
 };

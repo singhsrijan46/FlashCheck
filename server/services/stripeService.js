@@ -21,7 +21,7 @@ export const createPaymentIntent = async (amount, currency = 'usd', metadata = {
             paymentIntentId: paymentIntent.id
         };
     } catch (error) {
-        console.error('Error creating payment intent:', error);
+        // console.error('Error creating payment intent:', error);
         return {
             success: false,
             error: error.message
@@ -37,7 +37,7 @@ export const confirmPayment = async (paymentIntentId) => {
             paymentIntent: paymentIntent
         };
     } catch (error) {
-        console.error('Error confirming payment:', error);
+        // console.error('Error confirming payment:', error);
         return {
             success: false,
             error: error.message
@@ -61,7 +61,7 @@ export const createRefund = async (paymentIntentId, amount = null) => {
             refund: refund
         };
     } catch (error) {
-        console.error('Error creating refund:', error);
+        // console.error('Error creating refund:', error);
         return {
             success: false,
             error: error.message

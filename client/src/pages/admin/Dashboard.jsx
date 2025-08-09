@@ -35,12 +35,12 @@ const Dashboard = () => {
             })
             setLoading(false)
            } else {
-            console.error('Dashboard API error:', data.message);
+
             toast.error(data.message)
             setLoading(false)
            }
         } catch (error) {
-            console.error("Error fetching dashboard data:", error);
+
             toast.error("Error fetching dashboard data");
             setLoading(false);
         }

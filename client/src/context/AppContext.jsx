@@ -54,7 +54,7 @@ export const AppProvider = ({ children }) => {
                 return { success: false, message: data.message };
             }
         } catch (error) {
-            console.error('Login error:', error);
+
             
             // Provide more specific error messages
             let errorMessage = 'Login failed';
@@ -93,7 +93,7 @@ export const AppProvider = ({ children }) => {
                 return { success: false, message: data.message };
             }
         } catch (error) {
-            console.error('Registration error:', error);
+
             
             // Provide more specific error messages
             let errorMessage = 'Registration failed';
@@ -141,7 +141,6 @@ export const AppProvider = ({ children }) => {
                 }, 100);
             }
         } catch (error) {
-            console.error(error)
             if (error.response?.status === 401) {
                 removeToken();
             }
@@ -150,20 +149,15 @@ export const AppProvider = ({ children }) => {
 
     const fetchShows = async () => {
         try {
-            console.log('AppContext - Starting fetchShows')
             setFetchingShows(true);
             const { data } = await axios.get('/api/show/now-playing-public');
             
             if (data.success) {
-                console.log('AppContext - Shows fetched successfully:', data.movies?.length || 0)
                 setShows(data.movies || []);
             } else {
-                console.error('Failed to fetch shows:', data.message);
                 toast.error('Failed to fetch shows');
             }
         } catch (error) {
-            console.error('Error fetching shows:', error);
-            
             // Provide more specific error messages
             let errorMessage = 'Error fetching shows';
             
@@ -179,11 +173,9 @@ export const AppProvider = ({ children }) => {
                 errorMessage = error.response.data.message;
             }
             
-            console.log('AppContext - Show fetch error:', errorMessage)
             toast.error(errorMessage);
         } finally {
             setFetchingShows(false);
-            console.log('AppContext - fetchShows completed')
         }
     };
 
@@ -192,7 +184,6 @@ export const AppProvider = ({ children }) => {
     }
 
     const refreshShows = async () => {
-        console.log('refreshShows called - refreshing main shows data');
         await fetchShows()
     }
 
@@ -211,7 +202,6 @@ export const AppProvider = ({ children }) => {
                 toast.error(data.message || 'Failed to fetch favorites');
             }
         } catch (error) {
-            console.error('Error fetching favorite movies:', error);
             
             // Provide more specific error messages
             let errorMessage = 'Failed to fetch favorite movies';
@@ -236,7 +226,6 @@ export const AppProvider = ({ children }) => {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                console.log('AppContext - Starting auth check')
                 const token = getToken();
                 if (token) {
                     try {
@@ -246,23 +235,16 @@ export const AppProvider = ({ children }) => {
                         if (data.success) {
                             setUser(data.user);
                             setIsAdmin(data.user.role === 'admin');
-                            console.log('AppContext - User authenticated:', data.user)
                         } else {
                             removeToken();
-                            console.log('AppContext - Auth failed, removing token')
                         }
                     } catch (error) {
-                        console.error('Auth check error:', error);
                         removeToken();
-                        console.log('AppContext - Auth error, removing token')
                     }
-                } else {
-                    console.log('AppContext - No token found')
                 }
             } catch (error) {
-                console.error('Error in checkAuth:', error);
+                // Silent error handling for auth check
             } finally {
-                console.log('AppContext - Setting loading to false')
                 setLoading(false);
             }
         };
@@ -276,8 +258,7 @@ export const AppProvider = ({ children }) => {
             try {
                 await fetchShows();
             } catch (error) {
-                console.error('Error loading shows:', error);
-                // Don't let this break the app
+                // Silent error handling for initial show loading
             }
         };
         loadShows();

@@ -36,7 +36,6 @@ const CancelTicket = () => {
                 toast.error('Failed to fetch bookings');
             }
         } catch (error) {
-            console.error('Error fetching bookings:', error);
             toast.error('Failed to fetch bookings');
         } finally {
             setLoading(false);
@@ -50,7 +49,7 @@ const CancelTicket = () => {
                 setPolicy(response.data.policy);
             }
         } catch (error) {
-            console.error('Error fetching cancellation policy:', error);
+            // Silent error handling
         }
     };
 
@@ -75,7 +74,6 @@ const CancelTicket = () => {
                 toast.error(response.data.message || 'Failed to cancel booking');
             }
         } catch (error) {
-            console.error('Error cancelling booking:', error);
             const errorMessage = error.response?.data?.message || 'Failed to cancel booking';
             toast.error(errorMessage);
         } finally {

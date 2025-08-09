@@ -1,14 +1,15 @@
 import { ArrowRight } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import MovieCard from './MovieCard'
+import ChromaMovieGrid from './ChromaMovieGrid'
+import ShinyText from './ShinyText'
 import { useAppContext } from '../context/AppContext'
 import './FeaturedSection.css'
 
 const FeaturedSection = () => {
-    const url = import.meta.env.VITE_BASE_URL;
+    const url = import.meta.env.VITE_BASE_URL || 'http://localhost:8080';
     const navigate = useNavigate()
-    const { shows, selectedCity } = useAppContext()
+    const { selectedCity } = useAppContext()
     const [cityMovies, setCityMovies] = useState([])
     const [loading, setLoading] = useState(true)
 
@@ -21,14 +22,11 @@ const FeaturedSection = () => {
                 const data = await response.json();
                 
                 if (data.success) {
-                    console.log(`FeaturedSection - Found ${data.movies.length} movies for ${selectedCity}`);
                     setCityMovies(data.movies);
                 } else {
-                    console.error('FeaturedSection - Failed to fetch city movies:', data.message);
                     setCityMovies([]);
                 }
             } catch (error) {
-                console.error('FeaturedSection - Error fetching city movies:', error);
                 setCityMovies([]);
             } finally {
                 setLoading(false);
@@ -44,7 +42,14 @@ const FeaturedSection = () => {
     <div className='featured-section'>
 
       <div className='featured-header'>
-        <p className='featured-title'>Now Showing in {selectedCity}</p>
+        <p className='featured-title'>
+          <ShinyText 
+            text={`Now Showing in ${selectedCity}`} 
+            disabled={false} 
+            speed={3} 
+            className='featured-shiny-title' 
+          />
+        </p>
         <button onClick={()=> navigate('/movies')} className='featured-view-all'>
             View All 
             <ArrowRight className='featured-view-all-icon'/>
@@ -57,9 +62,16 @@ const FeaturedSection = () => {
             <p>Loading movies for {selectedCity}...</p>
           </div>
         ) : cityMovies.length > 0 ? (
-          cityMovies.slice(0, 4).map((movie) => (
-            <MovieCard key={movie._id} movie={movie}/>
-          ))
+          <ChromaMovieGrid 
+            movies={cityMovies.slice(0, 4)}
+            columns={4}
+            gap="1.5rem"
+            radius={250}
+            damping={0.4}
+            fadeOut={0.7}
+            ease="power3.out"
+            className="featured-chroma-grid"
+          />
         ) : (
           <div className='featured-no-movies'>
             <p>No movies available in {selectedCity} at the moment.</p>

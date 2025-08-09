@@ -121,7 +121,6 @@ const checkRateLimit = (endpoint) => {
 export const getNowPlayingMovies = async (req, res) => {
     try {
         if (!process.env.TMDB_API_KEY) {
-            console.log('TMDB API Key not configured, using sample movies');
             return res.json({success: true, movies: sampleMovies});
         }
 
@@ -139,7 +138,6 @@ export const getNowPlayingMovies = async (req, res) => {
                     });
                     return response;
                 } catch (error) {
-                    console.error(`API call failed for ${url} (attempt ${i + 1}/${retries}):`, error.message);
                     if (i === retries - 1) throw error;
                     await new Promise(resolve => setTimeout(resolve, 2000));
                 }
@@ -179,7 +177,6 @@ export const getNowPlayingMovies = async (req, res) => {
         res.json({success: true, movies: uniqueMovies});
         
     } catch (error) {
-        console.error('Error fetching now playing movies:', error);
         
         // Try to return cached movies if available
         const cachedMovies = [];
@@ -190,10 +187,8 @@ export const getNowPlayingMovies = async (req, res) => {
         }
         
         if (cachedMovies.length > 0) {
-            console.log(`Returning ${cachedMovies.length} cached movies due to API error`);
             res.json({success: true, movies: cachedMovies});
         } else {
-            console.log('No cached movies available, using sample movies');
             res.json({success: true, movies: sampleMovies});
         }
     }
@@ -211,10 +206,10 @@ export const getMoviesByCity = async (req, res) => {
             });
         }
 
-        console.log(`Fetching movies for city: ${city}`);
-
-        // Get all shows for the specified city
-        const cityShows = await Show.find({ city: city }).populate('movie');
+        // Get all shows for the specified city (case-insensitive search)
+        const cityShows = await Show.find({ 
+            city: { $regex: new RegExp('^' + city + '$', 'i') } 
+        }).populate('movie');
         
         // Extract unique movies from the shows
         const uniqueMovies = [];
@@ -227,8 +222,6 @@ export const getMoviesByCity = async (req, res) => {
             }
         });
 
-        console.log(`Found ${uniqueMovies.length} unique movies in ${city}`);
-
         res.json({ 
             success: true, 
             movies: uniqueMovies,
@@ -236,7 +229,6 @@ export const getMoviesByCity = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error fetching movies by city:', error);
         
         // Provide more specific error messages
         if (error.name === 'CastError') {
@@ -258,9 +250,6 @@ export const getMoviesByCity = async (req, res) => {
 // API to add a new show to the database
 export const addShow = async (req, res) => {
     try {
-        console.log('=== ADD SHOW REQUEST ===');
-        console.log('Request body:', JSON.stringify(req.body, null, 2));
-        
         const { movieId, theatreId, state, city, format, showsInput, silverPrice, goldPrice, diamondPrice } = req.body;
 
         // Validate required fields
@@ -279,16 +268,6 @@ export const addShow = async (req, res) => {
         if (!city) {
             return res.status(400).json({ success: false, message: 'City is required' });
         }
-        
-        // Screen validation is now done per show in showsInput
-        // if (!screen) {
-        //     return res.status(400).json({ success: false, message: 'Screen is required' });
-        // }
-        
-        // Format validation is now done per show in showsInput
-        // if (!format) {
-        //     return res.status(400).json({ success: false, message: 'Format is required' });
-        // }
         
         if (!showsInput || !Array.isArray(showsInput) || showsInput.length === 0) {
             return res.status(400).json({ success: false, message: 'Show times are required' });
@@ -319,15 +298,11 @@ export const addShow = async (req, res) => {
         for (const showInput of showsInput) {
             const { date, time, screen } = showInput;
             
-            console.log('Processing showInput:', showInput);
-            console.log('Screen from showInput:', screen);
-            
             if (!time || !Array.isArray(time) || time.length === 0) {
                 return res.status(400).json({ success: false, message: 'Show times are required' });
             }
             
             if (!screen) {
-                console.log('Screen validation failed - screen is empty or undefined');
                 return res.status(400).json({ success: false, message: 'Screen is required for each show' });
             }
 
@@ -399,7 +374,6 @@ export const addShow = async (req, res) => {
                         
                         setCachedMovieData(movieId, movieData);
                     } catch (error) {
-                        console.error('Error fetching movie data from TMDB:', error);
                         // Continue with fallback movie creation
                     }
                 }
@@ -415,7 +389,6 @@ export const addShow = async (req, res) => {
                         });
                         await movie.save();
                     } catch (saveError) {
-                        console.error('Error saving movie with TMDB data:', saveError);
                         // Try fallback creation
                         try {
                             movie = new Movie({
@@ -432,7 +405,6 @@ export const addShow = async (req, res) => {
                             });
                             await movie.save();
                         } catch (fallbackError) {
-                            console.error('Error saving fallback movie:', fallbackError);
                             return res.status(500).json({ 
                                 success: false, 
                                 message: 'Failed to create movie record',
@@ -457,7 +429,6 @@ export const addShow = async (req, res) => {
                         });
                         await movie.save();
                     } catch (fallbackError) {
-                        console.error('Error saving basic movie:', fallbackError);
                         return res.status(500).json({ 
                             success: false, 
                             message: 'Failed to create basic movie record',
@@ -484,7 +455,6 @@ export const addShow = async (req, res) => {
 
                     await show.save();
                 } catch (showError) {
-                    console.error('Error saving show:', showError);
                     return res.status(500).json({ 
                         success: false, 
                         message: 'Failed to create show',
@@ -497,7 +467,6 @@ export const addShow = async (req, res) => {
         res.json({ success: true, message: 'Shows added successfully' });
 
     } catch (error) {
-        console.error('Error adding show:', error);
         
         // Provide more specific error messages
         if (error.code === 11000) {
@@ -521,17 +490,6 @@ export const getShows = async (req, res) => {
     try {
         const shows = await Show.find().populate('movie').populate('theatre');
         
-        console.log('Raw shows from database:', shows.map(s => ({ 
-            showId: s._id, 
-            movieId: s.movie, 
-            movieTitle: s.movie?.title,
-            theatreId: s.theatre,
-            theatreName: s.theatre?.name,
-            state: s.state,
-            city: s.city,
-            showDateTime: s.showDateTime 
-        })));
-        
         const showsWithMovies = shows.map(show => {
             if (!show.movie) {
                 return {
@@ -553,21 +511,9 @@ export const getShows = async (req, res) => {
             return show;
         });
 
-        console.log('Processed shows:', showsWithMovies.map(s => ({ 
-            showId: s._id, 
-            movieId: s.movie, 
-            movieTitle: s.movie?.title,
-            theatreId: s.theatre,
-            theatreName: s.theatre?.name,
-            state: s.state,
-            city: s.city,
-            showDateTime: s.showDateTime 
-        })));
-
         res.json({ success: true, shows: showsWithMovies });
 
     } catch (error) {
-        console.error('Error fetching shows:', error);
         
         // Provide more specific error messages
         if (error.name === 'CastError') {
@@ -603,17 +549,13 @@ export const getShowsByMovieAndCity = async (req, res) => {
                 success: false, 
                 message: 'City is required' 
             });
-        }
-        
-        console.log('Looking for shows with movie ID:', movieId, 'and city:', city);
+                }
         
         // Find all shows for this movie in the specified city
         const shows = await Show.find({ 
             movie: movieId,
             city: city 
         }).populate('movie').populate('theatre');
-        
-        console.log('Found shows:', shows.length);
         
         if (shows.length === 0) {
             return res.json({ 
@@ -646,7 +588,6 @@ export const getShowsByMovieAndCity = async (req, res) => {
         });
         
     } catch (error) {
-        console.error('Error fetching shows by movie and city:', error);
         
         res.status(500).json({ 
             success: false, 
@@ -668,8 +609,6 @@ export const getShowByMovieId = async (req, res) => {
             });
         }
         
-        console.log('Looking for shows with movie ID:', movieId);
-        
         // Try to find a show for this movie with different ID formats
         let show = await Show.findOne({ movie: movieId }).populate('movie');
         
@@ -681,7 +620,6 @@ export const getShowByMovieId = async (req, res) => {
         // If still not found, try to find any show and check if movie ID matches
         if (!show) {
             const allShows = await Show.find().populate('movie');
-            console.log('Available shows:', allShows.map(s => ({ showId: s._id, movieId: s.movie, movieTitle: s.movie?.title })));
             
             // Try to find by movie title or other properties
             show = allShows.find(s => s.movie && (
@@ -720,7 +658,6 @@ export const getShowByMovieId = async (req, res) => {
                     });
                     return response;
                 } catch (error) {
-                            console.error(`API call failed for ${url} (attempt ${i + 1}/${retries}):`, error.message);
                     if (i === retries - 1) throw error;
                     await new Promise(resolve => setTimeout(resolve, 2000));
                 }
@@ -735,22 +672,20 @@ export const getShowByMovieId = async (req, res) => {
                 show.movie.casts = castData.slice(0, 12).map(cast => ({
             name: cast.name,
             profile_path: cast.profile_path,
-                    character: cast.character
-                }));
-                
-                // Save updated movie
-                await show.movie.save();
-                
-            } catch (error) {
-                console.error('Error fetching cast data:', error);
-                // Continue without cast data
-            }
-        }
+                                                character: cast.character
+                        }));
+                        
+                        // Save updated movie
+                        await show.movie.save();
+                        
+                    } catch (error) {
+                        // Continue without cast data
+                    }
+                }
 
         res.json({ success: true, show });
 
     } catch (error) {
-        console.error('Error fetching show by movie ID:', error);
         
         // Provide more specific error messages
         if (error.name === 'CastError') {
@@ -780,8 +715,6 @@ export const getSpecificShow = async (req, res) => {
                 message: 'Showtime ID is required' 
             });
         }
-        
-        console.log('Looking for showtime with ID:', showtimeId);
         
         // Find the specific showtime by ID
         const show = await Show.findById(showtimeId).populate('movie').populate('theatre');
@@ -816,7 +749,6 @@ export const getSpecificShow = async (req, res) => {
         });
         
     } catch (error) {
-        console.error('Error fetching specific showtime:', error);
         
         res.status(500).json({ 
             success: false, 
@@ -850,7 +782,6 @@ export const getShow = async (req, res) => {
         res.json({ success: true, show });
 
     } catch (error) {
-        console.error('Error fetching show:', error);
         
         // Provide more specific error messages
         if (error.name === 'CastError') {
@@ -895,7 +826,6 @@ export const getMovieTrailer = async (req, res) => {
                     });
                     return response;
                 } catch (error) {
-                    console.error(`Trailer API call failed for ${url} (attempt ${i + 1}/${retries}):`, error.message);
                     if (i === retries - 1) throw error;
                     await new Promise(resolve => setTimeout(resolve, 2000));
                 }
@@ -925,7 +855,6 @@ export const getMovieTrailer = async (req, res) => {
         res.json({ success: true, trailer });
 
     } catch (error) {
-        console.error('Error fetching movie trailer:', error);
         
         // Provide more specific error messages
         if (error.response?.status === 404) {
@@ -976,8 +905,7 @@ export const searchMovies = async (req, res) => {
                         timeout: 15000
                     });
                     return response;
-    } catch (error) {
-                    console.error(`Search API call failed for ${url} (attempt ${i + 1}/${retries}):`, error.message);
+                    } catch (error) {
                     if (i === retries - 1) throw error;
                     await new Promise(resolve => setTimeout(resolve, 2000));
                 }
@@ -990,7 +918,6 @@ export const searchMovies = async (req, res) => {
         res.json({ success: true, movies });
 
     } catch (error) {
-        console.error('Error searching movies:', error);
         
         // Provide more specific error messages
         if (error.response?.status === 401) {
@@ -1041,7 +968,6 @@ export const getPopularMovies = async (req, res) => {
                     });
                     return response;
                 } catch (error) {
-                    console.error(`Popular movies API call failed for ${url} (attempt ${i + 1}/${retries}):`, error.message);
                     if (i === retries - 1) throw error;
                     await new Promise(resolve => setTimeout(resolve, 2000));
                 }
@@ -1054,7 +980,6 @@ export const getPopularMovies = async (req, res) => {
         res.json({ success: true, movies });
 
     } catch (error) {
-        console.error('Error fetching popular movies:', error);
         
         // Provide more specific error messages
         if (error.response?.status === 401) {

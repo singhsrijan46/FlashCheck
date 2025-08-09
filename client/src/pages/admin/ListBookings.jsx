@@ -22,7 +22,7 @@ const ListBookings = () => {
             setBookings(data.bookings || [])
             setError(null)
         } catch (error) {
-          console.error(error);
+
           setError('Failed to load bookings')
           setBookings([])
         }

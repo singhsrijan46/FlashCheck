@@ -242,7 +242,7 @@ export const sendBookingConfirmationEmail = async (bookingData) => {
     try {
         // Check if email configuration is available
         if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-            console.log('⚠️ Email configuration not found. Skipping email send.');
+            // console.log('⚠️ Email configuration not found. Skipping email send.');
             return {
                 success: false,
                 message: 'Email configuration not available'
@@ -261,9 +261,9 @@ export const sendBookingConfirmationEmail = async (bookingData) => {
 
         const info = await transporter.sendMail(mailOptions);
         
-        console.log('✅ Booking confirmation email sent successfully');
-        console.log('📧 Email sent to:', bookingData.userEmail);
-        console.log('📧 Message ID:', info.messageId);
+        // console.log('✅ Booking confirmation email sent successfully');
+        // console.log('📧 Email sent to:', bookingData.userEmail);
+        // console.log('📧 Message ID:', info.messageId);
 
         return {
             success: true,
@@ -271,7 +271,7 @@ export const sendBookingConfirmationEmail = async (bookingData) => {
         };
 
     } catch (error) {
-        console.error('❌ Error sending booking confirmation email:', error);
+        // console.error('❌ Error sending booking confirmation email:', error);
         return {
             success: false,
             error: error.message
@@ -489,7 +489,7 @@ export const sendCancellationEmail = async (cancellationData) => {
     try {
         // Check if email configuration is available
         if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-            console.log('⚠️ Email configuration not found. Skipping email send.');
+            // console.log('⚠️ Email configuration not found. Skipping email send.');
             return {
                 success: false,
                 message: 'Email configuration not available'
@@ -508,9 +508,9 @@ export const sendCancellationEmail = async (cancellationData) => {
 
         const info = await transporter.sendMail(mailOptions);
         
-        console.log('✅ Cancellation email sent successfully');
-        console.log('📧 Email sent to:', cancellationData.userEmail);
-        console.log('📧 Message ID:', info.messageId);
+        // console.log('✅ Cancellation email sent successfully');
+        // console.log('📧 Email sent to:', cancellationData.userEmail);
+        // console.log('📧 Message ID:', info.messageId);
 
         return {
             success: true,
@@ -518,7 +518,7 @@ export const sendCancellationEmail = async (cancellationData) => {
         };
 
     } catch (error) {
-        console.error('❌ Error sending cancellation email:', error);
+        // console.error('❌ Error sending cancellation email:', error);
         return {
             success: false,
             error: error.message
@@ -555,14 +555,14 @@ export const sendWelcomeEmail = async (userEmail, userName) => {
 
         const info = await transporter.sendMail(mailOptions);
         
-        console.log('✅ Welcome email sent successfully');
+        // console.log('✅ Welcome email sent successfully');
         return {
             success: true,
             messageId: info.messageId
         };
 
     } catch (error) {
-        console.error('❌ Error sending welcome email:', error);
+        // console.error('❌ Error sending welcome email:', error);
         return {
             success: false,
             error: error.message

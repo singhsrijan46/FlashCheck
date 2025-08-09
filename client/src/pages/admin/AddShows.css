@@ -882,20 +882,9 @@
     padding: 8px;
 }
 
-/* Debug Info */
-.add-shows-debug-info {
-    margin-bottom: 20px;
-    padding: 15px;
-    background: rgba(255, 165, 0, 0.1);
-    border: 1px solid rgba(255, 165, 0, 0.3);
-    border-radius: 8px;
-    color: #ffa500;
-    font-size: 0.9rem;
-}
 
-.add-shows-debug-info p {
-    margin: 5px 0;
-    font-family: monospace;
-}
+
+
+
 
 /* Seat Prices Input */
