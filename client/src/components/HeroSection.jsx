@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../context/AppContext'
-import Aurora from './Aurora'
 import './HeroSection.css'
 
 const HeroSection = () => {
@@ -67,15 +66,7 @@ const HeroSection = () => {
   return (
     <>
       <div className='hero-section'>
-        {/* Aurora Background */}
-        <div className='hero-background'>
-          <Aurora
-            colorStops={["#3A29FF", "#FF94B4", "#FF3232"]}
-            blend={0.5}
-            amplitude={1.0}
-            speed={0.5}
-          />
-        </div>
+
         
         {/* Hero Content */}
         <div className='hero-content'>

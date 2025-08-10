@@ -113,17 +113,9 @@ const AddTheatre = () => {
   };
 
   return (
-    <div className="admin-layout">
-      <AdminNavbar />
-      <div className="admin-content">
-        <div className="admin-main">
-          <div className="add-theatre-container">
-            <div className="add-theatre-header">
-              <h1 className="add-theatre-header-title">Add Theatre</h1>
-              <p className="add-theatre-header-subtitle">Add a new theatre to the database</p>
-            </div>
-
-            <div className="add-theatre-main">
+    <>
+      <div className="add-theatre-container">
+        <div className="add-theatre-main">
               <form onSubmit={handleSubmit} className="add-theatre-form">
                 <div className="add-theatre-section">
                   <h2 className="add-theatre-section-title">Theatre Information</h2>
@@ -237,11 +229,9 @@ const AddTheatre = () => {
                   </button>
                 </div>
               </form>
-            </div>
-          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

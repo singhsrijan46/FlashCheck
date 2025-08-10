@@ -18,7 +18,7 @@
 }
 
 .list-shows-thead {
-  background-color: rgba(30, 144, 255, 0.3);
+  background-color: rgba(147, 51, 234, 0.3);
   text-align: left;
   color: white;
 }
@@ -36,12 +36,12 @@
 }
 
 .list-shows-tr {
-  border-bottom: 1px solid rgba(30, 144, 255, 0.2);
-  background-color: rgba(30, 144, 255, 0.05);
+  border-bottom: 1px solid rgba(147, 51, 234, 0.2);
+  background-color: rgba(147, 51, 234, 0.05);
 }
 
 .list-shows-tr:nth-child(even) {
-  background-color: rgba(30, 144, 255, 0.1);
+  background-color: rgba(147, 51, 234, 0.1);
 }
 
 .list-shows-td {
