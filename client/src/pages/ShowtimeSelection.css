@@ -41,7 +41,7 @@
 .showtime-poster-container {
   position: relative;
   width: auto;
-  height: calc(100vh - 7rem);
+  height: calc(100vh - 9rem);
   background: rgba(31, 41, 55, 0.8);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -52,7 +52,7 @@
 
 .showtime-movie-poster-large {
   width: auto;
-  height: calc(100vh - 7rem);
+  height: calc(100vh - 9rem);
   object-fit: contain;
   display: block;
 }
