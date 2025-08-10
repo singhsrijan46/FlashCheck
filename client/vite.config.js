@@ -7,6 +7,16 @@ export default defineConfig({
     port: 3000,
     open: true
   },
+  build: {
+    rollupOptions: {
+      external: [],
+      output: {
+        manualChunks: undefined
+      }
+    },
+    target: 'es2015',
+    minify: 'terser'
+  },
   define: {
     'import.meta.env.VITE_BASE_URL': JSON.stringify(process.env.VITE_BASE_URL),
     'import.meta.env.VITE_TMDB_IMAGE_BASE_URL': JSON.stringify('https://image.tmdb.org/t/p/w500'),
