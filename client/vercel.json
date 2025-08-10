@@ -6,6 +6,6 @@
     }
   ],
   "buildCommand": "npm run build",
-  "installCommand": "npm install --platform=linux --arch=x64 --no-optional",
+  "installCommand": "npm install --platform=linux --arch=x64 --omit=optional",
   "framework": "vite"
 }

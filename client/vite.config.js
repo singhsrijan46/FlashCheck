@@ -8,14 +8,13 @@ export default defineConfig({
     open: true
   },
   build: {
-    rollupOptions: {
-      external: [],
-      output: {
-        manualChunks: undefined
-      }
-    },
     target: 'es2015',
-    minify: 'terser'
+    minify: false,
+    rollupOptions: {
+      output: {
+        format: 'es'
+      }
+    }
   },
   define: {
     'import.meta.env.VITE_BASE_URL': JSON.stringify(process.env.VITE_BASE_URL),

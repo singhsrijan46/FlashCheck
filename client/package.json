@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --mode production",
+    "build:simple": "esbuild src/main.jsx --bundle --outdir=dist --format=esm --target=es2015",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -23,15 +24,16 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.2.0",
+    "esbuild": "^0.20.1",
     "eslint": "^8.0.0",
     "eslint-plugin-react": "^7.33.0",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "terser": "^5.28.1",
-    "vite": "^5.0.0"
+    "vite": "^4.5.2"
   },
   "overrides": {
     "rollup": {
       "optionalDependencies": {}
-    }
+    },
+    "@rollup/rollup-linux-x64-gnu": "npm:rollup@4.5.2"
   }
 }
