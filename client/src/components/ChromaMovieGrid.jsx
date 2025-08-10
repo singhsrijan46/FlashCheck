@@ -6,11 +6,7 @@ const ChromaMovieGrid = ({
   movies = [], 
   className = "",
   columns = 3,
-  gap = "1.5rem",
-  radius = 300,
-  damping = 0.45,
-  fadeOut = 0.6,
-  ease = "power3.out"
+  gap = "1.5rem"
 }) => {
   if (!movies || movies.length === 0) {
     return (
@@ -33,10 +29,6 @@ const ChromaMovieGrid = ({
           <ChromaMovieCard
             key={movie._id || movie.id || index}
             movie={movie}
-            radius={radius}
-            damping={damping}
-            fadeOut={fadeOut}
-            ease={ease}
           />
         ))}
       </div>

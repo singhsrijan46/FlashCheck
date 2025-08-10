@@ -1,17 +1,70 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useAppContext } from '../context/AppContext'
 import Aurora from './Aurora'
 import './HeroSection.css'
 
 const HeroSection = () => {
   const navigate = useNavigate()
+  const { image_base_url } = useAppContext()
+  const [nowPlayingMovies, setNowPlayingMovies] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  // Fetch now playing movies from TMDB
+  useEffect(() => {
+    const fetchNowPlayingMovies = async () => {
+      try {
+        setLoading(true)
+        const url = import.meta.env.VITE_BASE_URL || 'http://localhost:8080'
+        const response = await fetch(`${url}/api/show/now-playing-public`)
+        const data = await response.json()
+        
+        if (data.success && data.movies) {
+          // Take first 16 movies for the carousel
+          setNowPlayingMovies(data.movies.slice(0, 16))
+        } else {
+          setNowPlayingMovies([])
+        }
+      } catch (error) {
+        console.error('Error fetching now playing movies:', error)
+        setNowPlayingMovies([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchNowPlayingMovies()
+  }, [])
 
   const handleBookNowClick = () => {
     navigate('/movies')
   }
 
-    return (
+  // Fallback movies if API fails or no movies available
+  const fallbackMovies = [
+    { poster_path: "/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg", title: "Top Gun: Maverick" },
+    { poster_path: "/pFlaoHTZeyNkG83vxsAJiGzfSsa.jpg", title: "Black Panther: Wakanda Forever" },
+    { poster_path: "/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg", title: "Avatar: The Way of Water" },
+    { poster_path: "/4j0PNHkMr5ax3IA8tjtxcmPU3QT.jpg", title: "Thor: Love and Thunder" },
+    { poster_path: "/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg", title: "Spider-Man: No Way Home" },
+    { poster_path: "/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg", title: "Avengers: Endgame" },
+    { poster_path: "/6CoRTJTmijhBLJTUNoVSUNxZMEI.jpg", title: "No Time to Die" },
+    { poster_path: "/1BIoJGKbXjdFDAqUEiA2VHqkK1Z.jpg", title: "The Batman" },
+    { poster_path: "/5hoS3nEkGGXUfmnu39yw1k52JX5.jpg", title: "Fast X" },
+    { poster_path: "/rktDFPbfHfUbArZ6OOOKsXcv0Bm.jpg", title: "Dune" },
+    { poster_path: "/1E5baAaEse26fej7uHcjOgEE2t2.jpg", title: "Bullet Train" },
+    { poster_path: "/74xTEgt7R36Fpooo50r9T25onhq.jpg", title: "The Matrix Resurrections" },
+    { poster_path: "/5P8SmMzSNYikXpxil6BYzJ16611.jpg", title: "Eternals" },
+    { poster_path: "/qAZ0pzat24kLdO3o8ejmbLxyOac.jpg", title: "Interstellar" },
+    { poster_path: "/xDMIl84Qo5Tsu62c9DGWhmPI67A.jpg", title: "Encanto" },
+    { poster_path: "/cvsXj3I9Q2iyyIo95AecSd1tad7.jpg", title: "Oppenheimer" }
+  ]
+
+  // Use now playing movies if available, otherwise use fallback
+  const displayMovies = nowPlayingMovies.length > 0 ? nowPlayingMovies : fallbackMovies
+
+  return (
     <>
       <div className='hero-section'>
         {/* Aurora Background */}
@@ -49,105 +102,25 @@ const HeroSection = () => {
       <div className='movie-carousel-section'>
         <div className='movie-carousel-container'>
           <div className='movie-carousel-track'>
-            {/* First set of 16 movies */}
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg" alt="Top Gun: Maverick" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/pFlaoHTZeyNkG83vxsAJiGzfSsa.jpg" alt="Black Panther: Wakanda Forever" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg" alt="Avatar: The Way of Water" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/4j0PNHkMr5ax3IA8tjtxcmPU3QT.jpg" alt="Thor: Love and Thunder" />
+            {/* First set of movies */}
+            {displayMovies.map((movie, index) => (
+              <div key={`first-${index}`} className='movie-card'>
+                <img 
+                  src={image_base_url + (movie.poster_path || '/default-poster.jpg')} 
+                  alt={movie.title || 'Movie Poster'} 
+                />
               </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg" alt="Spider-Man: No Way Home" />
-              </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg" alt="Avengers: Endgame" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/6CoRTJTmijhBLJTUNoVSUNxZMEI.jpg" alt="No Time to Die" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/1BIoJGKbXjdFDAqUEiA2VHqkK1Z.jpg" alt="The Batman" />
-          </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/5hoS3nEkGGXUfmnu39yw1k52JX5.jpg" alt="Fast X" />
-        </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/rktDFPbfHfUbArZ6OOOKsXcv0Bm.jpg" alt="Dune" />
-      </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/1E5baAaEse26fej7uHcjOgEE2t2.jpg" alt="Bullet Train" />
-        </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg" alt="The Matrix Resurrections" />
-          </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/5P8SmMzSNYikXpxil6BYzJ16611.jpg" alt="Eternals" />
-        </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/qAZ0pzat24kLdO3o8ejmbLxyOac.jpg" alt="Interstellar" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/xDMIl84Qo5Tsu62c9DGWhmPI67A.jpg" alt="Encanto" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/cvsXj3I9Q2iyyIo95AecSd1tad7.jpg" alt="Oppenheimer" />
-          </div>
-          
+            ))}
+            
             {/* Duplicate set for seamless loop */}
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg" alt="Top Gun: Maverick" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/pFlaoHTZeyNkG83vxsAJiGzfSsa.jpg" alt="Black Panther: Wakanda Forever" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg" alt="Avatar: The Way of Water" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/4j0PNHkMr5ax3IA8tjtxcmPU3QT.jpg" alt="Thor: Love and Thunder" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg" alt="Spider-Man: No Way Home" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg" alt="Avengers: Endgame" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/6CoRTJTmijhBLJTUNoVSUNxZMEI.jpg" alt="No Time to Die" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/1BIoJGKbXjdFDAqUEiA2VHqkK1Z.jpg" alt="The Batman" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/5hoS3nEkGGXUfmnu39yw1k52JX5.jpg" alt="Fast X" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/rktDFPbfHfUbArZ6OOOKsXcv0Bm.jpg" alt="Dune" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/1E5baAaEse26fej7uHcjOgEE2t2.jpg" alt="Bullet Train" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg" alt="The Matrix Resurrections" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/5P8SmMzSNYikXpxil6BYzJ16611.jpg" alt="Eternals" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/qAZ0pzat24kLdO3o8ejmbLxyOac.jpg" alt="Interstellar" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/xDMIl84Qo5Tsu62c9DGWhmPI67A.jpg" alt="Encanto" />
-            </div>
-            <div className='movie-card'>
-              <img src="https://image.tmdb.org/t/p/w500/cvsXj3I9Q2iyyIo95AecSd1tad7.jpg" alt="Oppenheimer" />
-            </div>
+            {displayMovies.map((movie, index) => (
+              <div key={`second-${index}`} className='movie-card'>
+                <img 
+                  src={image_base_url + (movie.poster_path || '/default-poster.jpg')} 
+                  alt={movie.title || 'Movie Poster'} 
+                />
+              </div>
+            ))}
           </div>
         </div>
       </div>

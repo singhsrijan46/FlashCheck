@@ -1,8 +1,7 @@
 import { ArrowRight } from 'lucide-react'
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ChromaMovieGrid from './ChromaMovieGrid'
-import ShinyText from './ShinyText'
 import { useAppContext } from '../context/AppContext'
 import './FeaturedSection.css'
 
@@ -43,17 +42,9 @@ const FeaturedSection = () => {
 
       <div className='featured-header'>
         <p className='featured-title'>
-          <ShinyText 
-            text={`Now Showing in ${selectedCity}`} 
-            disabled={false} 
-            speed={3} 
-            className='featured-shiny-title' 
-          />
+          <span className='featured-title-text'>Now Showing in </span>
+          <span className='featured-city-name'>{selectedCity}</span>
         </p>
-        <button onClick={()=> navigate('/movies')} className='featured-view-all'>
-            View All 
-            <ArrowRight className='featured-view-all-icon'/>
-          </button>
       </div>
 
       <div className='featured-movies'>
@@ -63,8 +54,8 @@ const FeaturedSection = () => {
           </div>
         ) : cityMovies.length > 0 ? (
           <ChromaMovieGrid 
-            movies={cityMovies.slice(0, 4)}
-            columns={4}
+            movies={cityMovies.slice(0, 5)}
+            columns={5}
             gap="1.5rem"
             radius={250}
             damping={0.4}
@@ -78,6 +69,13 @@ const FeaturedSection = () => {
             <p>Please try another city or check back later for new releases.</p>
           </div>
         )}
+      </div>
+
+      <div className='featured-show-more'>
+        <button onClick={()=> navigate('/movies')} className='featured-show-more-btn'>
+          Show All
+          <ArrowRight className='featured-view-all-icon'/>
+        </button>
       </div>
 
     </div>

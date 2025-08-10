@@ -195,23 +195,30 @@ const ShowtimeSelection = () => {
 
   return (
     <div className="showtime-selection-page">
-      {/* Header with movie info */}
-      <div className="showtime-header">
-        <div className="showtime-movie-info">
-          <img 
-            src={image_base_url + currentMovie.backdrop_path} 
+      <div className="showtime-container">
+        {/* Left Column - Movie Poster */}
+        <div className="showtime-poster-column">
+          <div className="showtime-poster-container">
+            <img 
+              src={image_base_url + (currentMovie.poster_path || currentMovie.backdrop_path || '/default-poster.jpg')} 
             alt={currentMovie.title}
-            className="showtime-movie-poster"
-          />
-          <div className="showtime-movie-details">
-            <h1 className="showtime-movie-title">{currentMovie.title}</h1>
-            <p className="showtime-movie-meta">
+              className="showtime-movie-poster-large"
+            />
+            <div className="showtime-movie-info-overlay">
+              <h1 className="showtime-movie-title-large">{currentMovie.title}</h1>
+              <p className="showtime-movie-meta-large">
               {currentMovie.runtime} min • {currentMovie.genres?.map(genre => genre.name).join(", ") || 'Action, Drama'}
             </p>
-          </div>
+              <div className="showtime-movie-rating">
+                <span className="showtime-rating-label">Rating:</span>
+                <span className="showtime-rating-value">{currentMovie.vote_average?.toFixed(1) || 'N/A'}/10</span>
+              </div>
+            </div>
         </div>
       </div>
 
+        {/* Right Column - Selection Details */}
+        <div className="showtime-details-column">
       {/* Date Selection */}
       <div className="showtime-date-section">
         <h2 className="showtime-section-title">Select Date</h2>
@@ -240,11 +247,11 @@ const ShowtimeSelection = () => {
         </div>
       </div>
 
-      {/* Theatre Selection */}
+          {/* Theatre and Showtime Selection */}
       {selectedDate && (
-        <div className="showtime-theatre-section">
-          <h2 className="showtime-section-title">Select Theatre</h2>
-          <div className="showtime-theatre-list">
+            <div className="showtime-theatre-showtime-section">
+              <h2 className="showtime-section-title">Select Theatre & Showtime</h2>
+              <div className="showtime-theatre-showtime-list">
             {(() => {
               const theatres = getTheatresForDate(selectedDate);
               
@@ -257,38 +264,22 @@ const ShowtimeSelection = () => {
               }
               
               return theatres.map((theatre, index) => {
-                const isSelected = selectedTheatre && selectedTheatre.theatreId === theatre.theatreId;
                 return (
-                  <div key={index} className="showtime-theatre-item">
-                    <button
-                      className={`showtime-theatre-btn ${isSelected ? 'selected' : ''}`}
-                      onClick={() => handleTheatreSelect(theatre)}
-                    >
-                      <div className="showtime-theatre-info">
-                        <span className="showtime-theatre-name">{theatre.theatreName}</span>
+                      <div key={index} className="showtime-theatre-showtime-item">
+                        {/* Theatre Name on Left */}
+                        <div className="showtime-theatre-name-section">
+                          <h3 className="showtime-theatre-name">{theatre.theatreName}</h3>
                         <span className="showtime-theatre-count">{theatre.shows.length} showtimes</span>
                       </div>
-                    </button>
-                  </div>
-                );
-              });
-            })()}
-          </div>
-        </div>
-      )}
-
-      {/* Showtime Selection */}
-      {selectedDate && selectedTheatre && (
-        <div className="showtime-time-section">
-          <h2 className="showtime-section-title">
-            Select Showtime - {selectedTheatre.theatreName}
-          </h2>
-          <div className="showtime-time-grid">
-            {selectedTheatre.shows.map((showtime, index) => {
+                        
+                        {/* Showtimes on Right */}
+                        <div className="showtime-showtimes-section">
+                          <div className="showtime-showtimes-grid">
+                            {theatre.shows.map((showtime, showIndex) => {
               const isSelected = selectedShowtime && selectedShowtime._id === showtime._id;
               return (
                 <button
-                  key={index}
+                                  key={showIndex}
                   className={`showtime-time-btn ${isSelected ? 'selected' : ''}`}
                   onClick={() => handleShowtimeSelect(showtime)}
                 >
@@ -300,6 +291,12 @@ const ShowtimeSelection = () => {
                 </button>
               );
             })}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
           </div>
         </div>
       )}
@@ -315,6 +312,8 @@ const ShowtimeSelection = () => {
           </button>
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 };

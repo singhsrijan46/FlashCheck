@@ -1,6 +1,4 @@
-import { useRef, useEffect } from "react";
 import { StarIcon } from 'lucide-react';
-import { gsap } from "gsap";
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import "./ChromaMovieCard.css";
@@ -8,18 +6,9 @@ import "./ChromaMovieCard.css";
 export const ChromaMovieCard = ({
   movie,
   className = "",
-  radius = 300,
-  damping = 0.45,
-  fadeOut = 0.6,
-  ease = "power3.out",
 }) => {
   const navigate = useNavigate();
   const { image_base_url } = useAppContext();
-  const rootRef = useRef(null);
-  const fadeRef = useRef(null);
-  const setX = useRef(null);
-  const setY = useRef(null);
-  const pos = useRef({ x: 0, y: 0 });
 
   // Add null checks to prevent crashes
   if (!movie) {
@@ -33,45 +22,6 @@ export const ChromaMovieCard = ({
     return null;
   }
 
-  useEffect(() => {
-    const el = rootRef.current;
-    if (!el) return;
-    setX.current = gsap.quickSetter(el, "--x", "px");
-    setY.current = gsap.quickSetter(el, "--y", "px");
-    const { width, height } = el.getBoundingClientRect();
-    pos.current = { x: width / 2, y: height / 2 };
-    setX.current(pos.current.x);
-    setY.current(pos.current.y);
-  }, []);
-
-  const moveTo = (x, y) => {
-    gsap.to(pos.current, {
-      x,
-      y,
-      duration: damping,
-      ease,
-      onUpdate: () => {
-        setX.current?.(pos.current.x);
-        setY.current?.(pos.current.y);
-      },
-      overwrite: true,
-    });
-  };
-
-  const handleMove = (e) => {
-    const r = rootRef.current.getBoundingClientRect();
-    moveTo(e.clientX - r.left, e.clientY - r.top);
-    gsap.to(fadeRef.current, { opacity: 0, duration: 0.25, overwrite: true });
-  };
-
-  const handleLeave = () => {
-    gsap.to(fadeRef.current, {
-      opacity: 1,
-      duration: fadeOut,
-      overwrite: true,
-    });
-  };
-
   const handleCardClick = () => {
     navigate(`/movies/${movieData._id}`);
     scrollTo(0, 0);
@@ -82,8 +32,20 @@ export const ChromaMovieCard = ({
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    card.style.setProperty("--mouse-x", `${x}px`);
-    card.style.setProperty("--mouse-y", `${y}px`);
+    
+    // Calculate percentage for CSS custom properties
+    const xPercent = (x / rect.width) * 100;
+    const yPercent = (y / rect.height) * 100;
+    
+    card.style.setProperty("--mouse-x", `${xPercent}%`);
+    card.style.setProperty("--mouse-y", `${yPercent}%`);
+  };
+
+  const handleCardLeave = (e) => {
+    const card = e.currentTarget;
+    // Reset to center when mouse leaves
+    card.style.setProperty("--mouse-x", "50%");
+    card.style.setProperty("--mouse-y", "50%");
   };
 
   // Generate border color based on rating
@@ -98,18 +60,11 @@ export const ChromaMovieCard = ({
   const borderColor = getBorderColor(movieRating);
 
   return (
-    <div
-      ref={rootRef}
-      className={`chroma-movie-grid ${className}`}
-      style={{
-        "--r": `${radius}px`,
-      }}
-      onPointerMove={handleMove}
-      onPointerLeave={handleLeave}
-    >
+    <div className={`chroma-movie-card-container ${className}`}>
       <article
         className="chroma-movie-card"
         onMouseMove={handleCardMove}
+        onMouseLeave={handleCardLeave}
         onClick={handleCardClick}
         style={{
           "--card-border": borderColor,
@@ -148,9 +103,13 @@ export const ChromaMovieCard = ({
             </span>
           </div>
         </footer>
+        
+        {/* CSS-based spotlight effect */}
+        <div className="chroma-movie-spotlight"></div>
+        
+        {/* CSS-based glow effect */}
+        <div className="chroma-movie-glow"></div>
       </article>
-      <div className="chroma-movie-overlay" />
-      <div ref={fadeRef} className="chroma-movie-fade" />
     </div>
   );
 };

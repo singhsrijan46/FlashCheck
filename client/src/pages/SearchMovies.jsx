@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
-import MovieCard from '../components/MovieCard';
+import ChromaMovieCard from '../components/ChromaMovieCard';
 import './SearchMovies.css';
 
 const getUnique = (arr, key) => [...new Set(arr.map(item => item[key]))].filter(Boolean);
@@ -19,9 +19,11 @@ const getUniqueGenres = (movies) => {
 const getUniqueLanguages = (movies) => getUnique(movies, 'original_language').sort();
 
 const SearchMovies = () => {
-  const { shows = [] } = useAppContext();
+  const { selectedCity } = useAppContext();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const [cityMovies, setCityMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   const [selectedFilters, setSelectedFilters] = useState({
     theatre: [],
@@ -31,8 +33,35 @@ const SearchMovies = () => {
     rating: []
   });
 
-  const genres = useMemo(() => getUniqueGenres(shows), [shows]);
-  const languages = useMemo(() => getUniqueLanguages(shows), [shows]);
+  // Fetch movies for the selected city (same as FeaturedSection)
+  useEffect(() => {
+    const fetchCityMovies = async () => {
+      try {
+        setLoading(true);
+        const url = import.meta.env.VITE_BASE_URL || 'http://localhost:8080';
+        const response = await fetch(`${url}/api/show/city/${selectedCity}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          setCityMovies(data.movies || []);
+        } else {
+          setCityMovies([]);
+        }
+      } catch (error) {
+        console.error('Error fetching city movies:', error);
+        setCityMovies([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (selectedCity) {
+      fetchCityMovies();
+    }
+  }, [selectedCity]);
+
+  const genres = useMemo(() => getUniqueGenres(cityMovies), [cityMovies]);
+  const languages = useMemo(() => getUniqueLanguages(cityMovies), [cityMovies]);
 
   // Static data for filters
   const theatres = ['PVR', 'INOX', 'Cinepolis'];
@@ -57,7 +86,7 @@ const SearchMovies = () => {
   };
 
   const filteredMovies = useMemo(() => {
-    return shows.filter(movie => {
+    return cityMovies.filter(movie => {
       const matchesSearch = movie.title.toLowerCase().includes(search.toLowerCase());
       const matchesGenre = selectedFilters.genre.length === 0 || 
         (movie.genres && movie.genres.some(g => selectedFilters.genre.includes(g.name)));
@@ -74,7 +103,21 @@ const SearchMovies = () => {
         });
       return matchesSearch && matchesGenre && matchesLang && matchesRating;
     });
-  }, [shows, search, selectedFilters]);
+  }, [cityMovies, search, selectedFilters]);
+
+  if (loading) {
+    return (
+      <div className="search-page-container">
+        <div className="search-page">
+          <div className="search-body">
+            <div className="loading-message">
+              <p>Loading movies for {selectedCity}...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="search-page-container">
@@ -83,6 +126,7 @@ const SearchMovies = () => {
           {/* Left Filter Panel */}
           <div className="filters-panel">
             <h3>Advanced Filters</h3>
+            <p className="filter-subtitle">Filtering movies in {selectedCity}</p>
 
             <div className="filter-group">
               <label>Theatre</label>
@@ -191,7 +235,12 @@ const SearchMovies = () => {
             {/* Movie Results */}
             <div className="results-panel">
               <div className="search-results-grid">
-                {filteredMovies.length === 0 ? (
+                {cityMovies.length === 0 ? (
+                  <div className="no-results">
+                    <p>No movies available in {selectedCity} at the moment.</p>
+                    <p>Please try another city or check back later for new releases.</p>
+                  </div>
+                ) : filteredMovies.length === 0 ? (
                   <div className="no-results">
                     <p>No movies found matching your criteria.</p>
                     <p>Try adjusting your search or filters.</p>
@@ -199,7 +248,7 @@ const SearchMovies = () => {
                 ) : (
                   filteredMovies.map((movie) => (
                     <div key={movie._id || movie.id} onClick={() => handleMovieClick(movie._id || movie.id)}>
-                      <MovieCard movie={movie} />
+                      <ChromaMovieCard movie={movie} />
                     </div>
                   ))
                 )}

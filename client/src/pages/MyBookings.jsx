@@ -111,8 +111,13 @@ const MyBookings = () => {
   return !isLoading ? (
     <div className='my-bookings-page'>
       <div className='my-bookings-header'>
-        <h1 className='my-bookings-title'>My Bookings</h1>
-        <p className='my-bookings-subtitle'>Track your movie tickets and booking history</p>
+        <div className='my-bookings-title-container'>
+          <p className='my-bookings-title'>
+            <span className='my-bookings-title-text'>My </span>
+            <span className='my-bookings-title-highlight'>Bookings</span>
+          </p>
+          <p className='my-bookings-subtitle'>Track your movie tickets and booking history</p>
+        </div>
       </div>
 
       {bookings.length === 0 ? (
@@ -203,9 +208,6 @@ const MyBookings = () => {
                     </div>
                     
                     <div className="my-bookings-actions">
-                      <button className="my-bookings-action-btn my-bookings-view-btn">
-                        View Details
-                      </button>
                       {canCancelBooking(booking) && (
                         <button 
                           className="my-bookings-action-btn my-bookings-cancel-btn"

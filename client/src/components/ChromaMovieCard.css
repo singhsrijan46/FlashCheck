@@ -1,4 +1,4 @@
-.chroma-movie-grid {
+.chroma-movie-card-container {
   position: relative;
   width: 100%;
   height: 100%;
@@ -6,10 +6,6 @@
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
-
-  --x: 50%;
-  --y: 50%;
-  --r: 220px;
 }
 
 .chroma-movie-card {
@@ -22,40 +18,68 @@
   border-radius: 0.75rem;
   overflow: hidden;
   border: 1px solid transparent;
-  transition: border-color 0.3s ease, transform 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: linear-gradient(145deg, #010915, rgba(14, 20, 47, 0.9733)) !important;
   background-color: #010915 !important;
   cursor: pointer;
+  transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
+  transform-style: preserve-3d;
 
   --mouse-x: 50%;
   --mouse-y: 50%;
   --spotlight-color: rgba(255, 255, 255, 0.15);
+  --glow-color: rgba(163, 101, 255, 0.3);
 }
 
 .chroma-movie-card:hover {
   border-color: transparent;
-  transform: translateY(-5px);
+  transform: perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale(1);
+  box-shadow: 
+    0 10px 20px rgba(0, 0, 0, 0.2),
+    0 0 10px var(--glow-color);
   position: relative;
   z-index: 5;
-  background: linear-gradient(145deg, #010915, rgba(14, 20, 47, 0.9733)) !important;
-  background-color: #010915 !important;
 }
 
-.chroma-movie-card::before {
-  content: "";
+/* Spotlight effect using CSS */
+.chroma-movie-spotlight {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at var(--mouse-x) var(--mouse-y),
-      var(--spotlight-color),
-      transparent 70%);
+  background: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    var(--spotlight-color) 0%,
+    transparent 50%
+  );
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.3s ease;
   z-index: 2;
+  border-radius: 0.75rem;
 }
 
-.chroma-movie-card:hover::before {
+.chroma-movie-card:hover .chroma-movie-spotlight {
   opacity: 1;
+}
+
+/* Glow effect */
+.chroma-movie-glow {
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    var(--glow-color) 50%,
+    transparent 70%
+  );
+  border-radius: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+  filter: blur(8px);
+}
+
+.chroma-movie-card:hover .chroma-movie-glow {
+  opacity: 0.4;
 }
 
 .chroma-movie-img-wrapper {
@@ -65,8 +89,9 @@
   padding: 0.75rem 0.75rem 0 0.75rem;
   box-sizing: border-box;
   background: transparent;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
   height: 21rem;
+  overflow: hidden;
 }
 
 .chroma-movie-img-wrapper img {
@@ -75,6 +100,11 @@
   object-fit: cover;
   border-radius: 0.75rem;
   display: block;
+  transition: transform 0.3s ease;
+}
+
+.chroma-movie-card:hover .chroma-movie-img-wrapper img {
+  transform: scale(1.1);
 }
 
 .chroma-movie-poster-overlay {
@@ -88,20 +118,21 @@
   justify-content: space-between;
   pointer-events: none;
   z-index: 3;
+  padding: 0.75rem;
 }
 
 .chroma-movie-rating-container {
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
-  padding: 1rem 0 0 1rem;
+  padding: 0.5rem 0 0 0.5rem;
 }
 
 .chroma-movie-language-container {
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
-  padding: 0 1rem 0.7rem 0;
+  padding: 0 0.3rem 0.05rem 0;
 }
 
 .chroma-movie-rating-block {
@@ -119,6 +150,12 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   pointer-events: auto;
+  transition: all 0.3s ease;
+}
+
+.chroma-movie-card:hover .chroma-movie-rating-block {
+  transform: translateY(0px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .chroma-movie-rating-icon {
@@ -126,17 +163,17 @@
   height: 1rem;
   color: #FFD700;
   fill: #FFD700;
+  transition: transform 0.3s ease;
+}
+
+.chroma-movie-card:hover .chroma-movie-rating-icon {
+  transform: scale(1) rotate(0deg);
 }
 
 .chroma-movie-rating-value {
   font-weight: 700;
   color: #fff;
   font-size: 0.95em;
-}
-
-.chroma-movie-language {
-  display: flex;
-  gap: 0.4rem;
 }
 
 .chroma-movie-language-badge {
@@ -151,6 +188,12 @@
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.chroma-movie-card:hover .chroma-movie-language-badge {
+  transform: translateY(0px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .chroma-movie-info {
@@ -162,6 +205,11 @@
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
+  transition: all 0.3s ease;
+}
+
+.chroma-movie-card:hover .chroma-movie-info {
+  transform: translateY(0px);
 }
 
 .chroma-movie-title {
@@ -173,6 +221,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
+  transition: color 0.3s ease;
+}
+
+.chroma-movie-card:hover .chroma-movie-title {
+  color: #a365ff;
 }
 
 .chroma-movie-meta {
@@ -181,33 +234,46 @@
   gap: 0.4rem;
   color: #bbb;
   font-size: 0.85rem;
+  transition: color 0.3s ease;
+}
+
+.chroma-movie-card:hover .chroma-movie-meta {
+  color: #d1d5db;
 }
 
 .chroma-movie-dot {
   font-size: 1.2em;
   color: var(--card-border);
   margin: 0 0.2rem;
+  transition: color 0.3s ease;
+}
+
+.chroma-movie-card:hover .chroma-movie-dot {
+  color: #a365ff;
 }
 
 .chroma-movie-year, 
 .chroma-movie-duration {
   color: #bbb;
+  transition: color 0.3s ease;
 }
 
-.chroma-movie-overlay {
-  display: none;
-}
-
-.chroma-movie-fade {
-  display: none;
+.chroma-movie-card:hover .chroma-movie-year,
+.chroma-movie-card:hover .chroma-movie-duration {
+  color: #d1d5db;
 }
 
 /* Force gradient background on all movie cards */
-.chroma-movie-grid .chroma-movie-card,
+.chroma-movie-card-container .chroma-movie-card,
 .featured-chroma-grid .chroma-movie-card,
 article.chroma-movie-card {
   background: linear-gradient(145deg, #010915, rgba(14, 20, 47, 0.9733)) !important;
   background-color: #010915 !important;
+}
+
+/* Enhanced 3D tilt effect on mouse move */
+.chroma-movie-card {
+  transform-style: preserve-3d;
 }
 
 /* Responsive Design */
@@ -220,12 +286,6 @@ article.chroma-movie-card {
   .chroma-movie-img-wrapper {
     height: 18rem;
     padding: 0.5rem 0.5rem 0 0.5rem;
-  }
-  
-  .chroma-movie-overlay-content {
-    left: 0.5rem;
-    right: 0.5rem;
-    width: calc(100% - 1rem);
   }
   
   .chroma-movie-info {
@@ -246,4 +306,19 @@ article.chroma-movie-card {
   .chroma-movie-img-wrapper {
     height: 16rem;
   }
+}
+
+/* Smooth animations for all interactive elements */
+.chroma-movie-card * {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus states for accessibility */
+.chroma-movie-card:focus {
+  outline: 2px solid #a365ff;
+  outline-offset: 2px;
+}
+
+.chroma-movie-card:focus:not(:focus-visible) {
+  outline: none;
 }

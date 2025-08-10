@@ -43,7 +43,7 @@
 }
 
 .navbar-profile:hover {
-  transform: scale(1.05);
+  transform: none;
 }
 
 .navbar-profile-container {
@@ -64,13 +64,13 @@
 }
 
 .navbar-profile-btn:hover {
-  transform: scale(1.1);
+  transform: none;
 }
 
 .navbar-profile-avatar {
   width: 2.7rem;
   height: 2.7rem;
-  background: linear-gradient(135deg, #1E90FF, #4682B4);
+  background: #a365ff;
   border-radius: 0.5rem;
   display: flex;
   align-items: center;
@@ -80,8 +80,8 @@
 }
 
 .navbar-profile-btn:hover .navbar-profile-avatar {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(30, 144, 255, 0.3);
+  transform: none;
+  box-shadow: none;
 }
 
 .navbar-dropdown-icon {
@@ -148,7 +148,7 @@
 .navbar-profile-greeting {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1E90FF;
+  color: #a365ff;
   padding: 1.1rem 1.3rem 0.7rem 1.3rem;
   border-bottom: 1px solid rgba(255,255,255,0.08);
   margin-bottom: 0.25rem;
@@ -185,7 +185,7 @@
   position: absolute;
   bottom: -0.5rem;
   height: 0.25rem;
-  background-color: #1E90FF;
+  background-color: #a365ff;
   border-radius: 0.125rem;
   transition: all 0.3s ease;
   z-index: 1;
@@ -210,7 +210,7 @@
 }
 
 .navbar-nav-link.active {
-  color: #1E90FF;
+  color: #a365ff;
   transform: scale(1.05);
 }
 

@@ -68,7 +68,12 @@ const App = () => {
       {/* Render login as overlay when on login route */}
       {isLoginRoute && <Login state={{ from: location.state?.from || location }}/>} 
       
-      {!isAdminRoute && location.pathname !== '/movies/' + location.pathname.split('/')[2] + '/showtimes' && location.pathname.split('/').length !== 4 && <Footer />}
+      {!isAdminRoute && 
+       location.pathname !== '/movies/' + location.pathname.split('/')[2] + '/showtimes' && 
+       location.pathname.split('/').length !== 4 && 
+       location.pathname !== '/about-us' && 
+       location.pathname !== '/contact-us' && 
+       <Footer />}
     </>
   )
 }

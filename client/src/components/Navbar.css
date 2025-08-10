@@ -153,14 +153,13 @@
 }
 
 .navbar-profile-btn:hover {
-  transform: scale(1.05);
-  background: rgba(255, 255, 255, 0.1);
+  background: none;
 }
 
 .navbar-profile-avatar {
   width: 1.25rem;
   height: 1.25rem;
-  background: #3b82f6;
+  background: #a365ff;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -172,21 +171,7 @@
   font-size: 0.6rem;
 }
 
-.navbar-profile-avatar::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
-}
 
-.navbar-profile-btn:hover .navbar-profile-avatar::before {
-  transform: translateX(100%);
-}
 
 .navbar-dropdown-icon {
   color: #9ca3af;
@@ -240,7 +225,7 @@
   top: 0;
   width: 3px;
   height: 100%;
-  background: #3b82f6;
+  background: #a365ff;
   transform: scaleY(0);
   transition: transform 0.2s ease;
 }

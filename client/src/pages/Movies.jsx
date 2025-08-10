@@ -1,30 +1,73 @@
 import React from 'react'
-import { useEffect } from 'react'
-import MovieCard from '../components/MovieCard'
+import { useEffect, useState } from 'react'
+import ChromaMovieCard from '../components/ChromaMovieCard'
 import { useAppContext } from '../context/AppContext'
 import './Movies.css'
 
 const Movies = () => {
-
-  const { shows, getShows } = useAppContext();
+  const { selectedCity } = useAppContext();
+  const [cityMovies, setCityMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const url = import.meta.env.VITE_BASE_URL || 'http://localhost:8080';
 
   useEffect(() => {
-    getShows();
-  }, []);
+    const fetchCityMovies = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${url}/api/show/city/${selectedCity}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          setCityMovies(data.movies);
+        } else {
+          setCityMovies([]);
+        }
+      } catch (error) {
+        setCityMovies([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  return shows.length > 0 ? (
+    if (selectedCity) {
+      fetchCityMovies();
+    }
+  }, [selectedCity, url]);
+
+  if (loading) {
+    return (
+      <div className='movies-page'>
+        <div className='movies-header'>
+          <p className='movies-title'>
+            <span className='movies-title-text'>Now Showing in </span>
+            <span className='movies-city-name'>{selectedCity}</span>
+          </p>
+        </div>
+        <div className='movies-loading'>
+          <p>Loading movies for {selectedCity}...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return cityMovies.length > 0 ? (
     <div className='movies-page'>
-
-      <h1 className='movies-title'>Now Showing</h1>
+      <div className='movies-header'>
+        <p className='movies-title'>
+          <span className='movies-title-text'>Now Showing in </span>
+          <span className='movies-city-name'>{selectedCity}</span>
+        </p>
+      </div>
       <div className='movies-grid'>
-        {shows.map((show)=> (
-          <MovieCard movie={show.movie} key={show._id}/>
+        {cityMovies.map((movie)=> (
+          <ChromaMovieCard movie={movie} key={movie._id || movie.id}/>
         ))}
       </div>
     </div>
   ) : (
     <div className='movies-empty'>
-      <h1 className='movies-empty-title'>No movies available</h1>
+      <h1 className='movies-empty-title'>No movies available in {selectedCity}</h1>
+      <p className='movies-empty-subtitle'>Please try another city or check back later for new releases.</p>
     </div>
   )
 }

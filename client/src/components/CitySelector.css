@@ -27,7 +27,7 @@
 .city-selector-icon {
     width: 16px;
     height: 16px;
-    color: #1E90FF;
+    color: #a365ff;
 }
 
 .city-selector-text {
@@ -95,8 +95,8 @@
 .city-selector-state-dropdown:focus,
 .city-selector-city-dropdown:focus {
     outline: none;
-    border-color: #1E90FF;
-    box-shadow: 0 0 0 2px rgba(30, 144, 255, 0.2);
+    border-color: #a365ff;
+    box-shadow: 0 0 0 2px rgba(163, 101, 255, 0.2);
 }
 
 .city-selector-state-dropdown:disabled,
@@ -113,7 +113,7 @@
 }
 
 .city-selector-loading {
-    color: #1E90FF;
+    color: #a365ff;
     font-size: 0.8rem;
     margin-top: 4px;
     text-align: center;

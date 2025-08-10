@@ -28,26 +28,47 @@
   }
 }
 
+.movies-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 0;
+  padding-bottom: 0.4rem;
+  margin-top: -1rem;
+}
+
 .movies-title {
-  font-size: 2.1rem;
-  font-weight: 700;
-  margin: 0.1rem 0 0.3rem 0;
-  color: #d1d5db;
+  font-size: 2.5rem;
+  font-weight: 500;
+  color: #9333ea;
+}
+
+.movies-title-text {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.movies-city-name {
+  font-size: inherit;
+  font-weight: 500;
+  color: #9333ea;
 }
 
 .movies-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 0 2rem;
-  margin-top: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+  justify-items: center;
+  align-items: start;
 }
 
 @media (max-width: 639px) {
   .movies-grid {
-    justify-content: flex-start;
-    gap: 0 2rem;
-    margin-top: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2.5rem;
   }
 }
 
@@ -63,4 +84,32 @@
   font-size: 1.875rem;
   font-weight: 700;
   text-align: center;
+  color: #d1d5db;
+  margin-bottom: 1rem;
+}
+
+.movies-empty-subtitle {
+  font-size: 1rem;
+  color: #9ca3af;
+  text-align: center;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+.movies-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  color: #9ca3af;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.movies-loading p {
+  margin: 0;
+  padding: 20px;
+  background: rgba(14, 20, 47, 0.3);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 } 

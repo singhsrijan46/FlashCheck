@@ -65,7 +65,7 @@ const Footer = () => {
               <p><strong>Business Inquiries:</strong></p>
               <p>flashcheck@gmail.com</p>
               <p><strong>Address:</strong></p>
-              <p>House No. 462, Krishna Nagar Private Colony,<br />Baharatput, Gorakhpur, Uttar Pradesh, India - 273004</p>
+              <p>H.No.- 462, Krishna Nagar Private Colony,<br />Gorakhpur, Uttar Pradesh, India - 273004</p>
             </div>
           </div>
         </div>

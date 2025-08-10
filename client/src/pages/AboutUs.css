@@ -1,12 +1,12 @@
 .about-us {
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: #0e142f;
+  background: radial-gradient(circle, #7214ff40 0, #0e142f 100%);
   color: #d1d5db;
-  padding: 80px 4rem 0 4rem; /* Increased left/right padding */
+  padding: 80px 4rem 4rem 4rem; /* Increased left/right padding */
 }
 
 .about-hero {
-  background: linear-gradient(135deg, rgba(26, 26, 46, 0.9) 0%, rgba(22, 33, 62, 0.9) 100%);
   padding: 4rem 3rem 3rem; /* Increased padding */
   text-align: left;
   position: relative;
