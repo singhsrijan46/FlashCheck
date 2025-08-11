@@ -1,320 +1,245 @@
-# 🎬 Movie Ticket Booking System
+# Flash Check - Movie Ticket Booking System
 
-A full-stack web application for booking movie tickets with real-time seat selection, payment processing, and admin management features.
+## Project Title
+**Flash Check** - A Modern Movie Ticket Booking Platform
 
-## 🌟 Features
+## Project Description
+Flash Check is a full-stack web application that provides a seamless movie ticket booking experience. Built with React.js frontend and Node.js backend, it offers users the ability to browse movies, select showtimes, book seats, and manage their bookings. The platform features an intuitive admin dashboard for theatre and show management, real-time seat availability, and integrated payment processing.
 
-### 🎯 User Features
-- **Movie Discovery**: Browse movies by city with real-time availability
-- **Showtime Selection**: View available showtimes with language and format options
-- **Interactive Seat Booking**: Real-time seat selection with visual layout
-- **Secure Payments**: Stripe integration for secure payment processing
-- **Booking Management**: View and manage your bookings
-- **Ticket Cancellation**: Cancel tickets with refund processing
-- **Movie Trailers**: Watch trailers for movies currently playing
-- **Advanced Search**: Filter movies by language, genre, format, and rating
-- **City-based Content**: Location-specific movie listings and showtimes
+The application integrates with TMDB API for movie data and trailers, provides email notifications for bookings, and offers a responsive design that works across all devices. With features like advanced search filters, booking management, and cancellation policies, Flash Check delivers a complete movie ticket booking solution.
 
-### 🔧 Admin Features
-- **Show Management**: Add, edit, and manage movie shows
-- **Theatre Management**: Add and manage theatres and screens
-- **Booking Analytics**: View booking statistics and reports
-- **User Management**: Monitor user activities and bookings
-- **Real-time Updates**: Instant updates to show availability
+## Screenshots
 
-### 🎨 UI/UX Features
-- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
-- **Modern UI**: Clean, intuitive interface with smooth animations
-- **Dark Theme**: Eye-friendly dark mode design
-- **Loading States**: Smooth loading experiences
-- **Toast Notifications**: Real-time feedback for user actions
+### Home Page
+![Home Page](https://via.placeholder.com/800x400/9333ea/ffffff?text=Flash+Check+Home+Page)
 
-## 🏗️ Architecture
+### Movie Details
+![Movie Details](https://via.placeholder.com/800x400/9333ea/ffffff?text=Movie+Details+Page)
 
-### Frontend (React + Vite)
-- **React 18**: Modern React with hooks and functional components
-- **Vite**: Fast build tool and development server
-- **React Router**: Client-side routing
-- **Context API**: Global state management
-- **Axios**: HTTP client for API communication
-- **Stripe**: Payment processing integration
-- **Lucide React**: Modern icon library
+### Seat Selection
+![Seat Selection](https://via.placeholder.com/800x400/9333ea/ffffff?text=Seat+Selection+Interface)
 
-### Backend (Node.js + Express)
-- **Express.js**: Fast, unopinionated web framework
-- **MongoDB**: NoSQL database with Mongoose ODM
-- **JWT**: Secure authentication and authorization
-- **Stripe**: Payment processing and webhooks
-- **TMDB API**: Movie data and trailer integration
-- **Nodemailer**: Email notifications
+### Admin Dashboard
+![Admin Dashboard](https://via.placeholder.com/800x400/9333ea/ffffff?text=Admin+Dashboard)
 
+### Booking Management
+![Booking Management](https://via.placeholder.com/800x400/9333ea/ffffff?text=Booking+Management)
 
-## 📁 Project Structure
+## Hosted URL
+**Frontend:** https://flashcheck-client.vercel.app  
+**Backend:** https://flashcheck-server.vercel.app/
 
-```
-movieTicket/
-├── client/                 # Frontend React application
-│   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── pages/         # Page components
-│   │   │   └── admin/     # Admin panel pages
-│   │   ├── context/       # React context providers
-│   │   ├── lib/           # Utility libraries
-│   │   └── assets/        # Static assets
-│   ├── public/            # Public assets
-│   └── package.json
-├── server/                # Backend Node.js application
-│   ├── controllers/       # Route controllers
-│   ├── models/           # MongoDB schemas
-│   ├── routes/           # API routes
-│   ├── middleware/       # Custom middleware
-│   ├── configs/          # Configuration files
-│   ├── services/         # Business logic services
-│   └── utils/            # Utility functions
-└── README.md
-```
+## Features Implemented
 
-## 🚀 Quick Start
+### Frontend
+- **Responsive Design**: Mobile-first approach with adaptive layouts
+- **Movie Browsing**: Browse movies with detailed information and trailers
+- **Advanced Search**: Filter movies by genre, language, format, and rating
+- **Showtime Selection**: View available showtimes by date and theatre
+- **Interactive Seat Layout**: Visual seat selection with real-time availability
+- **Booking Management**: View and manage user bookings
+- **Payment Integration**: Secure payment processing with Stripe
+- **User Authentication**: Login/register with JWT tokens
+- **Admin Dashboard**: Complete theatre and show management
+- **Contact Management**: Admin interface for managing user inquiries
+- **Real-time Updates**: Live seat availability and booking status
+- **Email Notifications**: Booking confirmations and cancellations
+- **Responsive Navigation**: Mobile-friendly navigation with hamburger menu
+- **Loading States**: Smooth loading animations and error handling
+- **Toast Notifications**: User-friendly success/error messages
+
+### Backend
+- **RESTful API**: Complete CRUD operations for all entities
+- **User Authentication**: JWT-based authentication and authorization
+- **Admin Authorization**: Role-based access control for admin features
+- **Movie Management**: Integration with TMDB API for movie data
+- **Show Management**: Create, update, and manage movie shows
+- **Theatre Management**: Multi-screen theatre administration
+- **Booking System**: Complete booking lifecycle management
+- **Payment Processing**: Stripe integration for secure payments
+- **Email Service**: Automated email notifications using Nodemailer
+- **Database Management**: MongoDB with Mongoose ODM
+- **Error Handling**: Comprehensive error handling and validation
+- **API Rate Limiting**: Protection against abuse
+- **CORS Configuration**: Secure cross-origin resource sharing
+- **Environment Configuration**: Flexible environment variable management
+- **Contact Form Processing**: Store and manage user inquiries
+- **Cancellation System**: Booking cancellation with refund processing
+- **Search and Filtering**: Advanced search capabilities
+- **Data Caching**: Optimized performance with caching strategies
+
+## Technologies/Libraries/Packages Used
+
+### Frontend
+- **React.js** - Frontend framework
+- **Vite** - Build tool and development server
+- **React Router DOM** - Client-side routing
+- **Axios** - HTTP client for API calls
+- **React Hot Toast** - Toast notifications
+- **CSS3** - Styling with custom CSS
+- **Context API** - State management
+- **React Hooks** - Functional components and state
+- **Responsive Design** - Mobile-first CSS approach
+
+### Backend
+- **Node.js** - JavaScript runtime
+- **Express.js** - Web framework
+- **MongoDB** - NoSQL database
+- **Mongoose** - MongoDB object modeling
+- **JWT** - JSON Web Tokens for authentication
+- **bcryptjs** - Password hashing
+- **Nodemailer** - Email service
+- **Stripe** - Payment processing
+- **CORS** - Cross-origin resource sharing
+- **dotenv** - Environment variable management
+- **TMDB API** - Movie data integration
+- **Multer** - File upload handling
+- **Helmet** - Security middleware
+- **Express Rate Limit** - API rate limiting
+
+### Development Tools
+- **Git** - Version control
+- **npm** - Package manager
+- **ESLint** - Code linting
+- **Vercel** - Deployment platform
+- **Postman** - API testing
+- **MongoDB Atlas** - Cloud database
+
+## Local Setup
 
 ### Prerequisites
 - Node.js (v16 or higher)
-- MongoDB (local or Atlas)
-- TMDB API key
-- Stripe account
+- npm or yarn
+- MongoDB (local or MongoDB Atlas)
+- Git
 
-### Installation
+### Installation Steps
 
-1. **Clone the repository**
+1. **Clone the Repository**
    ```bash
-   git clone <repository-url>
-   cd movieTicket
+   git clone https://github.com/yourusername/flash-check.git
+   cd flash-check
    ```
 
-2. **Install dependencies**
+2. **Backend Setup**
    ```bash
-   # Install backend dependencies
    cd server
    npm install
-   
-   # Install frontend dependencies
+   ```
+
+3. **Environment Configuration**
+   Create `.env` file in the server directory:
+   ```env
+   MONGODB_URI=your_mongodb_connection_string
+   JWT_SECRET=your_jwt_secret_key
+   TMDB_API_KEY=your_tmdb_api_key
+   SMTP_USER=your_email@gmail.com
+   SMTP_PASS=your_email_password
+   STRIPE_SECRET_KEY=your_stripe_secret_key
+   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+   FRONTEND_URL=http://localhost:3000
+   ```
+
+4. **Frontend Setup**
+   ```bash
    cd ../client
    npm install
    ```
 
-3. **Environment Setup**
-
-   **Backend (.env)**
-   ```bash
-   cd server
-   cp env.example .env
-   ```
-   
-   Update the `.env` file with your configuration:
-   ```env
-   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database
-   JWT_SECRET=your_jwt_secret_key
-   TMDB_API_KEY=your_tmdb_api_key
-   STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
-   STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
-   STRIPE_WEBHOOK_SECRET=whsec_your_stripe_webhook_secret
-   FRONTEND_URL=http://localhost:3000
-   ```
-
-   **Frontend (.env)**
-   ```bash
-   cd client
-   cp env.example .env
-   ```
-   
-   Update the `.env` file:
+5. **Environment Configuration (Frontend)**
+   Create `.env` file in the client directory:
    ```env
    VITE_BASE_URL=http://localhost:8080
    VITE_TMDB_IMAGE_BASE_URL=https://image.tmdb.org/t/p/w500
-   VITE_CURRENCY=$
-   VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
    ```
 
-4. **Start the development servers**
-   ```bash
-   # Start backend server
-   cd server
-   npm run server
+6. **Start Development Servers**
    
-   # Start frontend server (in a new terminal)
+   **Backend:**
+   ```bash
+   cd server
+   npm start
+   ```
+   
+   **Frontend:**
+   ```bash
    cd client
    npm run dev
    ```
 
-5. **Access the application**
+7. **Access the Application**
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:8080
 
-## 📊 Database Models
+### Database Setup
+1. Create a MongoDB database (local or Atlas)
+2. Update the `MONGODB_URI` in your `.env` file
+3. The application will automatically create collections on first run
 
-### User
-- Authentication details
-- Booking history
-- Role-based access (user/admin)
+### API Keys Setup
+1. **TMDB API**: Get your API key from [TMDB](https://www.themoviedb.org/settings/api)
+2. **Stripe**: Create a Stripe account and get your API keys
+3. **Email**: Configure SMTP settings for email notifications
 
-### Movie
-- Movie information from TMDB API
-- Poster and backdrop images
-- Genre and rating data
+## Team Members
 
-### Theatre
-- Theatre details and location
-- Screen information
-- Operating hours
+### Development Team
+- **Srijan Singh** - MERN Developer
+  - Frontend Development (React.js)
+  - Backend Development (Node.js/Express)
+  - Database Design (MongoDB)
+  - API Integration
+  - UI/UX Design
+  - Payment Integration
+  - Email Service Implementation
 
-### Show
-- Movie showtimes
-- Language and format options
-- Pricing tiers (Silver, Gold, Diamond)
-- Seat availability
+### Project Roles
+- **Lead Developer**: Srijan
+- **UI/UX Designer**: Srijan
+- **Backend Developer**: Srijan
+- **Frontend Developer**: Srijan
+- **DevOps**: Srijan
 
-### Booking
-- User booking details
-- Seat information
-- Payment status
+## Demo Video
+**Demo Video Link:** [Flash Check Demo](https://www.youtube.com/watch?v=your-demo-video-id)
 
-
-## 🔌 API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/google` - Google OAuth login
-
-### Movies & Shows
-- `GET /api/show/city/:city` - Get movies by city
-- `GET /api/show/city/:city/trailers` - Get trailers for city
-- `GET /api/show/:movieId/city/:city` - Get shows by movie and city
-- `GET /api/show/:movieId/trailer` - Get movie trailer
-
-### Bookings
-- `POST /api/booking/create` - Create booking
-- `GET /api/booking/user/:userId` - Get user bookings
-- `POST /api/booking/cancel` - Cancel booking
-
-### Admin
-- `POST /api/show/add` - Add new show
-- `POST /api/theatre/add` - Add new theatre
-- `GET /api/admin/bookings` - Get all bookings
-- `GET /api/admin/shows` - Get all shows
-
-### Payments
-- `POST /api/payment/create-payment-intent` - Create payment
-- `POST /api/payment/webhook` - Stripe webhook handler
-
-## 🎨 Key Components
-
-### Frontend Components
-- **ChromaMovieCard**: Animated movie cards with hover effects
-- **SeatLayout**: Interactive seat selection interface
-- **TrailersSection**: Movie trailer carousel
-- **PaymentForm**: Secure payment processing
-- **CitySelector**: Location-based content filtering
-
-### Backend Services
-- **TMDB Integration**: Movie data and trailer fetching
-- **Stripe Integration**: Payment processing and webhooks
-- **Email Service**: Booking confirmations and notifications
-
-
-## 🔒 Security Features
-
-- **JWT Authentication**: Secure user sessions
-- **Password Hashing**: bcrypt for password security
-- **CORS Protection**: Cross-origin request security
-- **Input Validation**: Request data sanitization
-- **Rate Limiting**: API abuse prevention
-- **Environment Variables**: Secure configuration management
-
-## 🚀 Deployment
-
-### Vercel Deployment
-The project is configured for Vercel deployment with:
-- Automatic builds and deployments
-- Environment variable management
-- Serverless functions
-- CDN for static assets
-
-### Environment Variables for Production
-Set the following environment variables in your Vercel dashboard:
-- `MONGODB_URI`
-- `JWT_SECRET`
-- `TMDB_API_KEY`
-- `STRIPE_SECRET_KEY`
-- `STRIPE_PUBLISHABLE_KEY`
-- `STRIPE_WEBHOOK_SECRET`
-- `FRONTEND_URL`
-
-## 🧪 Testing
-
-### Manual Testing
-1. **User Registration/Login**: Test authentication flow
-2. **Movie Browsing**: Test city-based movie discovery
-3. **Seat Booking**: Test seat selection and booking process
-4. **Payment Processing**: Test Stripe payment integration
-5. **Admin Functions**: Test show and theatre management
-
-### API Testing
-Use tools like Postman or Thunder Client to test API endpoints:
-- Authentication endpoints
-- Movie and show endpoints
-- Booking endpoints
-- Admin endpoints
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **MongoDB Connection Error**
-   - Check MongoDB URI in environment variables
-   - Ensure MongoDB service is running
-   - Verify network connectivity
-
-2. **TMDB API Errors**
-   - Verify TMDB API key is correct
-   - Check API rate limits
-   - Ensure proper API key permissions
-
-3. **Stripe Payment Issues**
-   - Verify Stripe keys are correct
-   - Check webhook configuration
-   - Ensure proper currency settings
-
-4. **CORS Errors**
-   - Check FRONTEND_URL environment variable
-   - Verify CORS configuration in server.js
-   - Ensure proper domain settings
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **TMDB**: For movie data and trailer APIs
-- **Stripe**: For payment processing
-- **Vercel**: For hosting and deployment
-- **React Community**: For excellent documentation and tools
-
-## 📞 Support
-
-For support and questions:
-- Create an issue in the repository
-- Contact the development team
-- Check the documentation
+### Video Content
+- Project overview and features
+- User registration and authentication
+- Movie browsing and search functionality
+- Showtime selection and seat booking
+- Payment processing demonstration
+- Admin dashboard walkthrough
+- Booking management features
+- Mobile responsiveness showcase
 
 ---
 
-**Made with ❤️ by the Movie Ticket Booking Team**
+## Additional Information
+
+### Project Structure
+```
+flash-check/
+├── client/                 # Frontend React application
+│   ├── src/
+│   │   ├── components/     # Reusable components
+│   │   ├── pages/         # Page components
+│   │   ├── context/       # React context
+│   │   ├── assets/        # Static assets
+│   │   └── lib/          # Utility functions
+│   └── public/           # Public assets
+├── server/                # Backend Node.js application
+│   ├── controllers/      # Route controllers
+│   ├── models/          # Database models
+│   ├── routes/          # API routes
+│   ├── middleware/      # Custom middleware
+│   ├── services/        # Business logic
+│   └── configs/         # Configuration files
+└── README.md            # Project documentation
+```
+
+### License
+This project is licensed under the MIT License.
+
+### Support
+For support and questions, please contact: singhsrijangkp@gmail.com
