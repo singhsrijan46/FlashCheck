@@ -23,6 +23,7 @@ const AddShows = () => {
     const [addingShow, setAddingShow] = useState(false);
     const [loadingMovies, setLoadingMovies] = useState(true);
     const [movieFormat, setMovieFormat] = useState("2D"); // Add movie format state
+    const [movieLanguage, setMovieLanguage] = useState("English"); // Add movie language state
 
     // State-City-Theatre dropdown states
     const [states, setStates] = useState([]);
@@ -215,16 +216,18 @@ const AddShows = () => {
             // Check if this exact combination already exists
             const exists = prev.some(item => 
                 item.dateTime === dateTimeInput && 
-                item.screen === selectedScreen
+                item.screen === selectedScreen &&
+                item.language === movieLanguage
             );
             
             if (!exists) {
                 return [...prev, {
                     dateTime: dateTimeInput,
-                    screen: selectedScreen
+                    screen: selectedScreen,
+                    language: movieLanguage
                 }];
             } else {
-                toast.error('This combination of date-time and screen already exists');
+                toast.error('This combination of date-time, screen, and language already exists');
                 return prev;
             }
         });
@@ -232,13 +235,15 @@ const AddShows = () => {
         // Reset inputs after adding
         setDateTimeInput("");
         setSelectedScreen("");
+        setMovieLanguage("English"); // Reset language to default
     };
 
     const handleRemoveTime = (dateTimeObj) => {
         setDateTimeSelection((prev) => {
             return prev.filter((item) => 
                 !(item.dateTime === dateTimeObj.dateTime && 
-                  item.screen === dateTimeObj.screen)
+                  item.screen === dateTimeObj.screen &&
+                  item.language === dateTimeObj.language)
             );
         });
     };
@@ -309,6 +314,12 @@ const AddShows = () => {
                 setAddingShow(false);
                 return;
             }
+            
+            if (!movieLanguage || movieLanguage.trim() === '') {
+                toast.error('Please select a movie language');
+                setAddingShow(false);
+                return;
+            }
 
             // Validate that prices are numbers
             if (isNaN(Number(silverPrice)) || isNaN(Number(goldPrice)) || isNaN(Number(diamondPrice))) {
@@ -324,13 +335,17 @@ const AddShows = () => {
                 if (!showsByScreen[slot.screen]) {
                     showsByScreen[slot.screen] = [];
                 }
-                showsByScreen[slot.screen].push(slot.dateTime);
+                showsByScreen[slot.screen].push({
+                    dateTime: slot.dateTime,
+                    language: slot.language
+                });
             });
             
-            const showsInput = Object.entries(showsByScreen).map(([screen, times]) => ({
+            const showsInput = Object.entries(showsByScreen).map(([screen, slots]) => ({
                 date: "combined",
-                time: times,
-                screen: screen
+                time: slots.map(slot => slot.dateTime),
+                screen: screen,
+                language: slots[0].language // Use the language from the first slot (all should be same for same screen)
             }));
             
             const payload = {
@@ -372,6 +387,7 @@ const AddShows = () => {
                 setDiamondPrice("")
                 setDateTimeInput("")
                 setMovieFormat("2D") // Reset movie format to default
+                setMovieLanguage("English") // Reset movie language to default
                 // Refresh shows data after adding a new show
                 await refreshAdminData()
                 await refreshShows()
@@ -613,6 +629,70 @@ const AddShows = () => {
                         />
                     </div>
                     
+                    {/* Language Selection */}
+                    <div className="add-shows-datetime-group">
+                        <label>Language:</label>
+                        <select 
+                            value={movieLanguage} 
+                            onChange={(e) => setMovieLanguage(e.target.value)}
+                            className="add-shows-language-dropdown"
+                        >
+                            <option value="English">English</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="Tamil">Tamil</option>
+                            <option value="Telugu">Telugu</option>
+                            <option value="Malayalam">Malayalam</option>
+                            <option value="Kannada">Kannada</option>
+                            <option value="Bengali">Bengali</option>
+                            <option value="Marathi">Marathi</option>
+                            <option value="Gujarati">Gujarati</option>
+                            <option value="Punjabi">Punjabi</option>
+                            <option value="Urdu">Urdu</option>
+                            <option value="Odia">Odia</option>
+                            <option value="Assamese">Assamese</option>
+                            <option value="Manipuri">Manipuri</option>
+                            <option value="Konkani">Konkani</option>
+                            <option value="Sanskrit">Sanskrit</option>
+                            <option value="French">French</option>
+                            <option value="German">German</option>
+                            <option value="Spanish">Spanish</option>
+                            <option value="Italian">Italian</option>
+                            <option value="Portuguese">Portuguese</option>
+                            <option value="Russian">Russian</option>
+                            <option value="Japanese">Japanese</option>
+                            <option value="Korean">Korean</option>
+                            <option value="Chinese">Chinese</option>
+                            <option value="Arabic">Arabic</option>
+                            <option value="Turkish">Turkish</option>
+                            <option value="Dutch">Dutch</option>
+                            <option value="Swedish">Swedish</option>
+                            <option value="Norwegian">Norwegian</option>
+                            <option value="Danish">Danish</option>
+                            <option value="Finnish">Finnish</option>
+                            <option value="Polish">Polish</option>
+                            <option value="Czech">Czech</option>
+                            <option value="Slovak">Slovak</option>
+                            <option value="Hungarian">Hungarian</option>
+                            <option value="Romanian">Romanian</option>
+                            <option value="Bulgarian">Bulgarian</option>
+                            <option value="Croatian">Croatian</option>
+                            <option value="Serbian">Serbian</option>
+                            <option value="Slovenian">Slovenian</option>
+                            <option value="Estonian">Estonian</option>
+                            <option value="Latvian">Latvian</option>
+                            <option value="Lithuanian">Lithuanian</option>
+                            <option value="Greek">Greek</option>
+                            <option value="Hebrew">Hebrew</option>
+                            <option value="Persian">Persian</option>
+                            <option value="Thai">Thai</option>
+                            <option value="Vietnamese">Vietnamese</option>
+                            <option value="Indonesian">Indonesian</option>
+                            <option value="Malay">Malay</option>
+                            <option value="Filipino">Filipino</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
                     {/* Screen Selection */}
                     {selectedTheatre && theatreScreens.length > 0 && (
                         <div className="add-shows-datetime-group">
@@ -684,10 +764,11 @@ const AddShows = () => {
                 <h3 className="add-shows-subsection-title">Selected Shows</h3>
                 <div className="add-shows-selected-times-grid">
                     {dateTimeSelection.map((slot, index) => (
-                        <div key={`${slot.dateTime}-${slot.screen}`} className="add-shows-time-item" >
+                        <div key={`${slot.dateTime}-${slot.screen}-${slot.language}`} className="add-shows-time-item" >
                             <div className="add-shows-time-details">
                                 <span className="add-shows-time-datetime">{new Date(slot.dateTime).toLocaleString()}</span>
                                 <span className="add-shows-time-screen">Screen: {slot.screen}</span>
+                                <span className="add-shows-time-language">Language: {slot.language}</span>
                             </div>
                             <DeleteIcon onClick={() => handleRemoveTime(slot)} width={15} className="add-shows-time-delete" />
                         </div>

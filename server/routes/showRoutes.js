@@ -1,5 +1,5 @@
 import express from "express";
-import { addShow, getNowPlayingMovies, getShow, getShowByMovieId, getShows, getMovieTrailer, searchMovies, getPopularMovies, getMoviesByCity, getShowsByMovieAndCity, getSpecificShow } from "../controllers/showController.js";
+import { addShow, getNowPlayingMovies, getShow, getShowByMovieId, getShows, getMovieTrailer, searchMovies, getPopularMovies, getMoviesByCity, getShowsByMovieAndCity, getSpecificShow, getTrailersForCity } from "../controllers/showController.js";
 import { protectAdmin } from "../middleware/auth.js";
 
 const showRouter = express.Router();
@@ -8,6 +8,7 @@ const showRouter = express.Router();
 showRouter.get('/now-playing', protectAdmin, getNowPlayingMovies)
 showRouter.get('/now-playing-public', getNowPlayingMovies) // Public route for testing
 showRouter.get('/city/:city', getMoviesByCity) // Get movies by city
+showRouter.get('/city/:city/trailers', getTrailersForCity) // Get trailers for movies in city
 showRouter.get("/all", getShows)
 showRouter.get("/search", searchMovies)
 showRouter.get("/popular", getPopularMovies)

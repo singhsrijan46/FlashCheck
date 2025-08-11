@@ -477,6 +477,12 @@
   color: #9ca3af;
 }
 
+.showtime-language {
+  font-size: 0.65rem;
+  color: #10B981;
+  font-weight: 500;
+}
+
 /* Book Seats Button */
 .showtime-book-section {
   padding: 2rem 0;

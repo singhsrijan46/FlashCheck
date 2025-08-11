@@ -35,6 +35,10 @@ const ShowtimeSelection = () => {
         const showsResponse = await axios.get(`/api/show/${id}/city/${city}`);
         
         if (showsResponse.data.success) {
+          console.log('Shows data received:', showsResponse.data.shows); // Debug log
+          showsResponse.data.shows.forEach((show, index) => {
+            console.log(`Show ${index}:`, { id: show._id, language: show.language, format: show.format });
+          });
           setShowData(showsResponse.data.shows);
         } else {
           setShowData([]);
@@ -277,6 +281,7 @@ const ShowtimeSelection = () => {
                           <div className="showtime-showtimes-grid">
                             {theatre.shows.map((showtime, showIndex) => {
               const isSelected = selectedShowtime && selectedShowtime._id === showtime._id;
+              console.log(`Rendering showtime ${showIndex}:`, { id: showtime._id, language: showtime.language, fallback: showtime.language || 'English' }); // Debug log
               return (
                 <button
                                   key={showIndex}
@@ -287,6 +292,7 @@ const ShowtimeSelection = () => {
                     <span className="showtime-time">{formatTime(showtime.showDateTime)}</span>
                     <span className="showtime-format">{showtime.format || '2D'}</span>
                     <span className="showtime-screen">Screen {showtime.screen}</span>
+                    <span className="showtime-language">{showtime.language || 'English'}</span>
                   </div>
                 </button>
               );

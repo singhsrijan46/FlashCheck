@@ -206,12 +206,16 @@ export const getMoviesByCity = async (req, res) => {
             });
         }
 
-        // Get all shows for the specified city (case-insensitive search)
+        // Get current date and time
+        const now = new Date();
+
+        // Get all shows for the specified city that haven't ended yet (case-insensitive search)
         const cityShows = await Show.find({ 
-            city: { $regex: new RegExp('^' + city + '$', 'i') } 
+            city: { $regex: new RegExp('^' + city + '$', 'i') },
+            showDateTime: { $gt: now } // Only shows with future showtimes
         }).populate('movie');
         
-        // Extract unique movies from the shows
+        // Extract unique movies from the active shows
         const uniqueMovies = [];
         const seenMovieIds = new Set();
 
@@ -251,6 +255,8 @@ export const getMoviesByCity = async (req, res) => {
 export const addShow = async (req, res) => {
     try {
         const { movieId, theatreId, state, city, format, showsInput, silverPrice, goldPrice, diamondPrice } = req.body;
+
+        console.log('Received addShow request:', { movieId, theatreId, state, city, format, showsInput }); // Debug log
 
         // Validate required fields
         if (!movieId) {
@@ -296,7 +302,7 @@ export const addShow = async (req, res) => {
 
         // Process each show time
         for (const showInput of showsInput) {
-            const { date, time, screen } = showInput;
+            const { date, time, screen, language } = showInput;
             
             if (!time || !Array.isArray(time) || time.length === 0) {
                 return res.status(400).json({ success: false, message: 'Show times are required' });
@@ -304,6 +310,10 @@ export const addShow = async (req, res) => {
             
             if (!screen) {
                 return res.status(400).json({ success: false, message: 'Screen is required for each show' });
+            }
+            
+            if (!language) {
+                return res.status(400).json({ success: false, message: 'Language is required for each show' });
             }
 
             // Validate screen exists in theatre
@@ -439,6 +449,7 @@ export const addShow = async (req, res) => {
 
                 // Create the show
                 try {
+                    console.log('Creating show with language:', language); // Debug log
                     const show = new Show({
                         movie: movie._id, // Use the actual movie object ID
                         theatre: theatreId,
@@ -447,13 +458,15 @@ export const addShow = async (req, res) => {
                         screen: screen, // Add screen field
                         showDateTime: showDateTime,
                         format: req.body.format, // Use global format from request body
-                    silverPrice: Number(silverPrice),
-                    goldPrice: Number(goldPrice),
-                    diamondPrice: Number(diamondPrice),
-                    occupiedSeats: {}
+                        language: language, // Add language field from request body
+                        silverPrice: Number(silverPrice),
+                        goldPrice: Number(goldPrice),
+                        diamondPrice: Number(diamondPrice),
+                        occupiedSeats: {}
                     });
 
                     await show.save();
+                    console.log('Show saved successfully with language:', show.language); // Debug log
                 } catch (showError) {
                     return res.status(500).json({ 
                         success: false, 
@@ -551,10 +564,14 @@ export const getShowsByMovieAndCity = async (req, res) => {
             });
                 }
         
-        // Find all shows for this movie in the specified city
+        // Get current date and time
+        const now = new Date();
+        
+        // Find all shows for this movie in the specified city that haven't ended yet
         const shows = await Show.find({ 
             movie: movieId,
-            city: city 
+            city: city,
+            showDateTime: { $gt: now } // Only shows with future showtimes
         }).populate('movie').populate('theatre');
         
         if (shows.length === 0) {
@@ -566,20 +583,26 @@ export const getShowsByMovieAndCity = async (req, res) => {
         }
         
         // Process shows to include theatre and format information
-        const processedShows = shows.map(show => ({
-            _id: show._id,
-            movie: show.movie,
-            theatre: show.theatre,
-            state: show.state,
-            city: show.city,
-            screen: show.screen,
-            format: show.format,
-            showDateTime: show.showDateTime,
-            silverPrice: show.silverPrice,
-            goldPrice: show.goldPrice,
-            diamondPrice: show.diamondPrice,
-            occupiedSeats: show.occupiedSeats
-        }));
+        const processedShows = shows.map(show => {
+            console.log('Processing show:', show._id, 'Language:', show.language); // Debug log
+            return {
+                _id: show._id,
+                movie: show.movie,
+                theatre: show.theatre,
+                state: show.state,
+                city: show.city,
+                screen: show.screen,
+                format: show.format,
+                language: show.language, // Add language field
+                showDateTime: show.showDateTime,
+                silverPrice: show.silverPrice,
+                goldPrice: show.goldPrice,
+                diamondPrice: show.diamondPrice,
+                occupiedSeats: show.occupiedSeats
+            };
+        });
+        
+        console.log('Final processed shows:', processedShows.map(s => ({ id: s._id, language: s.language }))); // Debug log
         
         res.json({
             success: true, 
@@ -868,6 +891,120 @@ export const getMovieTrailer = async (req, res) => {
         res.status(500).json({ 
             success: false, 
             message: 'Failed to fetch movie trailer',
+            error: error.message 
+        });
+    }
+};
+
+// API to get trailers for movies currently playing in a city
+export const getTrailersForCity = async (req, res) => {
+    try {
+        const { city } = req.params;
+        
+        console.log('getTrailersForCity called for city:', city); // Debug log
+        
+        if (!city) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'City parameter is required' 
+            });
+        }
+
+        // Get current date and time
+        const now = new Date();
+        console.log('Current time:', now); // Debug log
+
+        // Get all shows for the specified city that haven't ended yet
+        const cityShows = await Show.find({ 
+            city: { $regex: new RegExp('^' + city + '$', 'i') },
+            showDateTime: { $gt: now } // Only shows with future showtimes
+        }).populate('movie');
+        
+        console.log('Found cityShows:', cityShows.length); // Debug log
+        
+        // Extract unique movies from the active shows
+        const uniqueMovies = [];
+        const seenMovieIds = new Set();
+
+        cityShows.forEach(show => {
+            if (show.movie && !seenMovieIds.has(show.movie._id)) {
+                seenMovieIds.add(show.movie._id);
+                uniqueMovies.push(show.movie);
+            }
+        });
+
+        console.log('Unique movies found:', uniqueMovies.length); // Debug log
+        console.log('Unique movies:', uniqueMovies.map(m => ({ id: m._id, title: m.title, tmdbId: m.tmdbId }))); // Debug log
+
+        // Get trailers for each movie
+        const moviesWithTrailers = [];
+        
+        for (const movie of uniqueMovies.slice(0, 5)) { // Limit to 5 movies for performance
+            try {
+                console.log('Fetching trailer for movie:', movie.title, 'TMDB ID:', movie.tmdbId || movie._id); // Debug log
+                
+                const fetchWithRetry = async (url, retries = 3) => {
+                    for (let i = 0; i < retries; i++) {
+                        try {
+                            if (!checkRateLimit('tmdb-api')) {
+                                await new Promise(resolve => setTimeout(resolve, 2000));
+                                continue;
+                            }
+                            
+                            const response = await axios.get(url, {
+                                headers: {Authorization : `Bearer ${process.env.TMDB_API_KEY}`},
+                                timeout: 15000
+                            });
+                            return response;
+                        } catch (error) {
+                            if (i === retries - 1) throw error;
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                        }
+                    }
+                };
+
+                const response = await fetchWithRetry(`https://api.themoviedb.org/3/movie/${movie.tmdbId || movie._id}/videos`);
+                const videos = response.data.results;
+
+                console.log('Videos found for movie:', movie.title, 'Count:', videos.length); // Debug log
+
+                // Find trailer
+                const trailer = videos.find(video => 
+                    (video.type === 'Trailer' || video.type === 'Teaser') && 
+                    video.site === 'YouTube' &&
+                    video.official === true
+                ) || videos.find(video => 
+                    (video.type === 'Trailer' || video.type === 'Teaser') && 
+                    video.site === 'YouTube'
+                );
+
+                if (trailer) {
+                    console.log('Trailer found for movie:', movie.title, 'Key:', trailer.key); // Debug log
+                    moviesWithTrailers.push({
+                        movie: movie,
+                        trailer: trailer
+                    });
+                } else {
+                    console.log('No trailer found for movie:', movie.title); // Debug log
+                }
+            } catch (error) {
+                console.log(`Failed to get trailer for movie ${movie.title}:`, error.message);
+                // Continue with other movies even if one fails
+            }
+        }
+
+        console.log('Final moviesWithTrailers:', moviesWithTrailers.length); // Debug log
+
+        res.json({ 
+            success: true, 
+            moviesWithTrailers,
+            city: city
+        });
+
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to fetch trailers for city',
             error: error.message 
         });
     }

@@ -96,10 +96,22 @@
   max-width: 1000px;
   width: 100%;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   position: relative;
-  z-index: 2;
-  margin: 0 auto;
+}
+
+.trailer-movie-title {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  z-index: 10;
+  text-align: center;
 }
 
 .trailer-card img,
@@ -220,7 +232,47 @@
 }
 
 .trailers-title-highlight {
-  color: #9333ea;
+  color: #a365ff;
+  font-weight: 700;
+}
+
+/* Loading and no-trailers states */
+.trailer-loading,
+.trailer-no-trailers {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: auto;
+  background: transparent;
+  border-radius: 0;
+  margin: 2rem 0;
+  flex-direction: column;
+}
+
+.trailer-loading p,
+.trailer-no-trailers p {
+  color: #d1d5db;
+  font-size: 1.1rem;
+  text-align: center;
+  margin: 0.5rem 0;
+}
+
+.trailer-no-trailers ul {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0 0;
+  text-align: center;
+}
+
+.trailer-no-trailers li {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  margin: 0.3rem 0;
+  padding: 0;
+}
+
+.trailer-loading p {
+  color: #a365ff;
   font-weight: 500;
 }
 

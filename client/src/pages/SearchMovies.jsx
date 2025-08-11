@@ -18,6 +18,27 @@ const getUniqueGenres = (movies) => {
 
 const getUniqueLanguages = (movies) => getUnique(movies, 'original_language').sort();
 
+// Language mapping function
+const getLanguageCode = (language) => {
+  const languageMap = {
+    'English': 'en',
+    'Hindi': 'hi',
+    'Tamil': 'ta',
+    'Telugu': 'te',
+    'Kannada': 'kn',
+    'Malayalam': 'ml',
+    'Bengali': 'bn',
+    'Marathi': 'mr',
+    'Gujarati': 'gu',
+    'Punjabi': 'pa',
+    'Odia': 'or',
+    'Assamese': 'as',
+    'Sanskrit': 'sa',
+    'Urdu': 'ur'
+  };
+  return languageMap[language] || language.toLowerCase();
+};
+
 const SearchMovies = () => {
   const { selectedCity } = useAppContext();
   const navigate = useNavigate();
@@ -26,7 +47,6 @@ const SearchMovies = () => {
   const [loading, setLoading] = useState(true);
   
   const [selectedFilters, setSelectedFilters] = useState({
-    theatre: [],
     language: [],
     genre: [],
     format: [],
@@ -64,8 +84,7 @@ const SearchMovies = () => {
   const languages = useMemo(() => getUniqueLanguages(cityMovies), [cityMovies]);
 
   // Static data for filters
-  const theatres = ['PVR', 'INOX', 'Cinepolis'];
-  const formats = ['2D', '3D', '4DX'];
+  const formats = ['2D', '3D', '4DX', 'IMAX', 'Dolby Atmos', 'DTS:X'];
   const ratings = ['7+', '8+', '9+'];
 
   const handleFilterChange = (filterType, value) => {
@@ -92,16 +111,21 @@ const SearchMovies = () => {
         (movie.genres && movie.genres.some(g => selectedFilters.genre.includes(g.name)));
       const matchesLang = selectedFilters.language.length === 0 || 
         selectedFilters.language.some(lang => {
-          const langCode = lang === 'English' ? 'en' : lang === 'Hindi' ? 'hi' : 
-                          lang === 'Tamil' ? 'ta' : lang === 'Telugu' ? 'te' : lang.toLowerCase();
+          // Check if any show for this movie has the selected language
+          // For now, we'll use the movie's original language as fallback
+          const langCode = getLanguageCode(lang);
           return movie.original_language === langCode;
         });
+      const matchesFormat = selectedFilters.format.length === 0 || 
+        // For now, we'll assume all movies support all formats
+        // In a real implementation, this would check the actual show formats
+        true;
       const matchesRating = selectedFilters.rating.length === 0 || 
         selectedFilters.rating.some(rating => {
           const minRating = parseInt(rating);
           return movie.vote_average >= minRating;
         });
-      return matchesSearch && matchesGenre && matchesLang && matchesRating;
+      return matchesSearch && matchesGenre && matchesLang && matchesFormat && matchesRating;
     });
   }, [cityMovies, search, selectedFilters]);
 
@@ -129,21 +153,6 @@ const SearchMovies = () => {
             <p className="filter-subtitle">Filtering movies in {selectedCity}</p>
 
             <div className="filter-group">
-              <label>Theatre</label>
-              <div className="filter-options">
-                {theatres.map(theatre => (
-                  <button 
-                    key={theatre}
-                    className={`filter-option ${isSelected('theatre', theatre) ? 'selected' : ''}`}
-                    onClick={() => handleFilterChange('theatre', theatre)}
-                  >
-                    {theatre}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="filter-group">
               <label>Language</label>
               <div className="filter-options">
                 <button 
@@ -169,6 +178,42 @@ const SearchMovies = () => {
                   onClick={() => handleFilterChange('language', 'Telugu')}
                 >
                   Telugu
+                </button>
+                <button 
+                  className={`filter-option ${isSelected('language', 'Kannada') ? 'selected' : ''}`}
+                  onClick={() => handleFilterChange('language', 'Kannada')}
+                >
+                  Kannada
+                </button>
+                <button 
+                  className={`filter-option ${isSelected('language', 'Malayalam') ? 'selected' : ''}`}
+                  onClick={() => handleFilterChange('language', 'Malayalam')}
+                >
+                  Malayalam
+                </button>
+                <button 
+                  className={`filter-option ${isSelected('language', 'Bengali') ? 'selected' : ''}`}
+                  onClick={() => handleFilterChange('language', 'Bengali')}
+                >
+                  Bengali
+                </button>
+                <button 
+                  className={`filter-option ${isSelected('language', 'Marathi') ? 'selected' : ''}`}
+                  onClick={() => handleFilterChange('language', 'Marathi')}
+                >
+                  Marathi
+                </button>
+                <button 
+                  className={`filter-option ${isSelected('language', 'Gujarati') ? 'selected' : ''}`}
+                  onClick={() => handleFilterChange('language', 'Gujarati')}
+                >
+                  Gujarati
+                </button>
+                <button 
+                  className={`filter-option ${isSelected('language', 'Punjabi') ? 'selected' : ''}`}
+                  onClick={() => handleFilterChange('language', 'Punjabi')}
+                >
+                  Punjabi
                 </button>
               </div>
             </div>
