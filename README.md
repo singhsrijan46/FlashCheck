@@ -9,9 +9,7 @@ Flash Check is a full-stack web application that provides a seamless movie ticke
 The application integrates with TMDB API for movie data and trailers, provides email notifications for bookings, and offers a responsive design that works across all devices. With features like advanced search filters, booking management, and cancellation policies, Flash Check delivers a complete movie ticket booking solution.
 
 ## Screenshots
-
-### Drive Link
-![Drive Link](https://drive.google.com/drive/u/2/folders/1TaNd2FR5cT18i_F1ZWkvknGOyR7iiFnx)
+**Screenshots Link:** [Drive Link](https://drive.google.com/drive/u/2/folders/1TaNd2FR5cT18i_F1ZWkvknGOyR7iiFnx)
 
 ## Hosted URL
 **Frontend:** https://flashcheck-client.vercel.app  
@@ -105,7 +103,7 @@ The application integrates with TMDB API for movie data and trailers, provides e
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/yourusername/flash-check.git
+   git clone https://github.com/singhsrijan46/FlashCheck
    cd flash-check
    ```
 
@@ -124,8 +122,10 @@ The application integrates with TMDB API for movie data and trailers, provides e
    SMTP_USER=your_email@gmail.com
    SMTP_PASS=your_email_password
    STRIPE_SECRET_KEY=your_stripe_secret_key
+   STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
    STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
    FRONTEND_URL=http://localhost:3000
+   CLIENT_URL=http://localhost:3000
    ```
 
 4. **Frontend Setup**
@@ -137,8 +137,11 @@ The application integrates with TMDB API for movie data and trailers, provides e
 5. **Environment Configuration (Frontend)**
    Create `.env` file in the client directory:
    ```env
+   VITE_NODE_ENV="development || production"
    VITE_BASE_URL=http://localhost:8080
    VITE_TMDB_IMAGE_BASE_URL=https://image.tmdb.org/t/p/w500
+   VITE_CURRENCY=$
+   VITE_STRIPE_PUBLISHABLE_KEY='your_stripe_publishable_key'
    ```
 
 6. **Start Development Servers**
