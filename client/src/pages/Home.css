@@ -1,0 +1,74 @@
+/* Home Page Responsive Layout */
+.home-page {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Section spacing and responsive adjustments */
+.home-page > * {
+  width: 100%;
+}
+
+/* Ensure proper spacing between sections on mobile */
+@media (max-width: 768px) {
+  .home-page {
+    padding-bottom: 2rem;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .home-page {
+    padding-bottom: 3rem;
+  }
+}
+
+/* Desktop adjustments */
+@media (min-width: 1024px) {
+  .home-page {
+    padding-bottom: 4rem;
+  }
+}
+
+/* Large screen optimizations */
+@media (min-width: 1536px) {
+  .home-page {
+    padding-bottom: 5rem;
+  }
+}
+
+/* Ensure smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Optimize for mobile performance */
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Ensure proper viewport handling */
+@media (max-width: 480px) {
+  .home-page {
+    min-height: 100dvh; /* Use dynamic viewport height for mobile */
+  }
+}
+
+/* Landscape orientation adjustments for mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .home-page {
+    min-height: 100vh;
+  }
+}

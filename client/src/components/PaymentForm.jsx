@@ -11,10 +11,10 @@ const PaymentForm = ({ amount, showId, selectedSeats, onSuccess, onCancel }) => 
         try {
             setLoading(true);
             
-            console.log('Starting checkout process...', { showId, selectedSeats, amount });
+    
             
             const token = await getToken();
-            console.log('Token obtained:', !!token);
+
             
             const requestData = {
                 showId,
@@ -22,26 +22,24 @@ const PaymentForm = ({ amount, showId, selectedSeats, onSuccess, onCancel }) => 
                 amount
             };
             
-            console.log('Sending request with data:', requestData);
+
             
             const { data } = await axios.post('/api/payment/create-checkout-session', requestData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            console.log('Response received:', data);
+
 
             if (data.success && data.url) {
-                console.log('Redirecting to:', data.url);
+
                 // Redirect to Stripe Checkout
                 window.location.href = data.url;
             } else {
-                console.error('Checkout failed:', data.message);
+    
                 toast.error(data.message || 'Failed to create checkout session');
             }
         } catch (error) {
-            console.error('Checkout error details:', error);
-            console.error('Error response:', error.response?.data);
-            console.error('Error status:', error.response?.status);
+
             
             if (error.response?.data?.message) {
                 toast.error(error.response.data.message);

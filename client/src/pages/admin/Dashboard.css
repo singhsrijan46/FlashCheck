@@ -126,15 +126,7 @@
   color: #d1d5db;
 }
 
-.dashboard-show-price-badge {
-  background: #1a1a1a;
-  color: #d1d5db;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border: 1px solid #333;
-}
+
 
 .dashboard-show-details {
   padding: 1rem;

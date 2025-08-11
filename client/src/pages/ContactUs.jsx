@@ -1,12 +1,16 @@
 import React, { useState } from 'react'
+import { useAppContext } from '../context/AppContext'
+import toast from 'react-hot-toast'
 import './ContactUs.css'
 
 const ContactUs = () => {
+  const { axios } = useAppContext()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     message: ''
   })
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
     setFormData({
@@ -15,12 +19,46 @@ const ContactUs = () => {
     })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Handle form submission here
-    console.log('Form submitted:', formData)
-    // Reset form
-    setFormData({ name: '', email: '', message: '' })
+    setLoading(true)
+
+    try {
+      // Validate form data
+      if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+        toast.error('Please fill in all fields')
+        return
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(formData.email)) {
+        toast.error('Please enter a valid email address')
+        return
+      }
+
+      // Submit form to backend
+      const response = await axios.post('/api/contact/submit', formData)
+
+      if (response.data.success) {
+        toast.success(response.data.message || 'Thank you for your message! We will get back to you soon.')
+        
+        // Reset form
+        setFormData({ name: '', email: '', message: '' })
+      } else {
+        toast.error(response.data.message || 'Failed to submit message. Please try again.')
+      }
+    } catch (error) {
+      
+      
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message)
+      } else {
+        toast.error('Failed to submit message. Please try again.')
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -47,6 +85,7 @@ const ContactUs = () => {
                 value={formData.name}
                 onChange={handleChange}
                 required
+                disabled={loading}
               />
             </div>
             <div className="form-group">
@@ -57,6 +96,7 @@ const ContactUs = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
+                disabled={loading}
               />
             </div>
             <div className="form-group">
@@ -67,10 +107,15 @@ const ContactUs = () => {
                 onChange={handleChange}
                 required
                 rows="6"
+                disabled={loading}
               ></textarea>
             </div>
-            <button type="submit" className="submit-btn">
-              Submit
+            <button 
+              type="submit" 
+              className="submit-btn"
+              disabled={loading}
+            >
+              {loading ? 'Sending...' : 'Submit'}
             </button>
           </form>
         </div>

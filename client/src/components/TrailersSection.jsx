@@ -15,22 +15,22 @@ const TrailersSection = () => {
         const fetchTrailers = async () => {
             try {
                 setLoading(true)
-                console.log('Fetching trailers for city:', selectedCity) // Debug log
+            
                 const response = await fetch(`${url}/api/show/city/${selectedCity}/trailers`)
                 const data = await response.json()
                 
-                console.log('Trailer API response:', data) // Debug log
+
                 
                 if (data.success && data.moviesWithTrailers.length > 0) {
-                    console.log('Setting movies with trailers:', data.moviesWithTrailers) // Debug log
+
                     setMoviesWithTrailers(data.moviesWithTrailers)
                 } else {
-                    console.log('No trailers found, showing message') // Debug log
+
                     // Don't show sample data, just show empty state
                     setMoviesWithTrailers([])
                 }
             } catch (error) {
-                console.error('Error fetching trailers:', error)
+        
                 // Don't show sample data on error, just show empty state
                 setMoviesWithTrailers([])
             } finally {

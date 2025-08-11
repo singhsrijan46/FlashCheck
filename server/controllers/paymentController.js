@@ -260,11 +260,11 @@ export const createCheckoutSessionController = async (req, res) => {
         const { showId, selectedSeats, amount } = req.body;
         const userId = req.user._id;
 
-        console.log('🔍 Creating checkout session for:', { showId, selectedSeats, amount, userId });
+    
 
         // Validate required fields
         if (!showId || !selectedSeats || !amount) {
-            console.log('❌ Missing required fields:', { showId, selectedSeats, amount });
+    
             return res.status(400).json({
                 success: false,
                 message: 'Show ID, selected seats, and amount are required'
@@ -274,7 +274,7 @@ export const createCheckoutSessionController = async (req, res) => {
         // Validate that the show exists
         const show = await Show.findById(showId).populate('theatre');
         if (!show) {
-            console.log('❌ Show not found:', showId);
+    
             return res.status(404).json({
                 success: false,
                 message: 'Show not found'
@@ -284,13 +284,13 @@ export const createCheckoutSessionController = async (req, res) => {
         // Get movie details separately since movie ID is a string
         const movie = await Movie.findById(show.movie);
         if (!movie) {
-            console.log('⚠️ Movie not found:', show.movie);
+    
         }
 
         // Check seat availability
         const isAnySeatTaken = selectedSeats.some(seat => show.occupiedSeats[seat]);
         if (isAnySeatTaken) {
-            console.log('❌ Seats already taken:', selectedSeats);
+    
             return res.status(400).json({
                 success: false,
                 message: 'Some selected seats are already booked'
@@ -309,22 +309,22 @@ export const createCheckoutSessionController = async (req, res) => {
             format: show.format
         };
 
-        console.log('📋 Created metadata:', metadata);
+
 
         // Create success and cancel URLs
         const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
         const successUrl = `${baseUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`;
         const cancelUrl = `${baseUrl}/seat-layout/${showId}`;
 
-        console.log('🔗 URLs:', { baseUrl, successUrl, cancelUrl });
+
 
         // Create checkout session
         const checkoutResult = await createCheckoutSession(amount, 'usd', metadata, successUrl, cancelUrl);
 
-        console.log('💳 Checkout result:', checkoutResult);
+
 
         if (!checkoutResult.success) {
-            console.log('❌ Failed to create checkout session:', checkoutResult.error);
+
             return res.status(500).json({
                 success: false,
                 message: 'Failed to create checkout session',
@@ -332,7 +332,7 @@ export const createCheckoutSessionController = async (req, res) => {
             });
         }
 
-        console.log('✅ Checkout session created successfully:', checkoutResult.sessionId);
+
 
         res.json({
             success: true,
@@ -342,7 +342,7 @@ export const createCheckoutSessionController = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error creating checkout session:', error);
+
         res.status(500).json({
             success: false,
             message: 'Internal server error',

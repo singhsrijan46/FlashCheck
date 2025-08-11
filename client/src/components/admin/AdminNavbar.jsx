@@ -64,6 +64,7 @@ const AdminNavbar = () => {
     { name: 'Add Theatre', path: '/admin/add-theatre' },
     { name: 'List Shows', path: '/admin/list-shows' },
     { name: 'List Bookings', path: '/admin/list-bookings' },
+    { name: 'Contact Management', path: '/admin/contact-management' },
   ]
 
   return (

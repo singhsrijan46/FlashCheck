@@ -26,7 +26,7 @@ const HeroSection = () => {
           setNowPlayingMovies([])
         }
       } catch (error) {
-        console.error('Error fetching now playing movies:', error)
+
         setNowPlayingMovies([])
       } finally {
         setLoading(false)

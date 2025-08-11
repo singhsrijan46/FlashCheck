@@ -15,6 +15,7 @@ import AddShows from './pages/admin/AddShows'
 import AddTheatre from './pages/admin/AddTheatre'
 import ListShows from './pages/admin/ListShows'
 import ListBookings from './pages/admin/ListBookings'
+import ContactManagement from './pages/admin/ContactManagement'
 import { useAppContext } from './context/AppContext'
 import Login from './components/Login'
 import Loading from './components/Loading'
@@ -64,6 +65,7 @@ const App = () => {
           <Route path="add-theatre" element={<AddTheatre/>}/>
           <Route path="list-shows" element={<ListShows/>}/>
           <Route path="list-bookings" element={<ListBookings/>}/>
+          <Route path="contact-management" element={<ContactManagement/>}/>
         </Route>
       </Routes>
       

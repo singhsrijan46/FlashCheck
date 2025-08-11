@@ -50,14 +50,14 @@ export const getTheatresByState = async (req, res) => {
 export const getTheatresByCity = async (req, res) => {
     try {
         const { city } = req.params;
-        console.log('getTheatresByCity - Requested city:', city);
+    
         
         const theatres = await Theatre.find({ city, isActive: true }).sort({ name: 1 });
-        console.log('getTheatresByCity - Found theatres:', theatres.length);
+
         
         res.json({ success: true, theatres });
     } catch (error) {
-        console.error('Error fetching theatres by city:', error);
+
         res.json({ success: false, message: error.message });
     }
 };
@@ -65,11 +65,11 @@ export const getTheatresByCity = async (req, res) => {
 // Add new theatre
 export const addTheatre = async (req, res) => {
     try {
-        console.log('addTheatre - Request body:', req.body);
+    
         const { name, state, city, address, numberOfScreens } = req.body;
 
         if (!name || !state || !city || !address || !numberOfScreens) {
-            console.log('addTheatre - Missing required fields:', { name, state, city, address, numberOfScreens });
+    
             return res.json({ success: false, message: 'All fields are required' });
         }
 
@@ -79,13 +79,7 @@ export const addTheatre = async (req, res) => {
             screens.push(`Screen ${i}`);
         }
 
-        console.log('addTheatre - Creating theatre with data:', {
-            name,
-            state,
-            city,
-            address,
-            screens
-        });
+
 
         const theatre = await Theatre.create({
             name,
@@ -95,7 +89,7 @@ export const addTheatre = async (req, res) => {
             screens
         });
 
-        console.log('addTheatre - Theatre created successfully:', theatre);
+
 
         res.json({ 
             success: true, 
@@ -103,7 +97,7 @@ export const addTheatre = async (req, res) => {
             theatre 
         });
     } catch (error) {
-        console.error('Error adding theatre:', error);
+
         res.json({ success: false, message: error.message });
     }
 };
@@ -146,7 +140,7 @@ export const updateTheatre = async (req, res) => {
             theatre: updatedTheatre 
         });
     } catch (error) {
-        console.error('Error updating theatre:', error);
+
         res.json({ success: false, message: error.message });
     }
 };
@@ -171,7 +165,7 @@ export const deleteTheatre = async (req, res) => {
             message: 'Theatre deleted successfully' 
         });
     } catch (error) {
-        console.error('Error deleting theatre:', error);
+
         res.json({ success: false, message: error.message });
     }
 };
@@ -188,7 +182,7 @@ export const getTheatreById = async (req, res) => {
 
         res.json({ success: true, theatre });
     } catch (error) {
-        console.error('Error fetching theatre:', error);
+
         res.json({ success: false, message: error.message });
     }
 }; 

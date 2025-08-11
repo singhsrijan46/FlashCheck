@@ -10,6 +10,7 @@ import authRouter from './routes/authRoutes.js';
 import theatreRouter from './routes/theatreRoutes.js';
 import paymentRouter from './routes/paymentRoutes.js';
 import cancellationRouter from './routes/cancellationRoutes.js';
+import contactRouter from './routes/contactRoutes.js';
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -19,8 +20,7 @@ const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET'];
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingEnvVars.length > 0) {
-    console.error('Missing required environment variables:', missingEnvVars);
-    console.error('Please set these environment variables in your Vercel dashboard');
+
 }
 
 // CORS configuration
@@ -63,34 +63,28 @@ const initializeServer = async (retryCount = 0) => {
         // Start the server only after successful database connection
         try {
             const server = app.listen(port, () => {
-                console.log(`🚀 Server listening at http://localhost:${port}`);
-                console.log('✅ Server is ready to handle requests');
+                
             });
             
             // Keep the server running
             server.on('error', (error) => {
-                console.error('❌ Server error:', error);
+        
             });
             
         } catch (portError) {
-            console.error(`❌ Port ${port} is already in use. Please stop any other services using this port.`);
+    
             process.exit(1);
         }
         
     } catch (error) {
-        console.error(`❌ Database connection failed (attempt ${retryCount + 1}/${maxRetries + 1}):`, error.message);
+
         
         if (retryCount < maxRetries) {
             setTimeout(() => {
                 initializeServer(retryCount + 1);
             }, retryDelay);
         } else {
-            console.error('💥 Maximum retry attempts reached. Server startup failed.');
-            console.error('💡 Please check:');
-            console.error('   1. MongoDB Atlas cluster status');
-            console.error('   2. Network connectivity');
-            console.error('   3. Environment variables');
-            console.error('   4. IP whitelist settings');
+            
             
             // In production, we might want to exit gracefully
             if (process.env.NODE_ENV === 'production') {
@@ -109,10 +103,11 @@ app.use('/api/user', userRouter);
 app.use('/api/theatre', theatreRouter);
 app.use('/api/payment', paymentRouter);
 app.use('/api/cancellation', cancellationRouter);
+app.use('/api/contact', contactRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error('Error:', err);
+    
     res.status(500).json({ 
         success: false, 
         message: 'Internal server error',
@@ -127,7 +122,7 @@ app.use('*', (req, res) => {
 
 // Initialize database connection and start server
 initializeServer().catch(error => {
-    console.error('❌ Server initialization failed:', error);
+
     process.exit(1);
 });
 

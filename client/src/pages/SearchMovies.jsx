@@ -68,7 +68,7 @@ const SearchMovies = () => {
           setCityMovies([]);
         }
       } catch (error) {
-        console.error('Error fetching city movies:', error);
+
         setCityMovies([]);
       } finally {
         setLoading(false);

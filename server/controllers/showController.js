@@ -8,6 +8,37 @@ import sendEmail from "../configs/nodeMailer.js";
 const movieCache = new Map();
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
+// Genre cache to avoid repeated API calls
+const genreCache = new Map();
+
+// Function to fetch genre names from TMDB
+const fetchGenres = async () => {
+    if (genreCache.size > 0) {
+        return genreCache;
+    }
+    
+    try {
+        if (!process.env.TMDB_API_KEY) {
+            return new Map();
+        }
+        
+        const response = await axios.get('https://api.themoviedb.org/3/genre/movie/list', {
+            headers: { Authorization: `Bearer ${process.env.TMDB_API_KEY}` },
+            timeout: 10000
+        });
+        
+        const genres = response.data.genres;
+        genres.forEach(genre => {
+            genreCache.set(genre.id, genre.name);
+        });
+        
+        return genreCache;
+    } catch (error) {
+
+        return new Map();
+    }
+};
+
 // Sample movie data as fallback when TMDB API is unavailable
 const sampleMovies = [
     {
@@ -154,9 +185,19 @@ export const getNowPlayingMovies = async (req, res) => {
         const uniqueMovies = [];
         const seenIds = new Set();
 
+        // Fetch genres once for all movies
+        const genresMap = await fetchGenres();
+
         allMovies.forEach(movie => {
             if (!seenIds.has(movie.id.toString())) {
                 seenIds.add(movie.id.toString());
+                
+                // Convert genre_ids to genre objects
+                const genres = movie.genre_ids ? movie.genre_ids.map(id => ({
+                    id: id,
+                    name: genresMap.get(id) || `Genre ${id}`
+                })) : [];
+                
                 const movieData = {
                     _id: movie.id.toString(),
                     tmdbId: movie.id.toString(), // Add tmdbId field
@@ -167,7 +208,9 @@ export const getNowPlayingMovies = async (req, res) => {
                     release_date: movie.release_date,
                     vote_average: movie.vote_average,
                     original_language: movie.original_language,
-                    genre_ids: movie.genre_ids
+                    genre_ids: movie.genre_ids || [],
+                    genres: genres, // Add actual genre objects
+                    runtime: movie.runtime || null // Add runtime
                 };
                 uniqueMovies.push(movieData);
                 setCachedMovieData(movie.id.toString(), movieData);
@@ -256,7 +299,7 @@ export const addShow = async (req, res) => {
     try {
         const { movieId, theatreId, state, city, format, showsInput, silverPrice, goldPrice, diamondPrice } = req.body;
 
-        console.log('Received addShow request:', { movieId, theatreId, state, city, format, showsInput }); // Debug log
+    
 
         // Validate required fields
         if (!movieId) {
@@ -355,11 +398,32 @@ export const addShow = async (req, res) => {
                 // Check cache first
                 const cachedData = getCachedMovieData(movieId);
                 if (cachedData) {
-                    movieData = cachedData;
+            
+                    // Check if cached data has genres, if not, fetch fresh data
+                    if (!cachedData.genres || cachedData.genres.length === 0) {
+
+                        movieData = null; // Force fresh fetch
+                    } else {
+                        movieData = cachedData;
+                    }
                 } else if (process.env.TMDB_API_KEY) {
                     try {
+        
                         const response = await fetchWithRetry(`https://api.themoviedb.org/3/movie/${movieId}`);
                         const apiData = response.data;
+                        
+
+                        
+                        // Fetch genres to get genre names
+                        const genresMap = await fetchGenres();
+        
+                        
+                        const genres = apiData.genre_ids ? apiData.genre_ids.map(id => ({
+                            id: id,
+                            name: genresMap.get(id) || `Genre ${id}`
+                        })) : [];
+                        
+
                         
                         movieData = {
                             _id: apiData.id.toString(),
@@ -371,8 +435,9 @@ export const addShow = async (req, res) => {
                             release_date: apiData.release_date,
                             vote_average: apiData.vote_average,
                             original_language: apiData.original_language,
-                            genre_ids: apiData.genre_ids,
-                            runtime: apiData.runtime,
+                            genre_ids: apiData.genre_ids || [],
+                            genres: genres, // Add actual genre objects
+                            runtime: apiData.runtime || null, // Use actual runtime or null
                             status: apiData.status,
                             tagline: apiData.tagline,
                             vote_count: apiData.vote_count,
@@ -382,8 +447,11 @@ export const addShow = async (req, res) => {
                             original_title: apiData.original_title
                         };
                         
+
+                        
                         setCachedMovieData(movieId, movieData);
                     } catch (error) {
+        
                         // Continue with fallback movie creation
                     }
                 }
@@ -411,7 +479,9 @@ export const addShow = async (req, res) => {
                                 release_date: movieData.release_date || new Date().toISOString().split('T')[0],
                                 vote_average: movieData.vote_average || 0,
                                 original_language: movieData.original_language || 'en',
-                                genre_ids: movieData.genre_ids || []
+                                genre_ids: movieData.genre_ids || [],
+                                genres: movieData.genres || [],
+                                runtime: movieData.runtime || null
                             });
                             await movie.save();
                         } catch (fallbackError) {
@@ -428,14 +498,16 @@ export const addShow = async (req, res) => {
                         movie = new Movie({
                             _id: movieId,
                             tmdbId: movieId, // Ensure tmdbId is set
-                        title: `Movie ${movieId}`,
+                            title: `Movie ${movieId}`,
                             overview: 'Movie information not available',
                             poster_path: '/default-poster.jpg',
                             backdrop_path: '/default-backdrop.jpg',
                             release_date: new Date().toISOString().split('T')[0],
-                        vote_average: 0,
+                            vote_average: 0,
                             original_language: 'en',
-                            genre_ids: []
+                            genre_ids: [],
+                            genres: [],
+                            runtime: null
                         });
                         await movie.save();
                     } catch (fallbackError) {
@@ -449,7 +521,7 @@ export const addShow = async (req, res) => {
 
                 // Create the show
                 try {
-                    console.log('Creating show with language:', language); // Debug log
+    
                     const show = new Show({
                         movie: movie._id, // Use the actual movie object ID
                         theatre: theatreId,
@@ -466,7 +538,7 @@ export const addShow = async (req, res) => {
                     });
 
                     await show.save();
-                    console.log('Show saved successfully with language:', show.language); // Debug log
+    
                 } catch (showError) {
                     return res.status(500).json({ 
                         success: false, 
@@ -584,7 +656,7 @@ export const getShowsByMovieAndCity = async (req, res) => {
         
         // Process shows to include theatre and format information
         const processedShows = shows.map(show => {
-            console.log('Processing show:', show._id, 'Language:', show.language); // Debug log
+            
             return {
                 _id: show._id,
                 movie: show.movie,
@@ -602,7 +674,7 @@ export const getShowsByMovieAndCity = async (req, res) => {
             };
         });
         
-        console.log('Final processed shows:', processedShows.map(s => ({ id: s._id, language: s.language }))); // Debug log
+
         
         res.json({
             success: true, 
@@ -901,7 +973,7 @@ export const getTrailersForCity = async (req, res) => {
     try {
         const { city } = req.params;
         
-        console.log('getTrailersForCity called for city:', city); // Debug log
+    
         
         if (!city) {
             return res.status(400).json({ 
@@ -912,7 +984,7 @@ export const getTrailersForCity = async (req, res) => {
 
         // Get current date and time
         const now = new Date();
-        console.log('Current time:', now); // Debug log
+
 
         // Get all shows for the specified city that haven't ended yet
         const cityShows = await Show.find({ 
@@ -920,7 +992,7 @@ export const getTrailersForCity = async (req, res) => {
             showDateTime: { $gt: now } // Only shows with future showtimes
         }).populate('movie');
         
-        console.log('Found cityShows:', cityShows.length); // Debug log
+
         
         // Extract unique movies from the active shows
         const uniqueMovies = [];
@@ -933,15 +1005,14 @@ export const getTrailersForCity = async (req, res) => {
             }
         });
 
-        console.log('Unique movies found:', uniqueMovies.length); // Debug log
-        console.log('Unique movies:', uniqueMovies.map(m => ({ id: m._id, title: m.title, tmdbId: m.tmdbId }))); // Debug log
+
 
         // Get trailers for each movie
         const moviesWithTrailers = [];
         
         for (const movie of uniqueMovies.slice(0, 5)) { // Limit to 5 movies for performance
             try {
-                console.log('Fetching trailer for movie:', movie.title, 'TMDB ID:', movie.tmdbId || movie._id); // Debug log
+    
                 
                 const fetchWithRetry = async (url, retries = 3) => {
                     for (let i = 0; i < retries; i++) {
@@ -966,7 +1037,7 @@ export const getTrailersForCity = async (req, res) => {
                 const response = await fetchWithRetry(`https://api.themoviedb.org/3/movie/${movie.tmdbId || movie._id}/videos`);
                 const videos = response.data.results;
 
-                console.log('Videos found for movie:', movie.title, 'Count:', videos.length); // Debug log
+
 
                 // Find trailer
                 const trailer = videos.find(video => 
@@ -979,21 +1050,21 @@ export const getTrailersForCity = async (req, res) => {
                 );
 
                 if (trailer) {
-                    console.log('Trailer found for movie:', movie.title, 'Key:', trailer.key); // Debug log
+
                     moviesWithTrailers.push({
                         movie: movie,
                         trailer: trailer
                     });
                 } else {
-                    console.log('No trailer found for movie:', movie.title); // Debug log
+                    
                 }
             } catch (error) {
-                console.log(`Failed to get trailer for movie ${movie.title}:`, error.message);
+
                 // Continue with other movies even if one fails
             }
         }
 
-        console.log('Final moviesWithTrailers:', moviesWithTrailers.length); // Debug log
+
 
         res.json({ 
             success: true, 

@@ -47,7 +47,7 @@ const PaymentSuccess = () => {
                 }, 2000);
             }
         } catch (error) {
-            console.error('Payment confirmation error:', error);
+    
             toast.error('Failed to confirm payment');
             // Redirect to home if there's an error
             setTimeout(() => {

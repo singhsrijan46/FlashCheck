@@ -47,7 +47,7 @@ A full-stack web application for booking movie tickets with real-time seat selec
 - **Stripe**: Payment processing and webhooks
 - **TMDB API**: Movie data and trailer integration
 - **Nodemailer**: Email notifications
-- **QR Code**: Ticket QR code generation
+
 
 ## 📁 Project Structure
 
@@ -176,7 +176,7 @@ movieTicket/
 - User booking details
 - Seat information
 - Payment status
-- QR code for tickets
+
 
 ## 🔌 API Endpoints
 
@@ -219,7 +219,7 @@ movieTicket/
 - **TMDB Integration**: Movie data and trailer fetching
 - **Stripe Integration**: Payment processing and webhooks
 - **Email Service**: Booking confirmations and notifications
-- **QR Code Generation**: Digital ticket generation
+
 
 ## 🔒 Security Features
 

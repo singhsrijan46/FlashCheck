@@ -130,7 +130,7 @@ const MovieDetails = () => {
               <p className='movie-details-overview'>{show.movie?.overview || 'No overview available'}</p>
 
               <p className='movie-details-meta'>
-                {show.movie?.runtime ? timeFormat(show.movie.runtime) : '120 min'} • 
+                {show.movie?.runtime ? timeFormat(show.movie.runtime) : 'Runtime not available'} • 
                 {show.movie?.original_language?.toUpperCase() || 'EN'} • 
                 {show.movie?.release_date ? show.movie.release_date.split("-")[0] : 'N/A'}
               </p>

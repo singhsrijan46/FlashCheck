@@ -35,9 +35,9 @@ const ShowtimeSelection = () => {
         const showsResponse = await axios.get(`/api/show/${id}/city/${city}`);
         
         if (showsResponse.data.success) {
-          console.log('Shows data received:', showsResponse.data.shows); // Debug log
+  
           showsResponse.data.shows.forEach((show, index) => {
-            console.log(`Show ${index}:`, { id: show._id, language: show.language, format: show.format });
+
           });
           setShowData(showsResponse.data.shows);
         } else {
@@ -211,7 +211,7 @@ const ShowtimeSelection = () => {
             <div className="showtime-movie-info-overlay">
               <h1 className="showtime-movie-title-large">{currentMovie.title}</h1>
               <p className="showtime-movie-meta-large">
-              {currentMovie.runtime} min • {currentMovie.genres?.map(genre => genre.name).join(", ") || 'Action, Drama'}
+              {currentMovie.runtime ? `${currentMovie.runtime} min` : 'Runtime not available'} • {currentMovie.genres?.map(genre => genre.name).join(", ") || 'Genres not available'}
             </p>
               <div className="showtime-movie-rating">
                 <span className="showtime-rating-label">Rating:</span>
@@ -281,7 +281,7 @@ const ShowtimeSelection = () => {
                           <div className="showtime-showtimes-grid">
                             {theatre.shows.map((showtime, showIndex) => {
               const isSelected = selectedShowtime && selectedShowtime._id === showtime._id;
-              console.log(`Rendering showtime ${showIndex}:`, { id: showtime._id, language: showtime.language, fallback: showtime.language || 'English' }); // Debug log
+      
               return (
                 <button
                                   key={showIndex}

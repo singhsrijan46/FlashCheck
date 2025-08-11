@@ -11,10 +11,11 @@ const movieSchema = new mongoose.Schema(
         release_date: {type: String, required: true},
         original_language: {type: String},
         tagline: {type: String},
-        genres: {type: Array, default: []},
+        genres: {type: Array, default: []}, // Array of genre objects with id and name
+        genre_ids: {type: Array, default: []}, // Array of genre IDs from TMDB
         casts: {type: Array, default: []},
         vote_average: {type: Number, default: 0},
-        runtime: {type: Number, default: 120},
+        runtime: {type: Number, default: null}, // Changed from 120 to null
         trailer: {
             key: {type: String, default: null},
             name: {type: String, default: null},
@@ -30,8 +31,9 @@ movieSchema.pre('save', function(next) {
         // Set default values for required fields
         if (!this.poster_path) this.poster_path = "/default-poster.jpg";
         if (!this.backdrop_path) this.backdrop_path = "/default-backdrop.jpg";
-        if (!this.runtime) this.runtime = 120;
+        if (!this.runtime) this.runtime = null; // Don't set default runtime
         if (!this.genres) this.genres = [];
+        if (!this.genre_ids) this.genre_ids = [];
         if (!this.casts) this.casts = [];
         if (!this.vote_average) this.vote_average = 0;
         

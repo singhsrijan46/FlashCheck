@@ -91,9 +91,6 @@ const Dashboard = () => {
                                             {show.movie?.vote_average?.toFixed(1) || '0.0'}
                                         </span>
                                     </div>
-                                    <div className="dashboard-show-price-badge">
-                                        {currency} {show.silverPrice || show.goldPrice || show.diamondPrice || '0'}
-                                    </div>
                                 </div>
                             </div>
                             <div className="dashboard-show-details">
