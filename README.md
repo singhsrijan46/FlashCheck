@@ -10,20 +10,8 @@ The application integrates with TMDB API for movie data and trailers, provides e
 
 ## Screenshots
 
-### Home Page
-![Home Page](https://via.placeholder.com/800x400/9333ea/ffffff?text=Flash+Check+Home+Page)
-
-### Movie Details
-![Movie Details](https://via.placeholder.com/800x400/9333ea/ffffff?text=Movie+Details+Page)
-
-### Seat Selection
-![Seat Selection](https://via.placeholder.com/800x400/9333ea/ffffff?text=Seat+Selection+Interface)
-
-### Admin Dashboard
-![Admin Dashboard](https://via.placeholder.com/800x400/9333ea/ffffff?text=Admin+Dashboard)
-
-### Booking Management
-![Booking Management](https://via.placeholder.com/800x400/9333ea/ffffff?text=Booking+Management)
+### Drive Link
+![Drive Link](https://drive.google.com/drive/u/2/folders/1TaNd2FR5cT18i_F1ZWkvknGOyR7iiFnx)
 
 ## Hosted URL
 **Frontend:** https://flashcheck-client.vercel.app  
@@ -201,7 +189,7 @@ The application integrates with TMDB API for movie data and trailers, provides e
 - **DevOps**: Srijan
 
 ## Demo Video
-**Demo Video Link:** [Flash Check Demo](https://www.youtube.com/watch?v=your-demo-video-id)
+**Demo Video Link:** [Flash Check Demo](https://drive.google.com/drive/u/2/folders/1TaNd2FR5cT18i_F1ZWkvknGOyR7iiFnx)
 
 ### Video Content
 - Project overview and features
