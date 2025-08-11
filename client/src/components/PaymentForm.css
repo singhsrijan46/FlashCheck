@@ -56,6 +56,41 @@
     margin: 0.25rem 0;
 }
 
+.checkout-info {
+    background: rgba(16, 185, 129, 0.1);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.checkout-info h3 {
+    color: #10B981;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.checkout-info p {
+    color: #9CA3AF;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.security-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.security-badge {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10B981;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
 .card-element-container {
     background: white;
     padding: 1rem;
@@ -173,5 +208,9 @@
     .payment-cancel-btn,
     .payment-submit-btn {
         flex: none;
+    }
+    
+    .security-badges {
+        justify-content: center;
     }
 } 

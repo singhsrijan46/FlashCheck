@@ -37,7 +37,7 @@ const connectDB = async () => {
             process.exit(1);
         }, 30000);
 
-        await mongoose.connect(`${process.env.MONGODB_URI}/quickshow`, options);
+        await mongoose.connect(process.env.MONGODB_URI, options);
         
         // Clear timeout on successful connection
         clearTimeout(connectionTimeout);

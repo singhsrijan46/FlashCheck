@@ -1,122 +1,59 @@
-import React, { useState, useEffect } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import toast from 'react-hot-toast';
 import './PaymentForm.css';
 
-// Load Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-
-const PaymentFormContent = ({ amount, showId, selectedSeats, onSuccess, onCancel }) => {
-    const stripe = useStripe();
-    const elements = useElements();
+const PaymentForm = ({ amount, showId, selectedSeats, onSuccess, onCancel }) => {
     const { axios, getToken } = useAppContext();
     const [loading, setLoading] = useState(false);
-    const [clientSecret, setClientSecret] = useState('');
 
-    useEffect(() => {
-        // Create payment intent when component mounts
-        createPaymentIntent();
-    }, []);
-
-    const createPaymentIntent = async () => {
+    const handleCheckout = async () => {
         try {
             setLoading(true);
             
+            console.log('Starting checkout process...', { showId, selectedSeats, amount });
+            
             const token = await getToken();
-            const { data } = await axios.post('/api/payment/create-payment-intent', {
+            console.log('Token obtained:', !!token);
+            
+            const requestData = {
                 showId,
                 selectedSeats,
                 amount
-            }, {
+            };
+            
+            console.log('Sending request with data:', requestData);
+            
+            const { data } = await axios.post('/api/payment/create-checkout-session', requestData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            if (data.success) {
-                setClientSecret(data.clientSecret);
+            console.log('Response received:', data);
+
+            if (data.success && data.url) {
+                console.log('Redirecting to:', data.url);
+                // Redirect to Stripe Checkout
+                window.location.href = data.url;
             } else {
-                toast.error(data.message || 'Failed to create payment intent');
+                console.error('Checkout failed:', data.message);
+                toast.error(data.message || 'Failed to create checkout session');
             }
         } catch (error) {
-            toast.error('Failed to initialize payment');
+            console.error('Checkout error details:', error);
+            console.error('Error response:', error.response?.data);
+            console.error('Error status:', error.response?.status);
+            
+            if (error.response?.data?.message) {
+                toast.error(error.response.data.message);
+            } else if (error.message) {
+                toast.error(error.message);
+            } else {
+                toast.error('Failed to initialize checkout');
+            }
         } finally {
             setLoading(false);
         }
     };
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-
-        if (!stripe || !elements || !clientSecret) {
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-                payment_method: {
-                    card: elements.getElement(CardElement),
-                }
-            });
-
-            if (error) {
-                toast.error(error.message || 'Payment failed');
-            } else if (paymentIntent.status === 'succeeded') {
-                // Confirm payment with backend
-                await confirmPaymentWithBackend(paymentIntent.id);
-            }
-        } catch (error) {
-            toast.error('Payment failed. Please try again.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const confirmPaymentWithBackend = async (paymentIntentId) => {
-        try {
-            const token = await getToken();
-            const { data } = await axios.post('/api/payment/confirm-payment', {
-                paymentIntentId
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            if (data.success) {
-                toast.success('Payment successful! Booking confirmed.');
-                onSuccess(data.bookingId);
-            } else {
-                toast.error(data.message || 'Failed to confirm booking');
-            }
-        } catch (error) {
-            toast.error('Failed to confirm booking');
-        }
-    };
-
-    const cardElementOptions = {
-        style: {
-            base: {
-                fontSize: '16px',
-                color: '#424770',
-                '::placeholder': {
-                    color: '#aab7c4',
-                },
-            },
-            invalid: {
-                color: '#9e2146',
-            },
-        },
-    };
-
-    if (loading && !clientSecret) {
-        return (
-            <div className="payment-loading">
-                <div className="payment-spinner"></div>
-                <p>Initializing payment...</p>
-            </div>
-        );
-    }
 
     return (
         <div className="payment-form-container">
@@ -125,53 +62,43 @@ const PaymentFormContent = ({ amount, showId, selectedSeats, onSuccess, onCancel
                 <p>Total Amount: ${amount}</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="payment-form">
-                <div className="payment-details">
-                    <div className="payment-info">
-                        <h3>Booking Details</h3>
-                        <p><strong>Seats:</strong> {selectedSeats.join(', ')}</p>
-                        <p><strong>Amount:</strong> ${amount}</p>
-                    </div>
-
-                    <div className="card-element-container">
-                        <label>Card Information</label>
-                        <CardElement options={cardElementOptions} />
-                    </div>
+            <div className="payment-details">
+                <div className="payment-info">
+                    <h3>Booking Details</h3>
+                    <p><strong>Seats:</strong> {selectedSeats.join(', ')}</p>
+                    <p><strong>Amount:</strong> ${amount}</p>
                 </div>
 
-                <div className="payment-actions">
-                    <button 
-                        type="button" 
-                        onClick={onCancel}
-                        className="payment-cancel-btn"
-                        disabled={loading}
-                    >
-                        Cancel
-                    </button>
-                    <button 
-                        type="submit" 
-                        className="payment-submit-btn"
-                        disabled={!stripe || loading}
-                    >
-                        {loading ? 'Processing...' : `Pay $${amount}`}
-                    </button>
+                <div className="checkout-info">
+                    <h3>Secure Payment</h3>
+                    <p>You will be redirected to Stripe's secure checkout page to complete your payment.</p>
+                    <div className="security-badges">
+                        <span className="security-badge">🔒 Secure</span>
+                        <span className="security-badge">💳 Multiple Payment Methods</span>
+                        <span className="security-badge">✅ PCI Compliant</span>
+                    </div>
                 </div>
-            </form>
+            </div>
+
+            <div className="payment-actions">
+                <button 
+                    type="button" 
+                    onClick={onCancel}
+                    className="payment-cancel-btn"
+                    disabled={loading}
+                >
+                    Cancel
+                </button>
+                <button 
+                    type="button" 
+                    onClick={handleCheckout}
+                    className="payment-submit-btn"
+                    disabled={loading}
+                >
+                    {loading ? 'Redirecting...' : `Pay $${amount}`}
+                </button>
+            </div>
         </div>
-    );
-};
-
-const PaymentForm = ({ amount, showId, selectedSeats, onSuccess, onCancel }) => {
-    return (
-        <Elements stripe={stripePromise}>
-            <PaymentFormContent 
-                amount={amount} 
-                showId={showId} 
-                selectedSeats={selectedSeats}
-                onSuccess={onSuccess}
-                onCancel={onCancel}
-            />
-        </Elements>
     );
 };
 

@@ -61,15 +61,20 @@ const initializeServer = async (retryCount = 0) => {
         await connectDB();
         
         // Start the server only after successful database connection
-        if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
-            try {
-                app.listen(port, () => {
-                    console.log(`🚀 Server listening at http://localhost:${port}`);
-                });
-            } catch (portError) {
-                console.error(`❌ Port ${port} is already in use. Please stop any other services using this port.`);
-                process.exit(1);
-            }
+        try {
+            const server = app.listen(port, () => {
+                console.log(`🚀 Server listening at http://localhost:${port}`);
+                console.log('✅ Server is ready to handle requests');
+            });
+            
+            // Keep the server running
+            server.on('error', (error) => {
+                console.error('❌ Server error:', error);
+            });
+            
+        } catch (portError) {
+            console.error(`❌ Port ${port} is already in use. Please stop any other services using this port.`);
+            process.exit(1);
         }
         
     } catch (error) {
@@ -121,7 +126,10 @@ app.use('*', (req, res) => {
 });
 
 // Initialize database connection and start server
-initializeServer();
+initializeServer().catch(error => {
+    console.error('❌ Server initialization failed:', error);
+    process.exit(1);
+});
 
 export default app;
 

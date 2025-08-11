@@ -29,6 +29,43 @@ export const createPaymentIntent = async (amount, currency = 'usd', metadata = {
     }
 };
 
+export const createCheckoutSession = async (amount, currency = 'usd', metadata = {}, successUrl, cancelUrl) => {
+    try {
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [
+                {
+                    price_data: {
+                        currency: currency,
+                        product_data: {
+                            name: metadata.movieTitle || 'Movie Ticket',
+                            description: `Seats: ${metadata.selectedSeats || 'N/A'}`,
+                        },
+                        unit_amount: Math.round(amount * 100), // Convert to cents
+                    },
+                    quantity: 1,
+                },
+            ],
+            mode: 'payment',
+            success_url: successUrl,
+            cancel_url: cancelUrl,
+            metadata: metadata,
+        });
+
+        return {
+            success: true,
+            sessionId: session.id,
+            url: session.url
+        };
+    } catch (error) {
+        // console.error('Error creating checkout session:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+};
+
 export const confirmPayment = async (paymentIntentId) => {
     try {
         const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);

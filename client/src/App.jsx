@@ -23,6 +23,7 @@ import SearchMovies from './pages/SearchMovies'
 import CancelTicket from './pages/CancelTicket'
 import AboutUs from './pages/AboutUs'
 import ContactUs from './pages/ContactUs'
+import PaymentSuccess from './pages/PaymentSuccess'
 
 const App = () => {
 
@@ -49,6 +50,7 @@ const App = () => {
         <Route path='/movies/:id/:date' element={<SeatLayout/>} />
         <Route path='/my-bookings' element={user ? <MyBookings/> : <Login state={{ from: location }}/>} />
         <Route path='/cancel-ticket' element={user ? <CancelTicket/> : <Login state={{ from: location }}/>} />
+        <Route path='/payment-success' element={<PaymentSuccess/>} />
         <Route path='/loading/:nextUrl' element={<Loading/>} />
         <Route path='/favorite' element={user ? <Favorite/> : <Login state={{ from: location }}/>} />
         <Route path='/login' element={<Home/>} />
